@@ -1,5 +1,5 @@
-import { useGame } from "./GameContext";
-import { TopBar, BottomNav } from "./Chrome";
+import { useGame } from "../GameContext";
+import { TopBar, BottomNav } from "../Chrome";
 import fairground from "@/assets/fairground.jpg";
 import maya from "@/assets/maya-avatar.png";
 
