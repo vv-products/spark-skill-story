@@ -5,38 +5,38 @@ export function TopBar({ layer, totalLayers }: { layer?: number; totalLayers?: n
   const pct = Math.min(100, (xp / totalXp) * 100);
 
   return (
-    <div className="sticky top-0 z-20 bg-background/85 backdrop-blur-md">
-      <div className="flex items-center gap-3 px-4 pt-4 pb-3">
-        <div className="flex items-center gap-1.5 rounded-full bg-gold/15 px-2.5 py-1.5 ring-1 ring-gold/30">
+    <div className="sticky top-0 z-20 bg-background/90 backdrop-blur-md">
+      <div className="flex items-center gap-3 px-5 pt-4 pb-3">
+        <div className="flex items-center gap-1.5 rounded-pill bg-card px-3 py-1.5 shadow-card">
           <span className="text-base">⭐</span>
           <span className="text-xs font-extrabold text-foreground">{level}</span>
         </div>
 
         <div className="flex flex-1 items-center gap-2">
-          <div className="relative h-3 flex-1 overflow-hidden rounded-full bg-muted">
+          <div className="relative h-2.5 flex-1 overflow-hidden rounded-pill bg-muted">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-gold to-coral transition-all duration-700 ease-out"
+              className="h-full rounded-pill bg-primary transition-all duration-700 ease-out"
               style={{ width: `${pct}%` }}
             />
           </div>
-          <span className="text-xs font-bold tabular-nums text-muted-foreground">
+          <span className="text-[11px] font-bold tabular-nums text-text-secondary">
             {xp}/{totalXp}
           </span>
         </div>
 
-        <div className="flex items-center gap-1 rounded-full bg-coral/15 px-2.5 py-1.5 ring-1 ring-coral/30">
+        <div className="flex items-center gap-1 rounded-pill bg-card px-3 py-1.5 shadow-card">
           <span className="text-base">🔥</span>
-          <span className="text-xs font-extrabold text-foreground">Day {streak}</span>
+          <span className="text-xs font-extrabold text-streak">Day {streak}</span>
         </div>
       </div>
 
       {layer && totalLayers && (
-        <div className="px-4 pb-3">
+        <div className="px-5 pb-3">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-text-secondary">
               Layer {layer} of {totalLayers}
             </span>
-            <span className="text-[11px] font-bold text-muted-foreground">
+            <span className="text-[11px] font-bold text-text-secondary">
               The Happy Stall
             </span>
           </div>
@@ -44,8 +44,8 @@ export function TopBar({ layer, totalLayers }: { layer?: number; totalLayers?: n
             {Array.from({ length: totalLayers }).map((_, i) => (
               <div
                 key={i}
-                className={`h-1.5 flex-1 rounded-full transition-all ${
-                  i < layer ? "bg-gold" : "bg-muted"
+                className={`h-1.5 flex-1 rounded-pill transition-all ${
+                  i < layer ? "bg-primary" : "bg-muted"
                 }`}
               />
             ))}
@@ -64,17 +64,26 @@ export function BottomNav() {
     { icon: "🎁", label: "Rewards" },
   ];
   return (
-    <div className="sticky bottom-0 z-20 mt-auto border-t border-border bg-card/95 backdrop-blur-md">
-      <div className="grid grid-cols-4 px-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-2">
+    <div
+      className="sticky bottom-0 z-20 mt-auto border-t border-border bg-card"
+      style={{ height: "calc(72px + env(safe-area-inset-bottom))" }}
+    >
+      <div className="grid h-[72px] grid-cols-4 px-2">
         {items.map((it) => (
           <button
             key={it.label}
-            className={`flex flex-col items-center gap-0.5 rounded-2xl py-2 transition-all active:scale-95 ${
-              it.active ? "text-gold" : "text-muted-foreground"
-            }`}
+            className="flex flex-col items-center justify-center gap-1 rounded-2xl py-1 transition-all active:scale-95"
           >
-            <span className="text-2xl">{it.icon}</span>
-            <span className="text-[10px] font-bold">{it.label}</span>
+            {it.active ? (
+              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-xl text-primary-foreground shadow-pop">
+                {it.icon}
+              </span>
+            ) : (
+              <span className="text-2xl opacity-60 grayscale">{it.icon}</span>
+            )}
+            <span className={`text-[10px] font-extrabold ${it.active ? "text-primary" : "text-[#999999]"}`}>
+              {it.label}
+            </span>
           </button>
         ))}
       </div>
