@@ -28,8 +28,7 @@ function Stage() {
 
 function Index() {
   return (
-    <div className="min-h-[100dvh] w-full bg-gradient-to-br from-indigo/20 via-background to-coral/10">
-      {/* Phone-shaped frame on larger screens, edge-to-edge on mobile */}
+    <div className="min-h-[100dvh] w-full bg-[#E5E5F2]">
       <div className="mx-auto min-h-[100dvh] w-full max-w-[430px] bg-background shadow-2xl">
         <GameProvider>
           <Stage />

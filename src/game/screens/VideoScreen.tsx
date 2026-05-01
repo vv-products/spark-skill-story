@@ -15,7 +15,7 @@ export function VideoScreen() {
     const interval = setInterval(() => {
       setProgress((p) => {
         if (p >= 100) { clearInterval(interval); return 100; }
-        return p + 100 / 30; // 3 seconds
+        return p + 100 / 30;
       });
     }, 100);
     const t = setTimeout(() => setReady(true), 3000);
@@ -26,19 +26,19 @@ export function VideoScreen() {
     <div className="flex min-h-[100dvh] flex-col bg-background">
       <TopBar layer={1} totalLayers={4} />
 
-      <main className="flex flex-1 flex-col px-4 pb-6">
+      <main className="flex flex-1 flex-col px-5 pb-6">
         <div className="mb-3 flex items-center justify-between">
           <p className="text-sm font-bold text-foreground">Watch what happens to Dash!</p>
-          <div className="rounded-full bg-gold/15 px-2.5 py-1 text-xs font-extrabold text-gold ring-1 ring-gold/30">
+          <div className="rounded-pill bg-card-gold px-3 py-1 text-xs font-extrabold text-gold-dark shadow-card">
             +10 XP
           </div>
         </div>
 
         {/* Video placeholder */}
-        <div className="relative aspect-[9/12] overflow-hidden rounded-3xl bg-gradient-to-br from-indigo via-coral to-gold shadow-pop">
+        <div className="relative aspect-[9/12] overflow-hidden rounded-[20px] bg-[var(--gradient-hero)] shadow-pop">
           {/* Stars */}
           <div className="pointer-events-none absolute inset-0">
-            {Array.from({ length: 20 }).map((_, i) => (
+            {Array.from({ length: 18 }).map((_, i) => (
               <span
                 key={i}
                 className="animate-float-soft absolute text-2xl"
@@ -46,7 +46,7 @@ export function VideoScreen() {
                   left: `${(i * 13) % 100}%`,
                   top: `${(i * 17) % 90}%`,
                   animationDelay: `${(i % 5) * 0.3}s`,
-                  filter: "drop-shadow(0 0 8px rgba(255,220,120,0.8))",
+                  filter: "drop-shadow(0 0 8px rgba(255,220,120,0.85))",
                 }}
               >
                 ✨
@@ -98,7 +98,7 @@ export function VideoScreen() {
           <button
             disabled={!ready}
             onClick={() => { addXp("foundation", 10); setShowXp(true); }}
-            className="w-full rounded-2xl bg-gold py-4 text-lg font-extrabold text-gold-foreground shadow-pop transition-all active:scale-[0.97] disabled:opacity-40"
+            className="w-full rounded-pill bg-primary py-4 text-lg font-extrabold text-primary-foreground shadow-pop transition-all active:scale-[0.97] disabled:opacity-40"
           >
             {ready ? "Continue →" : "Watching…"}
           </button>

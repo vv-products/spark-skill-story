@@ -6,10 +6,10 @@ import pip from "@/assets/pip-avatar.png";
 import dash from "@/assets/dash-avatar.png";
 
 const COLORS = [
+  { name: "purple", value: "#7B2FBE" },
   { name: "gold", value: "#F5A623" },
-  { name: "coral", value: "#FF6B6B" },
-  { name: "sky", value: "#5B9BD5" },
-  { name: "sage", value: "#5BAD8A" },
+  { name: "orange", value: "#FF6B35" },
+  { name: "ink", value: "#1A1A2E" },
 ];
 
 export function ReflectionScreen() {
@@ -27,22 +27,22 @@ export function ReflectionScreen() {
   }
 
   return (
-    <div className="relative flex min-h-[100dvh] flex-col bg-gradient-to-b from-background to-sky/10">
+    <div className="relative flex min-h-[100dvh] flex-col bg-background">
       <TopBar layer={4} totalLayers={4} />
 
-      <main className="flex flex-1 flex-col px-4 pb-6">
+      <main className="flex flex-1 flex-col px-5 pb-6">
         {/* Pip peeking */}
         <div className="absolute -right-2 top-24 z-0">
-          <img src={pip} alt="Pip the cat peeking" className="h-24 w-24 object-contain opacity-90 animate-float-soft" width={512} height={512} />
+          <img src={pip} alt="Pip the cat peeking" className="h-24 w-24 object-contain animate-float-soft" width={512} height={512} />
         </div>
 
-        <div className="rounded-full bg-indigo/15 px-3 py-1 text-xs font-extrabold text-indigo ring-1 ring-indigo/30 self-start">
+        <div className="self-start rounded-pill bg-card-warm px-3 py-1 text-xs font-extrabold text-foreground shadow-card">
           💭 Reflection
         </div>
 
-        <div className="mt-4 rounded-3xl bg-card p-5 shadow-soft">
+        <div className="relative mt-4 rounded-2xl bg-card p-5 shadow-card">
           <p className="text-center text-lg font-extrabold leading-snug text-foreground">
-            Draw or tell us — what made <span className="text-coral">YOU</span> feel happy this week?
+            Draw or tell us — what made <span className="text-primary">YOU</span> feel happy this week?
           </p>
         </div>
 
@@ -50,14 +50,14 @@ export function ReflectionScreen() {
           <div className="mt-6 grid grid-cols-2 gap-3">
             <button
               onClick={() => setMode("draw")}
-              className="flex h-44 flex-col items-center justify-center gap-2 rounded-3xl bg-gradient-to-br from-gold/30 to-coral/20 ring-2 ring-gold/40 shadow-soft transition-transform active:scale-95"
+              className="flex h-44 flex-col items-center justify-center gap-2 rounded-2xl bg-card-warm shadow-card transition-transform active:scale-95"
             >
               <span className="text-5xl">🎨</span>
               <span className="text-base font-extrabold text-foreground">Draw it</span>
             </button>
             <button
               onClick={() => setMode("voice")}
-              className="flex h-44 flex-col items-center justify-center gap-2 rounded-3xl bg-gradient-to-br from-sky/30 to-indigo/20 ring-2 ring-sky/40 shadow-soft transition-transform active:scale-95"
+              className="flex h-44 flex-col items-center justify-center gap-2 rounded-2xl bg-card-gold shadow-card transition-transform active:scale-95"
             >
               <span className="text-5xl">🎤</span>
               <span className="text-base font-extrabold text-foreground">Say it</span>
@@ -72,7 +72,7 @@ export function ReflectionScreen() {
           <div className="mt-8 flex flex-1 flex-col items-center justify-center text-center">
             <img src={dash} alt="Dash celebrating" className="animate-bounce-in h-40 w-40 object-contain" width={512} height={512} />
             <p className="mt-2 text-lg font-extrabold text-foreground">That's going in your Growth Journal!</p>
-            <p className="text-sm font-semibold text-muted-foreground">Dash loves it. 💛</p>
+            <p className="text-sm font-semibold text-text-secondary">Dash loves it. 💛</p>
           </div>
         )}
       </main>
@@ -129,7 +129,7 @@ function DrawCanvas({ onSubmit, onBack }: { onSubmit: () => void; onBack: () => 
 
   return (
     <div className="mt-5">
-      <div className="overflow-hidden rounded-3xl bg-white shadow-soft ring-2 ring-gold/30">
+      <div className="overflow-hidden rounded-2xl bg-white shadow-card ring-2 ring-primary/30">
         <canvas
           ref={canvasRef}
           className="block h-64 w-full touch-none"
@@ -151,15 +151,15 @@ function DrawCanvas({ onSubmit, onBack }: { onSubmit: () => void; onBack: () => 
             />
           ))}
         </div>
-        <button onClick={clear} className="rounded-full bg-muted px-3 py-1.5 text-xs font-bold text-muted-foreground active:scale-95">
+        <button onClick={clear} className="rounded-pill bg-muted px-3 py-1.5 text-xs font-bold text-tag-foreground active:scale-95">
           Clear
         </button>
       </div>
       <div className="mt-4 flex gap-2">
-        <button onClick={onBack} className="rounded-2xl bg-muted px-4 py-3 text-sm font-extrabold text-muted-foreground active:scale-95">
+        <button onClick={onBack} className="rounded-pill bg-card px-5 py-3 text-sm font-extrabold text-foreground shadow-card active:scale-95">
           ←
         </button>
-        <button onClick={onSubmit} className="flex-1 rounded-2xl bg-gradient-to-r from-gold to-coral py-3 text-base font-extrabold text-white shadow-pop active:scale-[0.97]">
+        <button onClick={onSubmit} className="flex-1 rounded-pill bg-primary py-3 text-base font-extrabold text-primary-foreground shadow-pop active:scale-[0.97]">
           Save my drawing
         </button>
       </div>
@@ -182,25 +182,23 @@ function VoiceRecorder({ onSubmit, onBack }: { onSubmit: () => void; onBack: () 
       <button
         onClick={() => setRecording((r) => !r)}
         className={`relative flex h-44 w-44 items-center justify-center rounded-full text-6xl shadow-pop transition-transform active:scale-95 ${
-          recording ? "bg-coral text-white animate-pulse-glow" : "bg-gradient-to-br from-sky to-indigo text-white"
+          recording ? "bg-streak text-streak-foreground animate-pulse-glow" : "bg-primary text-primary-foreground"
         }`}
       >
         🎤
-        {recording && (
-          <span className="absolute inset-0 animate-ping rounded-full bg-coral/40" />
-        )}
+        {recording && <span className="absolute inset-0 animate-ping rounded-full bg-streak/40" />}
       </button>
       <p className="mt-4 text-base font-extrabold text-foreground tabular-nums">
         {recording ? `Listening… ${seconds}s` : "Tap to start"}
       </p>
       <div className="mt-6 flex w-full gap-2">
-        <button onClick={onBack} className="rounded-2xl bg-muted px-4 py-3 text-sm font-extrabold text-muted-foreground active:scale-95">
+        <button onClick={onBack} className="rounded-pill bg-card px-5 py-3 text-sm font-extrabold text-foreground shadow-card active:scale-95">
           ←
         </button>
         <button
           disabled={!recording && seconds === 0}
           onClick={onSubmit}
-          className="flex-1 rounded-2xl bg-gradient-to-r from-sky to-indigo py-3 text-base font-extrabold text-white shadow-pop active:scale-[0.97] disabled:opacity-40"
+          className="flex-1 rounded-pill bg-primary py-3 text-base font-extrabold text-primary-foreground shadow-pop active:scale-[0.97] disabled:opacity-40"
         >
           Save my answer
         </button>
