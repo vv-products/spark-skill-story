@@ -1,0 +1,85 @@
+import { useStudio } from "../StudioContext";
+import { StudioLayout } from "../Layout";
+import { Btn, StatusPill, Tag } from "../ui";
+
+export function LibraryScreen() {
+  const { pillars, selectedPillarId, setSelectedPillar, selectedTopicId, setSelectedTopic, setView } = useStudio();
+  const pillar = pillars.find(p => p.id === selectedPillarId)!;
+  const topic = pillar.topics.find(t => t.id === selectedTopicId);
+
+  return (
+    <StudioLayout title="Content Library">
+      {/* Breadcrumb */}
+      <div className="border-b border-[#EBEBF5] bg-white px-8 py-3 text-[13px] text-[#666680]">
+        <span className="font-semibold text-[#1A1A2E]">{pillar.emoji} {pillar.name}</span>
+        {topic && <> <span className="mx-2 text-[#CCC]">›</span> <span className="font-semibold text-[#1A1A2E]">{topic.name}</span></>}
+      </div>
+
+      <div className="grid grid-cols-3 gap-px bg-[#EBEBF5]" style={{ minHeight: "calc(100vh - 60px - 49px)" }}>
+        {/* Panel 1 — Pillars */}
+        <Panel title="Pillars">
+          {pillars.map(p => {
+            const active = p.id === selectedPillarId;
+            return (
+              <button key={p.id} onClick={() => { setSelectedPillar(p.id); setSelectedTopic(p.topics[0]?.id ?? ""); }}
+                className={`flex w-full items-center justify-between rounded-[8px] px-3 py-3 text-left transition-colors ${active ? "bg-[#F0F0FA]" : "hover:bg-[#F8F8FC]"}`}>
+                <span className="flex items-center gap-2">
+                  <span className="text-lg">{p.emoji}</span>
+                  <span className={`text-sm ${active ? "font-bold text-[#7B2FBE]" : "font-semibold text-[#1A1A2E]"}`}>{p.name}</span>
+                </span>
+                <span className="rounded-[6px] bg-[#F0F0FA] px-2 py-0.5 text-[11px] font-semibold text-[#7B2FBE]">{p.topics.length} topics</span>
+              </button>
+            );
+          })}
+        </Panel>
+
+        {/* Panel 2 — Topics */}
+        <Panel title="Topics">
+          {pillar.topics.map(t => {
+            const active = t.id === selectedTopicId;
+            return (
+              <button key={t.id} onClick={() => setSelectedTopic(t.id)}
+                className={`block w-full rounded-[8px] px-3 py-3 text-left transition-colors ${active ? "bg-[#F0F0FA]" : "hover:bg-[#F8F8FC]"}`}>
+                <div className="flex items-center justify-between">
+                  <span className={`text-sm ${active ? "font-bold text-[#7B2FBE]" : "font-semibold text-[#1A1A2E]"}`}>{t.name}</span>
+                  <span className="rounded-[6px] bg-[#F0F0FA] px-2 py-0.5 text-[11px] font-semibold text-[#7B2FBE]">{t.modules.length} modules</span>
+                </div>
+                <div className="mt-1.5 flex gap-1">
+                  {t.ages.map(a => <Tag key={a}>{a}</Tag>)}
+                </div>
+              </button>
+            );
+          })}
+          <button className="mt-2 w-full rounded-[8px] border border-dashed border-[#D8D8E8] px-3 py-2.5 text-sm font-semibold text-[#7B2FBE] hover:bg-[#F8F8FC]">+ Add Topic</button>
+        </Panel>
+
+        {/* Panel 3 — Modules */}
+        <Panel title="Modules">
+          {topic?.modules.length ? topic.modules.map(m => {
+            const built = m.classes.filter(c => c.layers.length > 0).length;
+            return (
+              <button key={m.id} onClick={() => setView({ kind: "module", pillarId: pillar.id, topicId: topic.id, moduleId: m.id })}
+                className="block w-full rounded-[8px] px-3 py-3 text-left transition-colors hover:bg-[#F8F8FC]">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-semibold text-[#1A1A2E]">{m.name}</span>
+                  <StatusPill status={m.status} />
+                </div>
+                <div className="mt-1 text-[12px] text-[#666680]">{built}/10 classes built</div>
+              </button>
+            );
+          }) : <div className="px-3 py-8 text-center text-sm text-[#888]">No modules yet.</div>}
+          <button className="mt-2 w-full rounded-[8px] border border-dashed border-[#D8D8E8] px-3 py-2.5 text-sm font-semibold text-[#7B2FBE] hover:bg-[#F8F8FC]">+ Add Module</button>
+        </Panel>
+      </div>
+    </StudioLayout>
+  );
+}
+
+function Panel({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="bg-white p-4">
+      <div className="mb-3 px-1 text-[11px] font-bold uppercase tracking-wider text-[#888]">{title}</div>
+      <div className="flex flex-col gap-1">{children}</div>
+    </div>
+  );
+}
