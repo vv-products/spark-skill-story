@@ -8,11 +8,11 @@ export function XpPop({ amount, message, onDone }: { amount: number; message?: s
   return (
     <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center">
       <div className="animate-float-up flex flex-col items-center gap-2">
-        <div className="rounded-full bg-gold px-6 py-3 text-2xl font-extrabold text-gold-foreground shadow-glow-gold">
+        <div className="rounded-pill bg-gold px-6 py-3 text-2xl font-extrabold text-gold-foreground shadow-glow-gold">
           +{amount} XP
         </div>
         {message && (
-          <div className="rounded-full bg-card/95 px-4 py-1.5 text-sm font-bold text-foreground shadow-soft">
+          <div className="rounded-pill bg-card px-4 py-1.5 text-sm font-bold text-foreground shadow-card">
             {message}
           </div>
         )}
@@ -26,10 +26,10 @@ export function FullscreenFlash({ color, onDone }: { color: "green" | "red"; onD
     const t = setTimeout(onDone, 550);
     return () => clearTimeout(t);
   }, [onDone]);
-  const bg = color === "green" ? "bg-sage" : "bg-coral";
+  const bg = color === "green" ? "bg-primary" : "bg-destructive";
   const anim = color === "green" ? "animate-bounce-in" : "animate-shake";
   return (
-    <div className={`pointer-events-none fixed inset-0 z-40 ${bg} ${anim} opacity-80`}>
+    <div className={`pointer-events-none fixed inset-0 z-40 ${bg} ${anim} opacity-85`}>
       <div className="flex h-full w-full items-center justify-center">
         <span className="text-8xl">{color === "green" ? "✨" : "💫"}</span>
       </div>
@@ -44,7 +44,7 @@ export function Confetti() {
       left: Math.random() * 100,
       delay: Math.random() * 1.2,
       duration: 2 + Math.random() * 2,
-      color: ["bg-gold", "bg-coral", "bg-sky", "bg-sage", "bg-indigo"][i % 5],
+      color: ["bg-primary", "bg-gold", "bg-streak", "bg-primary-light", "bg-card-warm"][i % 5],
       size: 8 + Math.random() * 10,
     }))
   );
