@@ -1,26 +1,40 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { GameProvider, useGame } from "@/game/GameContext";
+import { HomeScreen } from "@/game/screens/HomeScreen";
+import { IntroScreen } from "@/game/screens/IntroScreen";
+import { VideoScreen } from "@/game/screens/VideoScreen";
+import { QuizScreen } from "@/game/screens/QuizScreen";
+import { BranchingScreen, BranchingResultScreen } from "@/game/screens/BranchingScreen";
+import { ReflectionScreen } from "@/game/screens/ReflectionScreen";
+import { CompleteScreen } from "@/game/screens/CompleteScreen";
 
 export const Route = createFileRoute("/")({
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. For sites with multiple pages (About, Services, Contact, etc.),
-// create separate route files (about.tsx, services.tsx, contact.tsx) — don't put all pages in this file.
-function PlaceholderIndex() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
+function Stage() {
+  const { step } = useGame();
+  switch (step) {
+    case "home": return <HomeScreen />;
+    case "intro": return <IntroScreen />;
+    case "video": return <VideoScreen />;
+    case "quiz": return <QuizScreen />;
+    case "branching": return <BranchingScreen />;
+    case "branching-result": return <BranchingResultScreen />;
+    case "reflection": return <ReflectionScreen />;
+    case "complete": return <CompleteScreen />;
+  }
 }
 
 function Index() {
-  return <PlaceholderIndex />;
+  return (
+    <div className="min-h-[100dvh] w-full bg-gradient-to-br from-indigo/20 via-background to-coral/10">
+      {/* Phone-shaped frame on larger screens, edge-to-edge on mobile */}
+      <div className="mx-auto min-h-[100dvh] w-full max-w-[430px] bg-background shadow-2xl">
+        <GameProvider>
+          <Stage />
+        </GameProvider>
+      </div>
+    </div>
+  );
 }
