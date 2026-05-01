@@ -51,6 +51,17 @@
   --color-tag: var(--tag);
   --color-tag-foreground: var(--tag-foreground);
 
+  /* Studio (CMS) tokens */
+  --color-studio-bg: #F8F8FC;
+  --color-studio-sidebar: #1A1A2E;
+  --color-studio-sidebar-text: #AAAACC;
+  --color-studio-card-border: #EBEBF5;
+  --color-studio-tag: #F0F0FA;
+  --color-success: #2E7D32;
+  --color-warning: #F5A623;
+  --font-studio: "Inter", system-ui, sans-serif;
+  --shadow-studio: 0 2px 8px rgba(0,0,0,0.06);
+
   --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.08);
   --shadow-pop: 0 8px 24px rgba(123, 47, 190, 0.25);
   --shadow-glow-purple: 0 0 30px rgba(123, 47, 190, 0.4);
@@ -186,3 +197,14 @@
 .animate-float-up { animation: float-up 1.2s ease-out forwards; }
 
 .font-display { font-family: var(--font-display); }
+.font-studio { font-family: var(--font-studio); }
+
+/* Studio scope — overrides app theme inside .studio-root */
+.studio-root {
+  font-family: var(--font-studio);
+  background: var(--color-studio-bg);
+  color: #1A1A2E;
+}
+.studio-root *::-webkit-scrollbar { width: 10px; height: 10px; }
+.studio-root *::-webkit-scrollbar-thumb { background: #D8D8E8; border-radius: 8px; }
+.studio-root *::-webkit-scrollbar-track { background: transparent; }
