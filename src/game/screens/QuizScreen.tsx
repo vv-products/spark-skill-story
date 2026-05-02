@@ -40,16 +40,17 @@ export function QuizScreen() {
     return () => clearTimeout(t);
   }, [time, locked, done]);
 
+  const scoreRef = useRef(0);
   function handle(picked: boolean) {
     if (locked) return;
     setLocked(true);
     const correct = picked === q.answer;
-    // Dash runs in the direction tapped (TRUE=left, FALSE=right). Timeout = wrong → no run.
     if (picked === true) setPickedSide("left");
     else if (picked === false) setPickedSide("right");
     setFlash(correct ? "green" : "red");
     if (correct) {
-      setScore((s) => s + 1);
+      scoreRef.current += 1;
+      setScore(scoreRef.current);
       setScorePulse((p) => p + 1);
     }
   }
@@ -84,13 +85,13 @@ export function QuizScreen() {
 
   function finish() {
     setDone(true);
-    // Show summary card for 2s
     setShowSummary(true);
+    const finalScore = scoreRef.current;
     setTimeout(() => {
       setShowSummary(false);
       const base = 5;
-      const allCorrect = score === TOTAL; // score state is current at this point
-      const bonus = allCorrect ? 15 : score >= 3 ? 8 : 0;
+      const allCorrect = finalScore === TOTAL;
+      const bonus = allCorrect ? 15 : finalScore >= 3 ? 8 : 0;
       const total = base + bonus;
       addXp("quiz", total);
       if (allCorrect) {
