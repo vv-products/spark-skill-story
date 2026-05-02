@@ -196,6 +196,30 @@
 .animate-bounce-in { animation: bounce-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
 .animate-float-up { animation: float-up 1.2s ease-out forwards; }
 
+@keyframes slide-up-in {
+  0% { transform: translateY(100%); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+.animate-slide-up-in { animation: slide-up-in 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+
+@keyframes score-pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.45); }
+  100% { transform: scale(1); }
+}
+.animate-score-pop { animation: score-pop 0.4s ease-out; }
+
+@keyframes dash-run-left {
+  0% { transform: translateX(0) scaleX(1); }
+  100% { transform: translateX(-60vw) scaleX(1.15) rotate(-8deg); opacity: 0.9; }
+}
+@keyframes dash-run-right {
+  0% { transform: translateX(0) scaleX(-1); }
+  100% { transform: translateX(60vw) scaleX(-1.15) rotate(8deg); opacity: 0.9; }
+}
+.animate-dash-run-left { animation: dash-run-left 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+.animate-dash-run-right { animation: dash-run-right 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+
 .font-display { font-family: var(--font-display); }
 .font-studio { font-family: var(--font-studio); }
 
