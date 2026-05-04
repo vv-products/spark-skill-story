@@ -99,9 +99,14 @@ export function HomeScreen() {
             { tag: "Class 2", title: "The Happy Stall", state: "current", emoji: "🌟" },
             { tag: "Class 3", title: "The Sad Corner", state: "locked", emoji: "🔒" },
           ].map((c) => (
-            <div
+            <button
               key={c.title}
-              className={`flex items-center gap-3 rounded-2xl bg-card p-3.5 shadow-card ${
+              type="button"
+              disabled={c.state === "locked"}
+              onClick={() => {
+                if (c.state === "current") setStep("intro");
+              }}
+              className={`flex w-full items-center gap-3 rounded-2xl bg-card p-3.5 text-left shadow-card transition-transform active:scale-[0.98] disabled:cursor-not-allowed disabled:active:scale-100 ${
                 c.state === "current" ? "ring-2 ring-primary" : ""
               }`}
             >
