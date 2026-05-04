@@ -276,3 +276,16 @@ export async function loadPublishedClasses(): Promise<DbClass[]> {
   if (error) throw error;
   return (data ?? []) as DbClass[];
 }
+
+// Returns total xp_reward summed per class_id, only for published classes' layers.
+export async function loadPublishedClassXpTotals(): Promise<Map<string, number>> {
+  const { data: cls } = await supabase.from("classes").select("id").eq("status", "published");
+  const ids = (cls ?? []).map((c) => c.id);
+  if (ids.length === 0) return new Map();
+  const { data: layers } = await supabase.from("layers").select("class_id, xp_reward").in("class_id", ids);
+  const totals = new Map<string, number>();
+  for (const l of layers ?? []) {
+    totals.set(l.class_id, (totals.get(l.class_id) ?? 0) + (l.xp_reward ?? 0));
+  }
+  return totals;
+}
