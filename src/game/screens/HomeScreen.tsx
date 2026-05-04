@@ -20,19 +20,19 @@ export function HomeScreen() {
 
       <main className="flex-1 px-5 pb-6">
         {/* Hero banner */}
-        <div className="relative overflow-hidden rounded-[20px] bg-[var(--gradient-hero)] p-5 text-primary-foreground shadow-pop">
+        <div className="relative overflow-hidden rounded-[20px] [background:var(--gradient-hero)] p-5 text-primary-foreground shadow-pop">
           <div className="pointer-events-none absolute -right-8 -top-8 h-40 w-40 rounded-full bg-white/10" />
           <div className="pointer-events-none absolute -bottom-10 -left-6 h-32 w-32 rounded-full bg-white/10" />
 
           <div className="relative flex items-start justify-between gap-3">
             <div className="flex-1">
-              <span className="inline-block rounded-pill bg-white/20 px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider">
+              <span className="inline-block rounded-pill bg-white/25 px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider drop-shadow-sm">
                 🎪 The Emotion Fair
               </span>
-              <h2 className="mt-3 text-2xl font-black leading-tight">
+              <h2 className="mt-3 text-2xl font-black leading-tight drop-shadow-md">
                 Continue Class 2:<br />The Happy Stall
               </h2>
-              <p className="mt-1 text-xs font-bold text-white drop-shadow-sm">4 layers · ~5 min</p>
+              <p className="mt-1 text-xs font-extrabold text-white drop-shadow-md">4 layers · ~5 min</p>
             </div>
             <img
               src={maya}
