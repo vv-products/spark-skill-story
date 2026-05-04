@@ -4,6 +4,9 @@ import { usePlayerAuth } from "./PlayerAuth";
 import { PlayerSignIn } from "./PlayerSignIn";
 import { loadPublishedClasses, loadPublishedClassXpTotals, type DbClass } from "@/studio/catalog";
 import { loadUserProgress, type UserProgress } from "./progress";
+import { Avatar } from "./avatar/Avatar";
+import { avatarFromSeed, type AvatarConfig } from "./avatar/config";
+import { loadProfile } from "./profileApi";
 
 const EMPTY_PROGRESS: UserProgress = {
   totalXp: 0, completedClassIds: new Set(), perClass: new Map(), streakDays: 0,
@@ -11,9 +14,12 @@ const EMPTY_PROGRESS: UserProgress = {
 
 export function GameHome() {
   const { user, loading, isGuest, setGuest, signOut } = usePlayerAuth();
+  const navigate = useNavigate();
   const [classes, setClasses] = useState<DbClass[] | null>(null);
   const [xpTotals, setXpTotals] = useState<Map<string, number>>(new Map());
   const [progress, setProgress] = useState<UserProgress>(EMPTY_PROGRESS);
+  const [avatarCfg, setAvatarCfg] = useState<AvatarConfig | null>(null);
+  const [displayName, setDisplayName] = useState<string | null>(null);
 
   useEffect(() => {
     Promise.all([loadPublishedClasses(), loadPublishedClassXpTotals()])
@@ -21,8 +27,14 @@ export function GameHome() {
       .catch(() => setClasses([]));
   }, []);
   useEffect(() => {
-    if (!user) { setProgress(EMPTY_PROGRESS); return; }
+    if (!user) { setProgress(EMPTY_PROGRESS); setAvatarCfg(null); setDisplayName(null); return; }
     loadUserProgress(user.id).then(setProgress).catch(() => setProgress(EMPTY_PROGRESS));
+    loadProfile(user.id)
+      .then((p) => {
+        setAvatarCfg(p?.avatar_config ?? avatarFromSeed(user.id));
+        setDisplayName(p?.display_name ?? null);
+      })
+      .catch(() => setAvatarCfg(avatarFromSeed(user.id)));
   }, [user]);
 
   // "Continue" = the most-recently-touched class that isn't completed yet.
