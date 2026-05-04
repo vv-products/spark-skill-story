@@ -131,6 +131,7 @@ export function HomeScreen() {
             title="Meet the Characters"
             description="Get to know your friends and their stories."
             cta="Explore →"
+            onClick={() => setStep("intro")}
           />
           <ActivityCard
             bg="bg-[#E8E0F8]"
@@ -138,6 +139,7 @@ export function HomeScreen() {
             title="Live Events"
             description="Join live shows, challenges, and special events."
             cta="Join Now →"
+            onClick={() => setStep("intro")}
           />
         </div>
 
