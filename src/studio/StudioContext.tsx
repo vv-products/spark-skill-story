@@ -36,6 +36,8 @@ type Ctx = {
   updateLayerField: (id: string, key: string, value: any) => void;
   updateClass: (patch: Partial<Class>) => void;
   unsaved: boolean;
+  saving: boolean;
+  publishing: boolean;
   save: () => Promise<void>;
   publish: () => Promise<void>;
 
