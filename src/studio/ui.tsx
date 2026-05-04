@@ -9,9 +9,18 @@ export function Card({ children, className = "", padding = "p-5" }: { children: 
   );
 }
 
-export function Btn({ children, onClick, variant = "primary", disabled, size = "md", title, type = "button" }: {
+export function Spinner({ className = "" }: { className?: string }) {
+  return (
+    <svg className={`animate-spin ${className}`} width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeOpacity="0.25" strokeWidth="4" />
+      <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function Btn({ children, onClick, variant = "primary", disabled, size = "md", title, type = "button", loading = false }: {
   children: ReactNode; onClick?: () => void; variant?: "primary" | "ghost" | "outline" | "danger" | "success";
-  disabled?: boolean; size?: "sm" | "md"; title?: string; type?: "button" | "submit";
+  disabled?: boolean; size?: "sm" | "md"; title?: string; type?: "button" | "submit"; loading?: boolean;
 }) {
   const sizes = { sm: "h-8 px-3 text-xs", md: "h-10 px-4 text-sm" };
   const variants = {
@@ -22,8 +31,9 @@ export function Btn({ children, onClick, variant = "primary", disabled, size = "
     success: "bg-[#2E7D32] text-white hover:bg-[#256528]",
   };
   return (
-    <button type={type} onClick={onClick} disabled={disabled} title={title}
+    <button type={type} onClick={onClick} disabled={disabled || loading} title={title}
       className={`inline-flex items-center justify-center gap-2 rounded-[8px] font-semibold transition-colors disabled:cursor-not-allowed ${sizes[size]} ${variants[variant]}`}>
+      {loading && <Spinner />}
       {children}
     </button>
   );
