@@ -53,6 +53,31 @@ export function ClassEditorScreen() {
         <button onClick={() => setView({ kind: "module", pillarId: pillar.id, topicId: topic.id, moduleId: module.id })} className="hover:underline">{module.name}</button>
         <span className="mx-2 text-[#CCC]">›</span>
         <span className="font-semibold text-[#1A1A2E]">Class {String(currentClass.number).padStart(2, "0")} — {currentClass.title || "Untitled"}</span>
+        <div ref={addMenuRef} className="relative ml-3 inline-block">
+          <button
+            onClick={() => setAddMenuOpen(o => !o)}
+            className="inline-flex h-7 items-center gap-1 rounded-[8px] border border-[#EBEBF5] bg-white px-2.5 text-[12px] font-semibold text-[#7B2FBE] hover:bg-[#F8F8FC]"
+            title="Add to catalog"
+          >
+            + Add
+          </button>
+          {addMenuOpen && (
+            <div className="absolute left-0 top-9 z-20 w-44 overflow-hidden rounded-[10px] border border-[#EBEBF5] bg-white shadow-[0_8px_24px_rgba(0,0,0,0.10)]">
+              <button onClick={() => { setAddMenuOpen(false); setAddDialog("topic"); }}
+                className="block w-full px-3 py-2 text-left text-[13px] text-[#1A1A2E] hover:bg-[#F8F8FC]">
+                New topic <span className="text-[#888]">in {pillar.name}</span>
+              </button>
+              <button onClick={() => { setAddMenuOpen(false); setAddDialog("module"); }}
+                className="block w-full px-3 py-2 text-left text-[13px] text-[#1A1A2E] hover:bg-[#F8F8FC]">
+                New module <span className="text-[#888]">in {topic.name}</span>
+              </button>
+              <button onClick={() => { setAddMenuOpen(false); setAddDialog("class"); }}
+                className="block w-full px-3 py-2 text-left text-[13px] text-[#1A1A2E] hover:bg-[#F8F8FC]">
+                New class <span className="text-[#888]">in {module.name}</span>
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-[320px_1fr_60px] gap-px bg-[#EBEBF5]" style={{ minHeight: "calc(100vh - 60px - 49px)" }}>
