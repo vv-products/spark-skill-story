@@ -65,13 +65,24 @@ export function GameHome() {
   return (
     <div className="min-h-[100dvh] bg-gradient-to-b from-[#F0F0FA] to-white">
       <header className="px-5 pt-6 pb-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="text-xs font-semibold text-[#666]">Hello,</div>
-            <div className="text-xl font-black text-[#1A1A2E]">
-              {user?.user_metadata?.display_name ?? user?.email?.split("@")[0] ?? "Explorer"}
-            </div>
-          </div>
+        <div className="flex items-center justify-between gap-3">
+          <button
+            type="button"
+            onClick={() => user && navigate({ to: "/profile" })}
+            disabled={!user}
+            className="flex items-center gap-3 rounded-full p-1 -m-1 text-left disabled:cursor-default"
+            aria-label="Edit your profile"
+          >
+            <span className="block h-12 w-12 overflow-hidden rounded-full ring-2 ring-white shadow">
+              <Avatar config={avatarCfg} size={48} />
+            </span>
+            <span>
+              <span className="block text-xs font-semibold text-[#666]">Hello,</span>
+              <span className="block text-xl font-black text-[#1A1A2E]">
+                {displayName ?? user?.user_metadata?.display_name ?? user?.email?.split("@")[0] ?? "Explorer"}
+              </span>
+            </span>
+          </button>
           {user ? (
             <button onClick={signOut} className="rounded-full bg-white px-3 py-1.5 text-xs font-bold text-[#7B2FBE] shadow border border-[#EBEBF5]">Sign out</button>
           ) : (
