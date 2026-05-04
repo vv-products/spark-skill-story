@@ -27,6 +27,8 @@ type GameContextType = {
   streak: number;
   breakdown: XpBreakdown;
   addXp: (key: keyof XpBreakdown, amount: number) => void;
+  branchingPick: "A" | "B" | null;
+  setBranchingPick: (p: "A" | "B" | null) => void;
   reset: () => void;
 };
 
