@@ -192,7 +192,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       selectedPillarId, selectedTopicId, setSelectedPillar, setSelectedTopic,
       ageGroup, setAgeGroup, expandedLayerId, setExpandedLayerId,
       addLayer, removeLayer, reorderLayer, updateLayerField, updateClass,
-      unsaved, save, publish, currentClass, classXp,
+      unsaved, saving, publishing, save, publish, currentClass, classXp,
       newTopic, newModule, newClass, removeClass,
     }}>{children}</StudioCtx.Provider>
   );
