@@ -26,8 +26,8 @@ export function ClassEditorScreen() {
       title="Class Editor"
       actions={
         <>
-          <Btn variant="outline" onClick={save}>Save</Btn>
-          <Btn variant="success" onClick={publish} disabled={!canPublish} title={canPublish ? undefined : "Add at least one layer to publish."}>Publish</Btn>
+          <Btn variant="outline" onClick={save} loading={saving} disabled={publishing}>{saving ? "Saving…" : "Save"}</Btn>
+          <Btn variant="success" onClick={publish} loading={publishing} disabled={!canPublish || saving} title={canPublish ? undefined : "Add at least one layer to publish."}>{publishing ? "Publishing…" : "Publish"}</Btn>
         </>
       }
     >
