@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import { TASK_BY_CODE, type AgeGroup, type Class, type Status } from "./data";
 import {
   loadFullCatalog, saveClass, createTopic, createModule, createClass, deleteClass,
+  renameTopic, renameModule, renameClass, deleteTopic, deleteModule,
   type HPillar, type HClass,
 } from "./catalog";
 import { toast } from "sonner";
