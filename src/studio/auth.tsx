@@ -10,6 +10,7 @@ type AuthCtx = {
   session: Session | null;
   roles: Role[];
   canEdit: boolean;
+  refreshRoles: () => Promise<void>;
   signIn: (email: string, password: string) => Promise<{ error?: string }>;
   signUp: (email: string, password: string, displayName?: string) => Promise<{ error?: string }>;
   signOut: () => Promise<void>;
