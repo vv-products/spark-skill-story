@@ -4,11 +4,18 @@ import { Btn, StatusPill, Chip } from "../ui";
 import { TASK_BY_CODE, type AgeGroup } from "../data";
 
 export function ModuleScreen() {
-  const { view, pillars, setView, ageGroup, setAgeGroup } = useStudio();
+  const { view, pillars, setView, ageGroup, setAgeGroup, newClass } = useStudio();
   if (view.kind !== "module") return null;
   const pillar = pillars.find(p => p.id === view.pillarId)!;
   const topic = pillar.topics.find(t => t.id === view.topicId)!;
   const module = topic.modules.find(m => m.id === view.moduleId)!;
+
+  async function handleAddClass() {
+    const title = window.prompt("New class title", "Untitled class")?.trim();
+    if (title === undefined) return;
+    const id = await newClass(module.id, title || "Untitled class");
+    if (id) setView({ kind: "class", pillarId: pillar.id, topicId: topic.id, moduleId: module.id, classId: id });
+  }
 
   return (
     <StudioLayout
