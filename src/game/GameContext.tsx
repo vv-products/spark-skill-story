@@ -27,6 +27,8 @@ type GameContextType = {
   streak: number;
   breakdown: XpBreakdown;
   addXp: (key: keyof XpBreakdown, amount: number) => void;
+  branchingPick: "A" | "B" | null;
+  setBranchingPick: (p: "A" | "B" | null) => void;
   reset: () => void;
 };
 
@@ -41,6 +43,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [breakdown, setBreakdown] = useState<XpBreakdown>({
     foundation: 0, quiz: 0, simulation: 0, reflection: 0, bonus: 0,
   });
+  const [branchingPick, setBranchingPick] = useState<"A" | "B" | null>(null);
 
   const addXp = useCallback((key: keyof XpBreakdown, amount: number) => {
     setXp((v) => v + amount);
@@ -51,13 +54,15 @@ export function GameProvider({ children }: { children: ReactNode }) {
     setStep("home");
     setXp(START_XP);
     setBreakdown({ foundation: 0, quiz: 0, simulation: 0, reflection: 0, bonus: 0 });
+    setBranchingPick(null);
   }, []);
 
   return (
     <GameContext.Provider
       value={{
         step, setStep, xp, totalXp: NEXT_LEVEL_XP,
-        level: "Explorer", streak: 3, breakdown, addXp, reset,
+        level: "Explorer", streak: 3, breakdown, addXp,
+        branchingPick, setBranchingPick, reset,
       }}
     >
       {children}
