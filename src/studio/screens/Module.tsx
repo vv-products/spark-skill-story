@@ -56,7 +56,7 @@ export function ModuleScreen() {
                 <span className="cursor-grab text-[#CCC]">⋮⋮</span>
                 <span className="w-8 text-center text-xs font-bold text-[#666680] tabular-nums">{String(c.number).padStart(2, "0")}</span>
                 {empty ? (
-                  <button onClick={() => alert("New class draft created.")} className="flex-1 text-left text-sm font-semibold text-[#888]">+ Empty — click to build this class.</button>
+                  <button onClick={() => setView({ kind: "class", pillarId: pillar.id, topicId: topic.id, moduleId: module.id, classId: c.id })} className="flex-1 text-left text-sm font-semibold text-[#888]">+ Empty — click to build this class.</button>
                 ) : (
                   <>
                     <div className="min-w-0 flex-1">
