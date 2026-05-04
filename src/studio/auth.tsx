@@ -10,6 +10,7 @@ type AuthCtx = {
   session: Session | null;
   roles: Role[];
   canEdit: boolean;
+  refreshRoles: () => Promise<void>;
   signIn: (email: string, password: string) => Promise<{ error?: string }>;
   signUp: (email: string, password: string, displayName?: string) => Promise<{ error?: string }>;
   signOut: () => Promise<void>;
@@ -45,7 +46,11 @@ export function StudioAuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   async function loadRoles(uid: string) {
-    const { data } = await supabase.from("user_roles").select("role").eq("user_id", uid);
+    const { data, error } = await supabase.from("user_roles").select("role").eq("user_id", uid);
+    if (error) {
+      console.error("[studio auth] loadRoles failed:", error);
+      return;
+    }
     setRoles((data ?? []).map((r) => r.role as Role));
   }
 
@@ -70,9 +75,10 @@ export function StudioAuthProvider({ children }: { children: ReactNode }) {
   }
 
   const canEdit = roles.includes("admin") || roles.includes("editor");
+  const refreshRoles = async () => { if (user) await loadRoles(user.id); };
 
   return (
-    <Ctx.Provider value={{ loading, user, session, roles, canEdit, signIn, signUp, signOut }}>
+    <Ctx.Provider value={{ loading, user, session, roles, canEdit, refreshRoles, signIn, signUp, signOut }}>
       {children}
     </Ctx.Provider>
   );

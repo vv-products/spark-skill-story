@@ -3,7 +3,7 @@ import { useStudioAuth } from "./auth";
 import { toast } from "sonner";
 
 export function AuthGate({ children }: { children: React.ReactNode }) {
-  const { loading, user, canEdit, signOut } = useStudioAuth();
+  const { loading, user, canEdit, signOut, refreshRoles } = useStudioAuth();
 
   if (loading) {
     return (
@@ -19,13 +19,21 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
     return (
       <div className="flex h-screen flex-col items-center justify-center gap-4 bg-studio-bg font-studio text-foreground">
         <p className="text-lg font-bold">You don't have editor access yet.</p>
-        <p className="text-sm text-text-secondary">Ask an admin to add you to the editor or admin role.</p>
-        <button
-          onClick={() => signOut()}
-          className="rounded-pill border border-border bg-card px-4 py-2 text-sm font-bold"
-        >
-          Sign out
-        </button>
+        <p className="text-sm text-text-secondary">If you just signed up, click refresh below.</p>
+        <div className="flex gap-2">
+          <button
+            onClick={() => refreshRoles()}
+            className="rounded-pill bg-primary px-4 py-2 text-sm font-bold text-primary-foreground"
+          >
+            Refresh access
+          </button>
+          <button
+            onClick={() => signOut()}
+            className="rounded-pill border border-border bg-card px-4 py-2 text-sm font-bold"
+          >
+            Sign out
+          </button>
+        </div>
       </div>
     );
   }
