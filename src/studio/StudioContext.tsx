@@ -154,11 +154,11 @@ export function StudioProvider({ children }: { children: ReactNode }) {
 
   async function newTopic(pillarId: string, name: string) {
     try { await createTopic(pillarId, name); toast.success("Topic added"); await reload(); }
-    catch (e: any) { toast.error(e?.message ?? "Failed"); }
+    catch (e: any) { toast.error(e?.message ?? "Failed to add topic"); throw e; }
   }
   async function newModule(topicId: string, name: string) {
     try { await createModule(topicId, name); toast.success("Module added"); await reload(); }
-    catch (e: any) { toast.error(e?.message ?? "Failed"); }
+    catch (e: any) { toast.error(e?.message ?? "Failed to add module"); throw e; }
   }
   async function newClass(moduleId: string, title: string) {
     try {
@@ -171,11 +171,11 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       toast.success("Class created");
       await reload();
       return id;
-    } catch (e: any) { toast.error(e?.message ?? "Failed"); return null; }
+    } catch (e: any) { toast.error(e?.message ?? "Failed to create class"); throw e; }
   }
   async function removeClass(classId: string) {
     try { await deleteClass(classId); toast.success("Class deleted"); await reload(); }
-    catch (e: any) { toast.error(e?.message ?? "Failed"); }
+    catch (e: any) { toast.error(e?.message ?? "Failed to delete class"); throw e; }
   }
 
   return (
