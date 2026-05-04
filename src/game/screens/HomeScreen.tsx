@@ -32,7 +32,7 @@ export function HomeScreen() {
               <h2 className="mt-3 text-2xl font-black leading-tight">
                 Continue Class 2:<br />The Happy Stall
               </h2>
-              <p className="mt-1 text-xs font-semibold text-white/80">4 layers · ~5 min</p>
+              <p className="mt-1 text-xs font-bold text-white drop-shadow-sm">4 layers · ~5 min</p>
             </div>
             <img
               src={maya}
