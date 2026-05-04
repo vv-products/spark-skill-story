@@ -4,6 +4,9 @@ import { usePlayerAuth } from "./PlayerAuth";
 import { PlayerSignIn } from "./PlayerSignIn";
 import { loadPublishedClasses, loadPublishedClassXpTotals, type DbClass } from "@/studio/catalog";
 import { loadUserProgress, type UserProgress } from "./progress";
+import { Avatar } from "./avatar/Avatar";
+import { avatarFromSeed, type AvatarConfig } from "./avatar/config";
+import { loadProfile } from "./profileApi";
 
 const EMPTY_PROGRESS: UserProgress = {
   totalXp: 0, completedClassIds: new Set(), perClass: new Map(), streakDays: 0,
@@ -11,9 +14,12 @@ const EMPTY_PROGRESS: UserProgress = {
 
 export function GameHome() {
   const { user, loading, isGuest, setGuest, signOut } = usePlayerAuth();
+  const navigate = useNavigate();
   const [classes, setClasses] = useState<DbClass[] | null>(null);
   const [xpTotals, setXpTotals] = useState<Map<string, number>>(new Map());
   const [progress, setProgress] = useState<UserProgress>(EMPTY_PROGRESS);
+  const [avatarCfg, setAvatarCfg] = useState<AvatarConfig | null>(null);
+  const [displayName, setDisplayName] = useState<string | null>(null);
 
   useEffect(() => {
     Promise.all([loadPublishedClasses(), loadPublishedClassXpTotals()])
@@ -21,8 +27,14 @@ export function GameHome() {
       .catch(() => setClasses([]));
   }, []);
   useEffect(() => {
-    if (!user) { setProgress(EMPTY_PROGRESS); return; }
+    if (!user) { setProgress(EMPTY_PROGRESS); setAvatarCfg(null); setDisplayName(null); return; }
     loadUserProgress(user.id).then(setProgress).catch(() => setProgress(EMPTY_PROGRESS));
+    loadProfile(user.id)
+      .then((p) => {
+        setAvatarCfg(p?.avatar_config ?? avatarFromSeed(user.id));
+        setDisplayName(p?.display_name ?? null);
+      })
+      .catch(() => setAvatarCfg(avatarFromSeed(user.id)));
   }, [user]);
 
   // "Continue" = the most-recently-touched class that isn't completed yet.
@@ -53,13 +65,24 @@ export function GameHome() {
   return (
     <div className="min-h-[100dvh] bg-gradient-to-b from-[#F0F0FA] to-white">
       <header className="px-5 pt-6 pb-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="text-xs font-semibold text-[#666]">Hello,</div>
-            <div className="text-xl font-black text-[#1A1A2E]">
-              {user?.user_metadata?.display_name ?? user?.email?.split("@")[0] ?? "Explorer"}
-            </div>
-          </div>
+        <div className="flex items-center justify-between gap-3">
+          <button
+            type="button"
+            onClick={() => user && navigate({ to: "/profile" })}
+            disabled={!user}
+            className="flex items-center gap-3 rounded-full p-1 -m-1 text-left disabled:cursor-default"
+            aria-label="Edit your profile"
+          >
+            <span className="block h-12 w-12 overflow-hidden rounded-full ring-2 ring-white shadow">
+              <Avatar config={avatarCfg} size={48} />
+            </span>
+            <span>
+              <span className="block text-xs font-semibold text-[#666]">Hello,</span>
+              <span className="block text-xl font-black text-[#1A1A2E]">
+                {displayName ?? user?.user_metadata?.display_name ?? user?.email?.split("@")[0] ?? "Explorer"}
+              </span>
+            </span>
+          </button>
           {user ? (
             <button onClick={signOut} className="rounded-full bg-white px-3 py-1.5 text-xs font-bold text-[#7B2FBE] shadow border border-[#EBEBF5]">Sign out</button>
           ) : (

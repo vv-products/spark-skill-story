@@ -222,21 +222,30 @@ export type Database = {
       }
       profiles: {
         Row: {
+          age: number | null
+          avatar_config: Json | null
           avatar_url: string | null
+          bio: string | null
           created_at: string
           display_name: string | null
           id: string
           updated_at: string
         }
         Insert: {
+          age?: number | null
+          avatar_config?: Json | null
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string
           display_name?: string | null
           id: string
           updated_at?: string
         }
         Update: {
+          age?: number | null
+          avatar_config?: Json | null
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string
           display_name?: string | null
           id?: string
