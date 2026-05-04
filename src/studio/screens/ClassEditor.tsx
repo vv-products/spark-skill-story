@@ -3,19 +3,32 @@ import { useStudio } from "../StudioContext";
 import { StudioLayout } from "../Layout";
 import { Btn, StatusPill, Tag, Field, Input, Textarea, Select, Toggle, Chip, FamilyBadge } from "../ui";
 import { PromptDialog } from "../PromptDialog";
+import { ConfirmDialog } from "../ConfirmDialog";
 import { TASK_BY_CODE, TASK_TYPES, FAMILY_COLOR, type Character, type Family, type AgeGroup } from "../data";
 
 const CHARACTERS: Character[] = ["Maya", "Leo", "Dash", "Pip"];
 
+type CatalogTarget = "topic" | "module" | "class";
+type AddDialog = { action: "create" | "rename"; target: CatalogTarget } | null;
+type ConfirmTarget = { target: CatalogTarget } | null;
+
 export function ClassEditorScreen() {
   const { view, pillars, setView, currentClass, classXp, expandedLayerId, setExpandedLayerId,
     removeLayer, reorderLayer, updateLayerField, updateClass, save, publish, saving, publishing, ageGroup,
-    newTopic, newModule, newClass } = useStudio();
+    newTopic, newModule, newClass,
+    editTopic, editModule, editClass,
+    removeTopic, removeModule, removeClass } = useStudio();
   const [pickerOpen, setPickerOpen] = useState(false);
   const [confirmRemove, setConfirmRemove] = useState<string | null>(null);
   const [addMenuOpen, setAddMenuOpen] = useState(false);
-  const [addDialog, setAddDialog] = useState<null | "topic" | "module" | "class">(null);
+  const [addDialog, setAddDialog] = useState<AddDialog>(null);
+  const [confirmCatalog, setConfirmCatalog] = useState<ConfirmTarget>(null);
   const addMenuRef = useRef<HTMLDivElement>(null);
+  const addBtnRef = useRef<HTMLButtonElement>(null);
+
+  // Restore focus to "+ Add" button after closing any dialog spawned from the menu
+  function closeAddDialog() { setAddDialog(null); setTimeout(() => addBtnRef.current?.focus(), 0); }
+  function closeConfirm() { setConfirmCatalog(null); setTimeout(() => addBtnRef.current?.focus(), 0); }
 
   useEffect(() => {
     if (!addMenuOpen) return;
@@ -55,26 +68,32 @@ export function ClassEditorScreen() {
         <span className="font-semibold text-[#1A1A2E]">Class {String(currentClass.number).padStart(2, "0")} — {currentClass.title || "Untitled"}</span>
         <div ref={addMenuRef} className="relative ml-3 inline-block">
           <button
+            ref={addBtnRef}
             onClick={() => setAddMenuOpen(o => !o)}
             className="inline-flex h-7 items-center gap-1 rounded-[8px] border border-[#EBEBF5] bg-white px-2.5 text-[12px] font-semibold text-[#7B2FBE] hover:bg-[#F8F8FC]"
-            title="Add to catalog"
+            title="Manage catalog"
+            aria-haspopup="menu"
+            aria-expanded={addMenuOpen}
           >
             + Add
           </button>
           {addMenuOpen && (
-            <div className="absolute left-0 top-9 z-20 w-44 overflow-hidden rounded-[10px] border border-[#EBEBF5] bg-white shadow-[0_8px_24px_rgba(0,0,0,0.10)]">
-              <button onClick={() => { setAddMenuOpen(false); setAddDialog("topic"); }}
-                className="block w-full px-3 py-2 text-left text-[13px] text-[#1A1A2E] hover:bg-[#F8F8FC]">
-                New topic <span className="text-[#888]">in {pillar.name}</span>
-              </button>
-              <button onClick={() => { setAddMenuOpen(false); setAddDialog("module"); }}
-                className="block w-full px-3 py-2 text-left text-[13px] text-[#1A1A2E] hover:bg-[#F8F8FC]">
-                New module <span className="text-[#888]">in {topic.name}</span>
-              </button>
-              <button onClick={() => { setAddMenuOpen(false); setAddDialog("class"); }}
-                className="block w-full px-3 py-2 text-left text-[13px] text-[#1A1A2E] hover:bg-[#F8F8FC]">
-                New class <span className="text-[#888]">in {module.name}</span>
-              </button>
+            <div role="menu" className="absolute left-0 top-9 z-20 w-64 overflow-hidden rounded-[10px] border border-[#EBEBF5] bg-white py-1 shadow-[0_8px_24px_rgba(0,0,0,0.10)]">
+              <MenuSection label="Topic" sub={pillar.name}>
+                <MenuItem onClick={() => { setAddMenuOpen(false); setAddDialog({ action: "create", target: "topic" }); }}>New topic</MenuItem>
+                <MenuItem onClick={() => { setAddMenuOpen(false); setAddDialog({ action: "rename", target: "topic" }); }}>Rename “{topic.name}”</MenuItem>
+                <MenuItem destructive onClick={() => { setAddMenuOpen(false); setConfirmCatalog({ target: "topic" }); }}>Delete “{topic.name}”</MenuItem>
+              </MenuSection>
+              <MenuSection label="Module" sub={topic.name}>
+                <MenuItem onClick={() => { setAddMenuOpen(false); setAddDialog({ action: "create", target: "module" }); }}>New module</MenuItem>
+                <MenuItem onClick={() => { setAddMenuOpen(false); setAddDialog({ action: "rename", target: "module" }); }}>Rename “{module.name}”</MenuItem>
+                <MenuItem destructive onClick={() => { setAddMenuOpen(false); setConfirmCatalog({ target: "module" }); }}>Delete “{module.name}”</MenuItem>
+              </MenuSection>
+              <MenuSection label="Class" sub={module.name}>
+                <MenuItem onClick={() => { setAddMenuOpen(false); setAddDialog({ action: "create", target: "class" }); }}>New class</MenuItem>
+                <MenuItem onClick={() => { setAddMenuOpen(false); setAddDialog({ action: "rename", target: "class" }); }}>Rename this class</MenuItem>
+                <MenuItem destructive onClick={() => { setAddMenuOpen(false); setConfirmCatalog({ target: "class" }); }}>Delete this class</MenuItem>
+              </MenuSection>
             </div>
           )}
         </div>
@@ -186,58 +205,128 @@ export function ClassEditorScreen() {
       {pickerOpen && <TaskPicker onClose={() => setPickerOpen(false)} />}
       {confirmRemove && (
         <ConfirmDialog
+          open={true}
           title="Remove this layer?"
-          body="This cannot be undone."
+          message="This cannot be undone."
           confirmLabel="Remove"
+          destructive
           onCancel={() => setConfirmRemove(null)}
           onConfirm={() => { removeLayer(confirmRemove); setConfirmRemove(null); }}
         />
       )}
+      {/* Catalog create / rename via PromptDialog. On thrown error, dialog stays open (toast already shown). */}
       <PromptDialog
-        open={addDialog === "topic"}
-        title={`New topic in ${pillar.name}`}
+        open={addDialog?.target === "topic"}
+        title={addDialog?.action === "rename" ? `Rename topic “${topic.name}”` : `New topic in ${pillar.name}`}
         label="Topic name"
         placeholder="e.g. Self-awareness"
-        onCancel={() => setAddDialog(null)}
-        onSubmit={async (name) => { await newTopic(pillar.id, name); setAddDialog(null); }}
+        defaultValue={addDialog?.action === "rename" ? topic.name : ""}
+        submitLabel={addDialog?.action === "rename" ? "Save" : "Create"}
+        onCancel={closeAddDialog}
+        onSubmit={async (name) => {
+          if (addDialog?.action === "rename") await editTopic(topic.id, name);
+          else await newTopic(pillar.id, name);
+          closeAddDialog();
+        }}
       />
       <PromptDialog
-        open={addDialog === "module"}
-        title={`New module in ${topic.name}`}
+        open={addDialog?.target === "module"}
+        title={addDialog?.action === "rename" ? `Rename module “${module.name}”` : `New module in ${topic.name}`}
         label="Module name"
         placeholder="e.g. Identity foundations"
-        onCancel={() => setAddDialog(null)}
-        onSubmit={async (name) => { await newModule(topic.id, name); setAddDialog(null); }}
+        defaultValue={addDialog?.action === "rename" ? module.name : ""}
+        submitLabel={addDialog?.action === "rename" ? "Save" : "Create"}
+        onCancel={closeAddDialog}
+        onSubmit={async (name) => {
+          if (addDialog?.action === "rename") await editModule(module.id, name);
+          else await newModule(topic.id, name);
+          closeAddDialog();
+        }}
       />
       <PromptDialog
-        open={addDialog === "class"}
-        title={`New class in ${module.name}`}
+        open={addDialog?.target === "class"}
+        title={addDialog?.action === "rename" ? `Rename class “${currentClass.title || "Untitled"}”` : `New class in ${module.name}`}
         label="Class title"
         placeholder="e.g. What is identity?"
-        defaultValue="Untitled class"
-        onCancel={() => setAddDialog(null)}
+        defaultValue={addDialog?.action === "rename" ? (currentClass.title || "") : "Untitled class"}
+        submitLabel={addDialog?.action === "rename" ? "Save" : "Create"}
+        onCancel={closeAddDialog}
         onSubmit={async (name) => {
-          const id = await newClass(module.id, name);
-          setAddDialog(null);
-          if (id) setView({ kind: "class", pillarId: pillar.id, topicId: topic.id, moduleId: module.id, classId: id });
+          if (addDialog?.action === "rename") {
+            await editClass(currentClass.id, name);
+            updateClass({ title: name });
+            closeAddDialog();
+          } else {
+            const id = await newClass(module.id, name);
+            closeAddDialog();
+            if (id) setView({ kind: "class", pillarId: pillar.id, topicId: topic.id, moduleId: module.id, classId: id });
+          }
+        }}
+      />
+
+      {/* Catalog deletion confirms */}
+      <ConfirmDialog
+        open={confirmCatalog?.target === "topic"}
+        title={`Delete topic “${topic.name}”?`}
+        message="This permanently removes the topic and every module, class, and layer inside it."
+        confirmLabel="Delete topic"
+        destructive
+        onCancel={closeConfirm}
+        onConfirm={async () => {
+          await removeTopic(topic.id);
+          closeConfirm();
+          setView({ kind: "library" });
+        }}
+      />
+      <ConfirmDialog
+        open={confirmCatalog?.target === "module"}
+        title={`Delete module “${module.name}”?`}
+        message="This permanently removes the module and every class and layer inside it."
+        confirmLabel="Delete module"
+        destructive
+        onCancel={closeConfirm}
+        onConfirm={async () => {
+          await removeModule(module.id);
+          closeConfirm();
+          setView({ kind: "library" });
+        }}
+      />
+      <ConfirmDialog
+        open={confirmCatalog?.target === "class"}
+        title={`Delete this class?`}
+        message="This permanently removes the class and all its layers."
+        confirmLabel="Delete class"
+        destructive
+        onCancel={closeConfirm}
+        onConfirm={async () => {
+          await removeClass(currentClass.id);
+          closeConfirm();
+          setView({ kind: "module", pillarId: pillar.id, topicId: topic.id, moduleId: module.id });
         }}
       />
     </StudioLayout>
   );
 }
 
-function ConfirmDialog({ title, body, confirmLabel, onCancel, onConfirm }: { title: string; body: string; confirmLabel: string; onCancel: () => void; onConfirm: () => void }) {
+function MenuSection({ label, sub, children }: { label: string; sub: string; children: React.ReactNode }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="w-[400px] rounded-[12px] bg-white p-6 shadow-2xl">
-        <h3 className="text-base font-bold text-[#1A1A2E]">{title}</h3>
-        <p className="mt-2 text-sm text-[#666680]">{body}</p>
-        <div className="mt-5 flex justify-end gap-2">
-          <Btn variant="outline" onClick={onCancel}>Cancel</Btn>
-          <Btn variant="danger" onClick={onConfirm}>{confirmLabel}</Btn>
-        </div>
+    <div className="border-b border-[#F0F0FA] py-1 last:border-b-0">
+      <div className="px-3 pb-1 pt-1 text-[10px] font-bold uppercase tracking-wider text-[#888]">
+        {label} <span className="font-semibold normal-case tracking-normal text-[#666680]">· {sub}</span>
       </div>
+      {children}
     </div>
+  );
+}
+function MenuItem({ children, onClick, destructive = false }: { children: React.ReactNode; onClick: () => void; destructive?: boolean }) {
+  return (
+    <button
+      role="menuitem"
+      onClick={onClick}
+      className={`block w-full truncate px-3 py-1.5 text-left text-[13px] hover:bg-[#F8F8FC] ${destructive ? "text-[#E5484D]" : "text-[#1A1A2E]"}`}
+    >
+      {children}
+    </button>
   );
 }
 

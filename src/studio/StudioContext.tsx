@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import { TASK_BY_CODE, type AgeGroup, type Class, type Status } from "./data";
 import {
   loadFullCatalog, saveClass, createTopic, createModule, createClass, deleteClass,
+  renameTopic, renameModule, renameClass, deleteTopic, deleteModule,
   type HPillar, type HClass,
 } from "./catalog";
 import { toast } from "sonner";
@@ -46,6 +47,11 @@ type Ctx = {
   newModule: (topicId: string, name: string) => Promise<void>;
   newClass: (moduleId: string, title: string) => Promise<string | null>;
   removeClass: (classId: string) => Promise<void>;
+  editTopic: (topicId: string, name: string) => Promise<void>;
+  editModule: (moduleId: string, name: string) => Promise<void>;
+  editClass: (classId: string, title: string) => Promise<void>;
+  removeTopic: (topicId: string) => Promise<void>;
+  removeModule: (moduleId: string) => Promise<void>;
 
   currentClass: HClass | null;
   classXp: number;
@@ -186,6 +192,27 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     catch (e: any) { toast.error(e?.message ?? "Failed to delete class"); throw e; }
   }
 
+  async function editTopic(topicId: string, name: string) {
+    try { await renameTopic(topicId, name); toast.success("Topic renamed"); await reload(); }
+    catch (e: any) { toast.error(e?.message ?? "Failed to rename topic"); throw e; }
+  }
+  async function editModule(moduleId: string, name: string) {
+    try { await renameModule(moduleId, name); toast.success("Module renamed"); await reload(); }
+    catch (e: any) { toast.error(e?.message ?? "Failed to rename module"); throw e; }
+  }
+  async function editClass(classId: string, title: string) {
+    try { await renameClass(classId, title); toast.success("Class renamed"); await reload(); }
+    catch (e: any) { toast.error(e?.message ?? "Failed to rename class"); throw e; }
+  }
+  async function removeTopic(topicId: string) {
+    try { await deleteTopic(topicId); toast.success("Topic deleted"); await reload(); }
+    catch (e: any) { toast.error(e?.message ?? "Failed to delete topic"); throw e; }
+  }
+  async function removeModule(moduleId: string) {
+    try { await deleteModule(moduleId); toast.success("Module deleted"); await reload(); }
+    catch (e: any) { toast.error(e?.message ?? "Failed to delete module"); throw e; }
+  }
+
   return (
     <StudioCtx.Provider value={{
       loadingCatalog, pillars, reload, view, setView,
@@ -194,6 +221,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       addLayer, removeLayer, reorderLayer, updateLayerField, updateClass,
       unsaved, saving, publishing, save, publish, currentClass, classXp,
       newTopic, newModule, newClass, removeClass,
+      editTopic, editModule, editClass, removeTopic, removeModule,
     }}>{children}</StudioCtx.Provider>
   );
 }
