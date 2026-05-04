@@ -5,9 +5,11 @@ import { XpPop } from "../Effects";
 import dash from "@/assets/dash-avatar.png";
 import leo from "@/assets/leo-avatar.png";
 
+type Pick = "A" | "B";
+
 export function BranchingScreen() {
-  const { setStep } = useGame();
-  const [pick, setPick] = useState<"A" | "B" | null>(null);
+  const { setStep, setBranchingPick } = useGame();
+  const [pick, setPick] = useState<Pick | null>(null);
 
   return (
     <div className="flex min-h-[100dvh] flex-col bg-background">
@@ -85,7 +87,11 @@ export function BranchingScreen() {
         <div className="mt-auto pt-5">
           <button
             disabled={!pick}
-            onClick={() => setStep("branching-result")}
+            onClick={() => {
+              if (!pick) return;
+              setBranchingPick(pick);
+              setStep("branching-result");
+            }}
             className="w-full rounded-pill bg-primary py-4 text-lg font-extrabold text-primary-foreground shadow-pop transition-transform active:scale-[0.97] disabled:opacity-40"
           >
             Play it out ▶
@@ -97,26 +103,34 @@ export function BranchingScreen() {
 }
 
 export function BranchingResultScreen() {
-  const { setStep, addXp } = useGame();
+  const { setStep, addXp, branchingPick, setBranchingPick } = useGame();
   const [showXp, setShowXp] = useState(false);
+  const isOptimal = branchingPick === "B";
 
   function handleContinue() {
-    addXp("simulation", 20);
+    addXp("simulation", isOptimal ? 20 : 10);
     setShowXp(true);
+  }
+
+  function handleTryAgain() {
+    setBranchingPick(null);
+    setStep("branching");
   }
 
   return (
     <div className="flex min-h-[100dvh] flex-col bg-background">
       <TopBar layer={3} totalLayers={4} />
       <main className="flex flex-1 flex-col px-5 pb-6">
-        <div className="self-start rounded-pill bg-card-gold px-3 py-1 text-xs font-extrabold text-gold-dark shadow-card">
-          ✓ Perfect choice
+        <div className={`self-start rounded-pill px-3 py-1 text-xs font-extrabold shadow-card ${
+          isOptimal ? "bg-card-gold text-gold-dark" : "bg-card-warm text-foreground"
+        }`}>
+          {isOptimal ? "✓ Perfect choice" : "💭 Oops — let's see what happened"}
         </div>
 
-        {/* Warm celebration scene */}
+        {/* Scene */}
         <div className="relative mt-3 flex aspect-[4/3] items-end justify-center overflow-hidden rounded-2xl bg-[var(--gradient-hero)] shadow-pop">
           <div className="pointer-events-none absolute inset-0">
-            {["🎉", "✨", "💛", "⭐", "🎊"].map((s, i) => (
+            {(isOptimal ? ["🎉", "✨", "💛", "⭐", "🎊"] : ["💥", "😮", "🫣", "📚", "💢"]).map((s, i) => (
               <span key={i} className="animate-float-soft absolute text-3xl"
                 style={{ left: `${10 + i * 18}%`, top: `${10 + (i % 3) * 20}%`, animationDelay: `${i * 0.2}s` }}>
                 {s}
@@ -124,21 +138,48 @@ export function BranchingResultScreen() {
             ))}
           </div>
           <div className="relative z-10 flex items-end gap-2 pb-4">
-            <img src={leo} alt="Leo celebrating with Dash" className="h-36 w-36 object-contain drop-shadow-xl animate-bounce-in" width={512} height={512} />
-            <img src={dash} alt="Dash celebrating" className="h-40 w-40 object-contain drop-shadow-xl animate-bounce-in" width={512} height={512} style={{ animationDelay: "0.15s" }} />
+            {isOptimal ? (
+              <>
+                <img src={leo} alt="Leo celebrating with Dash" className="h-36 w-36 object-contain drop-shadow-xl animate-bounce-in" width={512} height={512} />
+                <img src={dash} alt="Dash celebrating" className="h-40 w-40 object-contain drop-shadow-xl animate-bounce-in" width={512} height={512} style={{ animationDelay: "0.15s" }} />
+              </>
+            ) : (
+              <img src={dash} alt="Dash looking sheepish after knocking things over" className="h-40 w-40 object-contain drop-shadow-xl animate-vibrate" width={512} height={512} />
+            )}
           </div>
         </div>
 
         <div className="mt-5 rounded-2xl bg-card p-5 shadow-card">
-          <p className="text-center text-base font-extrabold leading-snug text-foreground">
-            "Happiness is best when you share it the right way!" 💛
-          </p>
-          <p className="mt-2 text-center text-sm font-semibold text-text-secondary">
-            Dash and Leo's joy spread across the whole table — that's the magic of shared happiness.
-          </p>
+          {isOptimal ? (
+            <>
+              <p className="text-center text-base font-extrabold leading-snug text-foreground">
+                "Happiness is best when you share it the right way!" 💛
+              </p>
+              <p className="mt-2 text-center text-sm font-semibold text-text-secondary">
+                Dash and Leo's joy spread across the whole table — that's the magic of shared happiness.
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="text-center text-base font-extrabold leading-snug text-foreground">
+                Uh oh — Dash's big feelings knocked the paint pots flying! 🎨💦
+              </p>
+              <p className="mt-2 text-center text-sm font-semibold text-text-secondary">
+                Big joy is wonderful, but it needs somewhere to <span className="font-extrabold text-foreground">go</span>. Sharing it with a friend turns the volume down — and the magic up.
+              </p>
+            </>
+          )}
         </div>
 
-        <div className="mt-auto pt-5">
+        <div className="mt-auto pt-5 flex flex-col gap-2">
+          {!isOptimal && (
+            <button
+              onClick={handleTryAgain}
+              className="w-full rounded-pill border-2 border-primary bg-card py-3 text-base font-extrabold text-primary transition-transform active:scale-[0.97]"
+            >
+              ↺ Try the other path
+            </button>
+          )}
           <button
             onClick={handleContinue}
             className="w-full rounded-pill bg-primary py-4 text-lg font-extrabold text-primary-foreground shadow-pop transition-transform active:scale-[0.97]"
@@ -147,7 +188,7 @@ export function BranchingResultScreen() {
           </button>
         </div>
       </main>
-      {showXp && <XpPop amount={20} message="Perfect choice!" onDone={() => setStep("reflection")} />}
+      {showXp && <XpPop amount={isOptimal ? 20 : 10} message={isOptimal ? "Perfect choice!" : "Good try — you learned something!"} onDone={() => setStep("reflection")} />}
     </div>
   );
 }
