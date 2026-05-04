@@ -1,16 +1,30 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useStudio } from "../StudioContext";
 import { StudioLayout } from "../Layout";
 import { Btn, StatusPill, Tag, Field, Input, Textarea, Select, Toggle, Chip, FamilyBadge } from "../ui";
+import { PromptDialog } from "../PromptDialog";
 import { TASK_BY_CODE, TASK_TYPES, FAMILY_COLOR, type Character, type Family, type AgeGroup } from "../data";
 
 const CHARACTERS: Character[] = ["Maya", "Leo", "Dash", "Pip"];
 
 export function ClassEditorScreen() {
   const { view, pillars, setView, currentClass, classXp, expandedLayerId, setExpandedLayerId,
-    removeLayer, reorderLayer, updateLayerField, updateClass, save, publish, saving, publishing, ageGroup } = useStudio();
+    removeLayer, reorderLayer, updateLayerField, updateClass, save, publish, saving, publishing, ageGroup,
+    newTopic, newModule, newClass } = useStudio();
   const [pickerOpen, setPickerOpen] = useState(false);
   const [confirmRemove, setConfirmRemove] = useState<string | null>(null);
+  const [addMenuOpen, setAddMenuOpen] = useState(false);
+  const [addDialog, setAddDialog] = useState<null | "topic" | "module" | "class">(null);
+  const addMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!addMenuOpen) return;
+    function onDoc(e: MouseEvent) {
+      if (!addMenuRef.current?.contains(e.target as Node)) setAddMenuOpen(false);
+    }
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, [addMenuOpen]);
 
   if (view.kind !== "class" || !currentClass) return null;
   const pillar = pillars.find(p => p.id === view.pillarId)!;
@@ -39,6 +53,31 @@ export function ClassEditorScreen() {
         <button onClick={() => setView({ kind: "module", pillarId: pillar.id, topicId: topic.id, moduleId: module.id })} className="hover:underline">{module.name}</button>
         <span className="mx-2 text-[#CCC]">›</span>
         <span className="font-semibold text-[#1A1A2E]">Class {String(currentClass.number).padStart(2, "0")} — {currentClass.title || "Untitled"}</span>
+        <div ref={addMenuRef} className="relative ml-3 inline-block">
+          <button
+            onClick={() => setAddMenuOpen(o => !o)}
+            className="inline-flex h-7 items-center gap-1 rounded-[8px] border border-[#EBEBF5] bg-white px-2.5 text-[12px] font-semibold text-[#7B2FBE] hover:bg-[#F8F8FC]"
+            title="Add to catalog"
+          >
+            + Add
+          </button>
+          {addMenuOpen && (
+            <div className="absolute left-0 top-9 z-20 w-44 overflow-hidden rounded-[10px] border border-[#EBEBF5] bg-white shadow-[0_8px_24px_rgba(0,0,0,0.10)]">
+              <button onClick={() => { setAddMenuOpen(false); setAddDialog("topic"); }}
+                className="block w-full px-3 py-2 text-left text-[13px] text-[#1A1A2E] hover:bg-[#F8F8FC]">
+                New topic <span className="text-[#888]">in {pillar.name}</span>
+              </button>
+              <button onClick={() => { setAddMenuOpen(false); setAddDialog("module"); }}
+                className="block w-full px-3 py-2 text-left text-[13px] text-[#1A1A2E] hover:bg-[#F8F8FC]">
+                New module <span className="text-[#888]">in {topic.name}</span>
+              </button>
+              <button onClick={() => { setAddMenuOpen(false); setAddDialog("class"); }}
+                className="block w-full px-3 py-2 text-left text-[13px] text-[#1A1A2E] hover:bg-[#F8F8FC]">
+                New class <span className="text-[#888]">in {module.name}</span>
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-[320px_1fr_60px] gap-px bg-[#EBEBF5]" style={{ minHeight: "calc(100vh - 60px - 49px)" }}>
@@ -154,6 +193,35 @@ export function ClassEditorScreen() {
           onConfirm={() => { removeLayer(confirmRemove); setConfirmRemove(null); }}
         />
       )}
+      <PromptDialog
+        open={addDialog === "topic"}
+        title={`New topic in ${pillar.name}`}
+        label="Topic name"
+        placeholder="e.g. Self-awareness"
+        onCancel={() => setAddDialog(null)}
+        onSubmit={async (name) => { await newTopic(pillar.id, name); setAddDialog(null); }}
+      />
+      <PromptDialog
+        open={addDialog === "module"}
+        title={`New module in ${topic.name}`}
+        label="Module name"
+        placeholder="e.g. Identity foundations"
+        onCancel={() => setAddDialog(null)}
+        onSubmit={async (name) => { await newModule(topic.id, name); setAddDialog(null); }}
+      />
+      <PromptDialog
+        open={addDialog === "class"}
+        title={`New class in ${module.name}`}
+        label="Class title"
+        placeholder="e.g. What is identity?"
+        defaultValue="Untitled class"
+        onCancel={() => setAddDialog(null)}
+        onSubmit={async (name) => {
+          const id = await newClass(module.id, name);
+          setAddDialog(null);
+          if (id) setView({ kind: "class", pillarId: pillar.id, topicId: topic.id, moduleId: module.id, classId: id });
+        }}
+      />
     </StudioLayout>
   );
 }
