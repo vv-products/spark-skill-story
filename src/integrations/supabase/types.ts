@@ -14,16 +14,360 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      class_progress: {
+        Row: {
+          class_id: string
+          completed_at: string | null
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+          xp_earned: number
+        }
+        Insert: {
+          class_id: string
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+          xp_earned?: number
+        }
+        Update: {
+          class_id?: string
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+          xp_earned?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_progress_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      classes: {
+        Row: {
+          created_at: string
+          estimated_minutes: number | null
+          hero_image_url: string | null
+          id: string
+          module_id: string
+          position: number
+          slug: string
+          status: Database["public"]["Enums"]["publish_status"]
+          subtitle: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          estimated_minutes?: number | null
+          hero_image_url?: string | null
+          id?: string
+          module_id: string
+          position?: number
+          slug: string
+          status?: Database["public"]["Enums"]["publish_status"]
+          subtitle?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          estimated_minutes?: number | null
+          hero_image_url?: string | null
+          id?: string
+          module_id?: string
+          position?: number
+          slug?: string
+          status?: Database["public"]["Enums"]["publish_status"]
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "classes_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      layers: {
+        Row: {
+          class_id: string
+          config: Json
+          created_at: string
+          id: string
+          position: number
+          title: string
+          type: Database["public"]["Enums"]["layer_type"]
+          updated_at: string
+          xp_reward: number
+        }
+        Insert: {
+          class_id: string
+          config?: Json
+          created_at?: string
+          id?: string
+          position?: number
+          title: string
+          type: Database["public"]["Enums"]["layer_type"]
+          updated_at?: string
+          xp_reward?: number
+        }
+        Update: {
+          class_id?: string
+          config?: Json
+          created_at?: string
+          id?: string
+          position?: number
+          title?: string
+          type?: Database["public"]["Enums"]["layer_type"]
+          updated_at?: string
+          xp_reward?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "layers_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      modules: {
+        Row: {
+          created_at: string
+          id: string
+          position: number
+          slug: string
+          subtitle: string | null
+          title: string
+          topic_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          position?: number
+          slug: string
+          subtitle?: string | null
+          title: string
+          topic_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          position?: number
+          slug?: string
+          subtitle?: string | null
+          title?: string
+          topic_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "modules_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pillars: {
+        Row: {
+          created_at: string
+          emoji: string | null
+          id: string
+          position: number
+          slug: string
+          subtitle: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          emoji?: string | null
+          id?: string
+          position?: number
+          slug: string
+          subtitle?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          emoji?: string | null
+          id?: string
+          position?: number
+          slug?: string
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      topics: {
+        Row: {
+          created_at: string
+          id: string
+          pillar_id: string
+          position: number
+          slug: string
+          subtitle: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          pillar_id: string
+          position?: number
+          slug: string
+          subtitle?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          pillar_id?: string
+          position?: number
+          slug?: string
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "topics_pillar_id_fkey"
+            columns: ["pillar_id"]
+            isOneToOne: false
+            referencedRelation: "pillars"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      xp_events: {
+        Row: {
+          amount: number
+          class_id: string | null
+          created_at: string
+          id: string
+          layer_id: string | null
+          source: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          class_id?: string | null
+          created_at?: string
+          id?: string
+          layer_id?: string | null
+          source: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          class_id?: string | null
+          created_at?: string
+          id?: string
+          layer_id?: string | null
+          source?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "xp_events_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "xp_events_layer_id_fkey"
+            columns: ["layer_id"]
+            isOneToOne: false
+            referencedRelation: "layers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "editor"
+      layer_type: "foundation" | "quiz" | "simulation" | "reflection"
+      publish_status: "draft" | "published"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +494,10 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "editor"],
+      layer_type: ["foundation", "quiz", "simulation", "reflection"],
+      publish_status: ["draft", "published"],
+    },
   },
 } as const
