@@ -182,6 +182,41 @@ export async function deleteClass(classId: string) {
   if (error) throw error;
 }
 
+export async function renameTopic(topicId: string, name: string) {
+  const { error } = await supabase.from("topics").update({ title: name }).eq("id", topicId);
+  if (error) throw error;
+}
+export async function renameModule(moduleId: string, name: string) {
+  const { error } = await supabase.from("modules").update({ title: name }).eq("id", moduleId);
+  if (error) throw error;
+}
+export async function renameClass(classId: string, title: string) {
+  const { error } = await supabase.from("classes").update({ title }).eq("id", classId);
+  if (error) throw error;
+}
+
+export async function deleteTopic(topicId: string) {
+  const { data: mods } = await supabase.from("modules").select("id").eq("topic_id", topicId);
+  const moduleIds = (mods ?? []).map(m => m.id);
+  if (moduleIds.length) {
+    const { data: cls } = await supabase.from("classes").select("id").in("module_id", moduleIds);
+    const classIds = (cls ?? []).map(c => c.id);
+    if (classIds.length) await supabase.from("layers").delete().in("class_id", classIds);
+    await supabase.from("classes").delete().in("module_id", moduleIds);
+    await supabase.from("modules").delete().in("id", moduleIds);
+  }
+  const { error } = await supabase.from("topics").delete().eq("id", topicId);
+  if (error) throw error;
+}
+export async function deleteModule(moduleId: string) {
+  const { data: cls } = await supabase.from("classes").select("id").eq("module_id", moduleId);
+  const classIds = (cls ?? []).map(c => c.id);
+  if (classIds.length) await supabase.from("layers").delete().in("class_id", classIds);
+  await supabase.from("classes").delete().eq("module_id", moduleId);
+  const { error } = await supabase.from("modules").delete().eq("id", moduleId);
+  if (error) throw error;
+}
+
 export async function saveClass(c: HClass, opts: { publish?: boolean } = {}) {
   const status = opts.publish ? "published" : STATUS_TO_DB[c.status];
   const { error } = await supabase.from("classes").update({
