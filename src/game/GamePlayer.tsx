@@ -2,29 +2,53 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { usePlayerAuth } from "./PlayerAuth";
 import { PlayerSignIn } from "./PlayerSignIn";
-import { loadPublishedClasses, type DbClass } from "@/studio/catalog";
-import { loadUserProgress } from "./progress";
+import { loadPublishedClasses, loadPublishedClassXpTotals, type DbClass } from "@/studio/catalog";
+import { loadUserProgress, type UserProgress } from "./progress";
+
+const EMPTY_PROGRESS: UserProgress = {
+  totalXp: 0, completedClassIds: new Set(), perClass: new Map(), streakDays: 0,
+};
 
 export function GameHome() {
   const { user, loading, isGuest, setGuest, signOut } = usePlayerAuth();
   const [classes, setClasses] = useState<DbClass[] | null>(null);
-  const [completed, setCompleted] = useState<Set<string>>(new Set());
-  const [totalXp, setTotalXp] = useState(0);
+  const [xpTotals, setXpTotals] = useState<Map<string, number>>(new Map());
+  const [progress, setProgress] = useState<UserProgress>(EMPTY_PROGRESS);
 
   useEffect(() => {
-    loadPublishedClasses().then(setClasses).catch(() => setClasses([]));
+    Promise.all([loadPublishedClasses(), loadPublishedClassXpTotals()])
+      .then(([cls, totals]) => { setClasses(cls); setXpTotals(totals); })
+      .catch(() => setClasses([]));
   }, []);
   useEffect(() => {
-    if (!user) { setCompleted(new Set()); setTotalXp(0); return; }
-    loadUserProgress(user.id).then((r) => {
-      setCompleted(new Set(r.progress.filter((p) => p.completed_at).map((p) => p.class_id)));
-      setTotalXp(r.totalXp);
-    });
+    if (!user) { setProgress(EMPTY_PROGRESS); return; }
+    loadUserProgress(user.id).then(setProgress).catch(() => setProgress(EMPTY_PROGRESS));
   }, [user]);
+
+  // "Continue" = the most-recently-touched class that isn't completed yet.
+  // Fallback for a brand-new signed-in user: first non-completed published class.
+  const continueClass = useMemo<DbClass | null>(() => {
+    if (!classes || classes.length === 0) return null;
+    const byId = new Map(classes.map((c) => [c.id, c]));
+    let best: { c: DbClass; t: number } | null = null;
+    for (const [classId, info] of progress.perClass) {
+      if (progress.completedClassIds.has(classId)) continue;
+      const c = byId.get(classId);
+      if (!c) continue;
+      if (!best || info.lastAt > best.t) best = { c, t: info.lastAt };
+    }
+    if (best) return best.c;
+    return classes.find((c) => !progress.completedClassIds.has(c.id)) ?? null;
+  }, [classes, progress]);
 
   if (loading) return <div className="flex h-[100dvh] items-center justify-center bg-[#F8F8FC] text-[#666]">Loading…</div>;
 
   if (!user && !isGuest) return <PlayerSignIn onContinueAsGuest={() => setGuest(true)} />;
+
+  const continueXpEarned = continueClass ? (progress.perClass.get(continueClass.id)?.xp ?? 0) : 0;
+  const continueXpTotal = continueClass ? (xpTotals.get(continueClass.id) ?? 0) : 0;
+  const continuePct = continueXpTotal > 0 ? Math.min(100, Math.round((continueXpEarned / continueXpTotal) * 100)) : 0;
+  const isResume = continueClass ? (progress.perClass.get(continueClass.id)?.layersTouched ?? 0) > 0 : false;
 
   return (
     <div className="min-h-[100dvh] bg-gradient-to-b from-[#F0F0FA] to-white">
@@ -43,9 +67,9 @@ export function GameHome() {
           )}
         </div>
         <div className="mt-4 grid grid-cols-3 gap-2">
-          <Stat label="XP" value={user ? totalXp : "—"} />
-          <Stat label="Classes" value={user ? completed.size : "—"} />
-          <Stat label="Streak" value={user ? "3🔥" : "—"} />
+          <Stat label="XP" value={user ? progress.totalXp : "—"} />
+          <Stat label="Classes" value={user ? progress.completedClassIds.size : "—"} />
+          <Stat label="Streak" value={user ? (progress.streakDays > 0 ? `${progress.streakDays}🔥` : "0") : "—"} />
         </div>
         {!user && isGuest && (
           <div className="mt-3 rounded-xl bg-[#FFF8E8] px-3 py-2 text-[12px] font-semibold text-[#A66D00]">
@@ -54,8 +78,47 @@ export function GameHome() {
         )}
       </header>
 
-      <section className="px-5 pb-20">
-        <h2 className="mb-3 text-base font-extrabold text-[#1A1A2E]">Today's classes</h2>
+      {/* Continue card — only for signed-in users with at least one class to play */}
+      {user && continueClass && (
+        <section className="px-5 pb-2">
+          <h2 className="mb-2 text-[11px] font-bold uppercase tracking-wider text-[#666]">
+            {isResume ? "Continue where you left off" : "Start your first class"}
+          </h2>
+          <Link
+            to="/play/$slug"
+            params={{ slug: continueClass.slug }}
+            className="block rounded-2xl bg-gradient-to-br from-[#7B2FBE] to-[#5A1F9A] p-5 text-white shadow-[0_8px_24px_rgba(123,47,190,0.35)]"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0 flex-1">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-white/70">
+                  Class {String(continueClass.position).padStart(2, "0")}
+                </div>
+                <div className="mt-0.5 truncate text-lg font-black">{continueClass.title}</div>
+                {continueClass.subtitle && (
+                  <div className="mt-0.5 truncate text-xs text-white/80">{continueClass.subtitle}</div>
+                )}
+              </div>
+              <div className="rounded-full bg-white/15 px-3 py-1 text-[11px] font-bold backdrop-blur">
+                {isResume ? "Resume →" : "Start →"}
+              </div>
+            </div>
+            {isResume && continueXpTotal > 0 && (
+              <>
+                <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-white/20">
+                  <div className="h-full bg-white transition-all" style={{ width: `${continuePct}%` }} />
+                </div>
+                <div className="mt-1.5 text-[11px] font-semibold text-white/80">
+                  {continueXpEarned} / {continueXpTotal} XP · {continuePct}%
+                </div>
+              </>
+            )}
+          </Link>
+        </section>
+      )}
+
+      <section className="px-5 pb-20 pt-4">
+        <h2 className="mb-3 text-base font-extrabold text-[#1A1A2E]">All classes</h2>
         {classes == null ? (
           <div className="text-sm text-[#666]">Loading classes…</div>
         ) : classes.length === 0 ? (
@@ -65,18 +128,33 @@ export function GameHome() {
         ) : (
           <div className="space-y-3">
             {classes.map((c) => {
-              const done = completed.has(c.id);
+              const done = progress.completedClassIds.has(c.id);
+              const earnedHere = progress.perClass.get(c.id)?.xp ?? 0;
+              const totalHere = xpTotals.get(c.id) ?? 0;
+              const inProgress = !done && earnedHere > 0;
+              const pct = totalHere > 0 ? Math.min(100, Math.round((earnedHere / totalHere) * 100)) : 0;
               return (
                 <Link key={c.id} to="/play/$slug" params={{ slug: c.slug }}
                   className="block rounded-2xl bg-white p-4 shadow border border-[#EBEBF5]">
                   <div className="flex items-center gap-3">
-                    <div className={`flex h-12 w-12 items-center justify-center rounded-xl text-xl ${done ? "bg-[#E8F5E9]" : "bg-[#F0F0FA]"}`}>
-                      {done ? "✅" : "▶️"}
+                    <div className={`flex h-12 w-12 items-center justify-center rounded-xl text-xl ${done ? "bg-[#E8F5E9]" : inProgress ? "bg-[#FFF3D9]" : "bg-[#F0F0FA]"}`}>
+                      {done ? "✅" : inProgress ? "⏳" : "▶️"}
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="text-[10px] font-bold uppercase tracking-wider text-[#7B2FBE]">Class {String(c.position).padStart(2, "0")}</div>
                       <div className="truncate text-base font-extrabold text-[#1A1A2E]">{c.title}</div>
                       {c.subtitle && <div className="truncate text-xs text-[#666]">{c.subtitle}</div>}
+                      {inProgress && totalHere > 0 && (
+                        <div className="mt-1.5 flex items-center gap-2">
+                          <div className="h-1 flex-1 overflow-hidden rounded-full bg-[#F0F0FA]">
+                            <div className="h-full bg-[#7B2FBE] transition-all" style={{ width: `${pct}%` }} />
+                          </div>
+                          <div className="text-[10px] font-bold text-[#666]">{pct}%</div>
+                        </div>
+                      )}
+                      {done && totalHere > 0 && (
+                        <div className="mt-1 text-[10px] font-bold text-[#2E7D32]">+{earnedHere} XP earned</div>
+                      )}
                     </div>
                     <span className="text-[#7B2FBE]">→</span>
                   </div>
