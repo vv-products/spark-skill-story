@@ -73,6 +73,37 @@ export function PlayerSignIn({ onContinueAsGuest }: { onContinueAsGuest: () => v
         className="mt-4 w-full rounded-full border border-white/30 bg-white/10 py-2.5 text-sm font-bold text-white">
         Play as guest (progress not saved)
       </button>
+
+      <div className="mt-6 rounded-2xl border border-white/20 bg-white/10 p-3">
+        <div className="mb-2 text-center text-[11px] font-bold uppercase tracking-wide text-white/70">
+          Demo accounts
+        </div>
+        <div className="grid grid-cols-5 gap-2">
+          {[
+            { name: "Mia", email: "mia.kid@example.com", emoji: "🌟" },
+            { name: "Leo", email: "leo.kid@example.com", emoji: "🦁" },
+            { name: "Zoe", email: "zoe.kid@example.com", emoji: "🌈" },
+            { name: "Kai", email: "kai.kid@example.com", emoji: "🌊" },
+            { name: "Ada", email: "ada.kid@example.com", emoji: "🌸" },
+          ].map((kid) => (
+            <button
+              key={kid.email}
+              type="button"
+              disabled={busy}
+              onClick={async () => {
+                setBusy(true);
+                const res = await signIn(kid.email, "KidPass123!");
+                setBusy(false);
+                if (res.error) toast.error(res.error);
+              }}
+              className="flex flex-col items-center gap-1 rounded-xl bg-white/15 py-2 text-white hover:bg-white/25 disabled:opacity-50"
+            >
+              <span className="text-xl">{kid.emoji}</span>
+              <span className="text-[11px] font-bold">{kid.name}</span>
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
