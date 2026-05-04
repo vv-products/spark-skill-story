@@ -130,7 +130,7 @@ export function HomeScreen() {
                 </p>
               </div>
               <span className="text-base text-tag-foreground">🔖</span>
-            </div>
+            </button>
           ))}
         </div>
       </main>
