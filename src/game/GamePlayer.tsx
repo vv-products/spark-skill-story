@@ -130,13 +130,13 @@ export function ClassPlayer({ slug }: { slug: string }) {
   async function handleComplete(xp: number) {
     const newEarned = earned + xp;
     setEarned(newEarned);
+    const d = data as { cls: any; layers: any[] };
     if (user && !isGuest) {
       const { recordLayerXp, recordClassComplete } = await import("./progress");
-      await recordLayerXp({ userId: user.id, classId: data!.cls.id, layerId: layer.id, amount: xp, source: layer.config?.taskCode ?? "layer" });
-      if (isLast) await recordClassComplete({ userId: user.id, classId: data!.cls.id, xpEarned: newEarned });
+      await recordLayerXp({ userId: user.id, classId: d.cls.id, layerId: layer.id, amount: xp, source: layer.config?.taskCode ?? "layer" });
+      if (isLast) await recordClassComplete({ userId: user.id, classId: d.cls.id, xpEarned: newEarned });
     }
-    if (isLast) setIdx((i) => i + 1);
-    else setIdx((i) => i + 1);
+    setIdx((i) => i + 1);
   }
 
   if (idx >= data.layers.length) {
