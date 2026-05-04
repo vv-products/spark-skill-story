@@ -137,16 +137,19 @@ export function StudioProvider({ children }: { children: ReactNode }) {
   }
 
   async function save() {
-    if (!currentClass) return;
+    if (!currentClass || saving) return;
+    setSaving(true);
     try {
       await saveClass(currentClass);
       setUnsaved(false);
       toast.success("Saved");
       await reload();
     } catch (e: any) { toast.error(e?.message ?? "Save failed"); }
+    finally { setSaving(false); }
   }
   async function publish() {
-    if (!currentClass || currentClass.layers.length === 0) return;
+    if (!currentClass || currentClass.layers.length === 0 || publishing) return;
+    setPublishing(true);
     try {
       await saveClass(currentClass, { publish: true });
       setEditing((prev) => prev ? { ...prev, status: "Published" as Status } : prev);
@@ -154,6 +157,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       toast.success("Published");
       await reload();
     } catch (e: any) { toast.error(e?.message ?? "Publish failed"); }
+    finally { setPublishing(false); }
   }
 
   async function newTopic(pillarId: string, name: string) {
