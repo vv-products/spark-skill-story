@@ -71,7 +71,7 @@ export function ModuleScreen() {
               </div>
             );
           })}
-          <button className="mt-1 w-full rounded-[12px] border border-dashed border-[#D8D8E8] py-3 text-sm font-semibold text-[#7B2FBE] hover:bg-white">+ Add Class</button>
+          <button onClick={handleAddClass} className="mt-1 w-full rounded-[12px] border border-dashed border-[#D8D8E8] py-3 text-sm font-semibold text-[#7B2FBE] hover:bg-white">+ Add Class</button>
         </div>
       </div>
     </StudioLayout>
