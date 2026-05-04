@@ -199,9 +199,11 @@ export function ClassEditorScreen() {
       {pickerOpen && <TaskPicker onClose={() => setPickerOpen(false)} />}
       {confirmRemove && (
         <ConfirmDialog
+          open={true}
           title="Remove this layer?"
-          body="This cannot be undone."
+          message="This cannot be undone."
           confirmLabel="Remove"
+          destructive
           onCancel={() => setConfirmRemove(null)}
           onConfirm={() => { removeLayer(confirmRemove); setConfirmRemove(null); }}
         />
