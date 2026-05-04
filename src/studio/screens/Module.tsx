@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { useStudio } from "../StudioContext";
 import { StudioLayout } from "../Layout";
 import { Btn, StatusPill, Chip } from "../ui";
+import { PromptDialog } from "../PromptDialog";
 import { TASK_BY_CODE, type AgeGroup } from "../data";
 
 export function ModuleScreen() {
