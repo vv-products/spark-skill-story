@@ -18,14 +18,11 @@ export function PromptDialog({
 }: Props) {
   const [value, setValue] = useState(defaultValue);
   const [busy, setBusy] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (open) {
       setValue(defaultValue);
       setBusy(false);
-      // focus next tick
-      setTimeout(() => inputRef.current?.focus(), 0);
     }
   }, [open, defaultValue]);
 
