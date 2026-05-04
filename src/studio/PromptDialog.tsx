@@ -61,7 +61,7 @@ export function PromptDialog({
         <h2 className="mb-4 text-[18px] font-bold text-[#1A1A2E]">{title}</h2>
         <Field label={label}>
           <Input
-            ref={inputRef as any}
+            autoFocus
             value={value}
             placeholder={placeholder}
             onChange={(e) => setValue(e.target.value)}
