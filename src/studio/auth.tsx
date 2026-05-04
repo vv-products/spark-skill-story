@@ -75,9 +75,10 @@ export function StudioAuthProvider({ children }: { children: ReactNode }) {
   }
 
   const canEdit = roles.includes("admin") || roles.includes("editor");
+  const refreshRoles = async () => { if (user) await loadRoles(user.id); };
 
   return (
-    <Ctx.Provider value={{ loading, user, session, roles, canEdit, signIn, signUp, signOut }}>
+    <Ctx.Provider value={{ loading, user, session, roles, canEdit, refreshRoles, signIn, signUp, signOut }}>
       {children}
     </Ctx.Provider>
   );
