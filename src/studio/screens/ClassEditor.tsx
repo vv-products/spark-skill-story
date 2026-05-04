@@ -241,21 +241,6 @@ export function ClassEditorScreen() {
   );
 }
 
-function ConfirmDialog({ title, body, confirmLabel, onCancel, onConfirm }: { title: string; body: string; confirmLabel: string; onCancel: () => void; onConfirm: () => void }) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="w-[400px] rounded-[12px] bg-white p-6 shadow-2xl">
-        <h3 className="text-base font-bold text-[#1A1A2E]">{title}</h3>
-        <p className="mt-2 text-sm text-[#666680]">{body}</p>
-        <div className="mt-5 flex justify-end gap-2">
-          <Btn variant="outline" onClick={onCancel}>Cancel</Btn>
-          <Btn variant="danger" onClick={onConfirm}>{confirmLabel}</Btn>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function TaskPicker({ onClose }: { onClose: () => void }) {
   const { addLayer, ageGroup } = useStudio();
   const [filter, setFilter] = useState<Family | "All">("All");
