@@ -193,6 +193,35 @@ export function ClassEditorScreen() {
           onConfirm={() => { removeLayer(confirmRemove); setConfirmRemove(null); }}
         />
       )}
+      <PromptDialog
+        open={addDialog === "topic"}
+        title={`New topic in ${pillar.name}`}
+        label="Topic name"
+        placeholder="e.g. Self-awareness"
+        onCancel={() => setAddDialog(null)}
+        onSubmit={async (name) => { await newTopic(pillar.id, name); setAddDialog(null); }}
+      />
+      <PromptDialog
+        open={addDialog === "module"}
+        title={`New module in ${topic.name}`}
+        label="Module name"
+        placeholder="e.g. Identity foundations"
+        onCancel={() => setAddDialog(null)}
+        onSubmit={async (name) => { await newModule(topic.id, name); setAddDialog(null); }}
+      />
+      <PromptDialog
+        open={addDialog === "class"}
+        title={`New class in ${module.name}`}
+        label="Class title"
+        placeholder="e.g. What is identity?"
+        defaultValue="Untitled class"
+        onCancel={() => setAddDialog(null)}
+        onSubmit={async (name) => {
+          const id = await newClass(module.id, name);
+          setAddDialog(null);
+          if (id) setView({ kind: "class", pillarId: pillar.id, topicId: topic.id, moduleId: module.id, classId: id });
+        }}
+      />
     </StudioLayout>
   );
 }
