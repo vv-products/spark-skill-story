@@ -12,10 +12,12 @@ export function ModuleScreen() {
   const topic = pillar.topics.find(t => t.id === view.topicId)!;
   const module = topic.modules.find(m => m.id === view.moduleId)!;
 
-  async function handleAddClass() {
-    const title = window.prompt("New class title", "Untitled class")?.trim();
-    if (title === undefined) return;
-    const id = await newClass(module.id, title || "Untitled class");
+  const [addOpen, setAddOpen] = useState(false);
+
+  function openAddClass() { setAddOpen(true); }
+  async function submitAddClass(title: string) {
+    const id = await newClass(module.id, title);
+    setAddOpen(false);
     if (id) setView({ kind: "class", pillarId: pillar.id, topicId: topic.id, moduleId: module.id, classId: id });
   }
 
