@@ -62,6 +62,8 @@ export function StudioProvider({ children }: { children: ReactNode }) {
   const [ageGroup, setAgeGroup] = useState<AgeGroup>("Explorer");
   const [expandedLayerId, setExpandedLayerId] = useState<string | null>(null);
   const [unsaved, setUnsaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [publishing, setPublishing] = useState(false);
   // local working copy of the class being edited (so edits don't clobber other classes)
   const [editing, setEditing] = useState<HClass | null>(null);
 
