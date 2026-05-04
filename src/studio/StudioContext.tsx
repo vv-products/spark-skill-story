@@ -47,6 +47,11 @@ type Ctx = {
   newModule: (topicId: string, name: string) => Promise<void>;
   newClass: (moduleId: string, title: string) => Promise<string | null>;
   removeClass: (classId: string) => Promise<void>;
+  editTopic: (topicId: string, name: string) => Promise<void>;
+  editModule: (moduleId: string, name: string) => Promise<void>;
+  editClass: (classId: string, title: string) => Promise<void>;
+  removeTopic: (topicId: string) => Promise<void>;
+  removeModule: (moduleId: string) => Promise<void>;
 
   currentClass: HClass | null;
   classXp: number;
