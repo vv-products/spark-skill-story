@@ -68,26 +68,32 @@ export function ClassEditorScreen() {
         <span className="font-semibold text-[#1A1A2E]">Class {String(currentClass.number).padStart(2, "0")} — {currentClass.title || "Untitled"}</span>
         <div ref={addMenuRef} className="relative ml-3 inline-block">
           <button
+            ref={addBtnRef}
             onClick={() => setAddMenuOpen(o => !o)}
             className="inline-flex h-7 items-center gap-1 rounded-[8px] border border-[#EBEBF5] bg-white px-2.5 text-[12px] font-semibold text-[#7B2FBE] hover:bg-[#F8F8FC]"
-            title="Add to catalog"
+            title="Manage catalog"
+            aria-haspopup="menu"
+            aria-expanded={addMenuOpen}
           >
             + Add
           </button>
           {addMenuOpen && (
-            <div className="absolute left-0 top-9 z-20 w-44 overflow-hidden rounded-[10px] border border-[#EBEBF5] bg-white shadow-[0_8px_24px_rgba(0,0,0,0.10)]">
-              <button onClick={() => { setAddMenuOpen(false); setAddDialog("topic"); }}
-                className="block w-full px-3 py-2 text-left text-[13px] text-[#1A1A2E] hover:bg-[#F8F8FC]">
-                New topic <span className="text-[#888]">in {pillar.name}</span>
-              </button>
-              <button onClick={() => { setAddMenuOpen(false); setAddDialog("module"); }}
-                className="block w-full px-3 py-2 text-left text-[13px] text-[#1A1A2E] hover:bg-[#F8F8FC]">
-                New module <span className="text-[#888]">in {topic.name}</span>
-              </button>
-              <button onClick={() => { setAddMenuOpen(false); setAddDialog("class"); }}
-                className="block w-full px-3 py-2 text-left text-[13px] text-[#1A1A2E] hover:bg-[#F8F8FC]">
-                New class <span className="text-[#888]">in {module.name}</span>
-              </button>
+            <div role="menu" className="absolute left-0 top-9 z-20 w-64 overflow-hidden rounded-[10px] border border-[#EBEBF5] bg-white py-1 shadow-[0_8px_24px_rgba(0,0,0,0.10)]">
+              <MenuSection label="Topic" sub={pillar.name}>
+                <MenuItem onClick={() => { setAddMenuOpen(false); setAddDialog({ action: "create", target: "topic" }); }}>New topic</MenuItem>
+                <MenuItem onClick={() => { setAddMenuOpen(false); setAddDialog({ action: "rename", target: "topic" }); }}>Rename “{topic.name}”</MenuItem>
+                <MenuItem destructive onClick={() => { setAddMenuOpen(false); setConfirmCatalog({ target: "topic" }); }}>Delete “{topic.name}”</MenuItem>
+              </MenuSection>
+              <MenuSection label="Module" sub={topic.name}>
+                <MenuItem onClick={() => { setAddMenuOpen(false); setAddDialog({ action: "create", target: "module" }); }}>New module</MenuItem>
+                <MenuItem onClick={() => { setAddMenuOpen(false); setAddDialog({ action: "rename", target: "module" }); }}>Rename “{module.name}”</MenuItem>
+                <MenuItem destructive onClick={() => { setAddMenuOpen(false); setConfirmCatalog({ target: "module" }); }}>Delete “{module.name}”</MenuItem>
+              </MenuSection>
+              <MenuSection label="Class" sub={module.name}>
+                <MenuItem onClick={() => { setAddMenuOpen(false); setAddDialog({ action: "create", target: "class" }); }}>New class</MenuItem>
+                <MenuItem onClick={() => { setAddMenuOpen(false); setAddDialog({ action: "rename", target: "class" }); }}>Rename this class</MenuItem>
+                <MenuItem destructive onClick={() => { setAddMenuOpen(false); setConfirmCatalog({ target: "class" }); }}>Delete this class</MenuItem>
+              </MenuSection>
             </div>
           )}
         </div>
