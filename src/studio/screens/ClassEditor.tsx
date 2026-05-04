@@ -3,19 +3,32 @@ import { useStudio } from "../StudioContext";
 import { StudioLayout } from "../Layout";
 import { Btn, StatusPill, Tag, Field, Input, Textarea, Select, Toggle, Chip, FamilyBadge } from "../ui";
 import { PromptDialog } from "../PromptDialog";
+import { ConfirmDialog } from "../ConfirmDialog";
 import { TASK_BY_CODE, TASK_TYPES, FAMILY_COLOR, type Character, type Family, type AgeGroup } from "../data";
 
 const CHARACTERS: Character[] = ["Maya", "Leo", "Dash", "Pip"];
 
+type CatalogTarget = "topic" | "module" | "class";
+type AddDialog = { action: "create" | "rename"; target: CatalogTarget } | null;
+type ConfirmTarget = { target: CatalogTarget } | null;
+
 export function ClassEditorScreen() {
   const { view, pillars, setView, currentClass, classXp, expandedLayerId, setExpandedLayerId,
     removeLayer, reorderLayer, updateLayerField, updateClass, save, publish, saving, publishing, ageGroup,
-    newTopic, newModule, newClass } = useStudio();
+    newTopic, newModule, newClass,
+    editTopic, editModule, editClass,
+    removeTopic, removeModule, removeClass } = useStudio();
   const [pickerOpen, setPickerOpen] = useState(false);
   const [confirmRemove, setConfirmRemove] = useState<string | null>(null);
   const [addMenuOpen, setAddMenuOpen] = useState(false);
-  const [addDialog, setAddDialog] = useState<null | "topic" | "module" | "class">(null);
+  const [addDialog, setAddDialog] = useState<AddDialog>(null);
+  const [confirmCatalog, setConfirmCatalog] = useState<ConfirmTarget>(null);
   const addMenuRef = useRef<HTMLDivElement>(null);
+  const addBtnRef = useRef<HTMLButtonElement>(null);
+
+  // Restore focus to "+ Add" button after closing any dialog spawned from the menu
+  function closeAddDialog() { setAddDialog(null); setTimeout(() => addBtnRef.current?.focus(), 0); }
+  function closeConfirm() { setConfirmCatalog(null); setTimeout(() => addBtnRef.current?.focus(), 0); }
 
   useEffect(() => {
     if (!addMenuOpen) return;
