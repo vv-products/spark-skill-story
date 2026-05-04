@@ -1,16 +1,30 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useStudio } from "../StudioContext";
 import { StudioLayout } from "../Layout";
 import { Btn, StatusPill, Tag, Field, Input, Textarea, Select, Toggle, Chip, FamilyBadge } from "../ui";
+import { PromptDialog } from "../PromptDialog";
 import { TASK_BY_CODE, TASK_TYPES, FAMILY_COLOR, type Character, type Family, type AgeGroup } from "../data";
 
 const CHARACTERS: Character[] = ["Maya", "Leo", "Dash", "Pip"];
 
 export function ClassEditorScreen() {
   const { view, pillars, setView, currentClass, classXp, expandedLayerId, setExpandedLayerId,
-    removeLayer, reorderLayer, updateLayerField, updateClass, save, publish, saving, publishing, ageGroup } = useStudio();
+    removeLayer, reorderLayer, updateLayerField, updateClass, save, publish, saving, publishing, ageGroup,
+    newTopic, newModule, newClass } = useStudio();
   const [pickerOpen, setPickerOpen] = useState(false);
   const [confirmRemove, setConfirmRemove] = useState<string | null>(null);
+  const [addMenuOpen, setAddMenuOpen] = useState(false);
+  const [addDialog, setAddDialog] = useState<null | "topic" | "module" | "class">(null);
+  const addMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!addMenuOpen) return;
+    function onDoc(e: MouseEvent) {
+      if (!addMenuRef.current?.contains(e.target as Node)) setAddMenuOpen(false);
+    }
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, [addMenuOpen]);
 
   if (view.kind !== "class" || !currentClass) return null;
   const pillar = pillars.find(p => p.id === view.pillarId)!;
