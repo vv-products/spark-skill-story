@@ -86,6 +86,7 @@ export function HomeScreen() {
             tags={["Decisions", "Episode 3"]}
             cta="Continue →"
             ctaVariant="primary"
+            onClick={() => setStep("intro")}
           />
           <JourneyCard
             image={pip}
@@ -94,6 +95,7 @@ export function HomeScreen() {
             tags={["Curiosity", "Episode 2"]}
             cta="Start →"
             ctaVariant="dark"
+            onClick={() => setStep("intro")}
           />
         </div>
 
@@ -107,6 +109,7 @@ export function HomeScreen() {
             tags={["Reading", "Episode 1"]}
             cta="Start →"
             ctaVariant="dark"
+            onClick={() => setStep("intro")}
           />
           <JourneyCard
             image={pip}
@@ -115,6 +118,7 @@ export function HomeScreen() {
             tags={["Curiosity", "Episode 2"]}
             cta="Continue →"
             ctaVariant="primary"
+            onClick={() => setStep("intro")}
           />
         </div>
 
