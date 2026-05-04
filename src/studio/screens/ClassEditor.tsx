@@ -8,7 +8,7 @@ const CHARACTERS: Character[] = ["Maya", "Leo", "Dash", "Pip"];
 
 export function ClassEditorScreen() {
   const { view, pillars, setView, currentClass, classXp, expandedLayerId, setExpandedLayerId,
-    removeLayer, reorderLayer, updateLayerField, updateClass, save, publish, ageGroup } = useStudio();
+    removeLayer, reorderLayer, updateLayerField, updateClass, save, publish, saving, publishing, ageGroup } = useStudio();
   const [pickerOpen, setPickerOpen] = useState(false);
   const [confirmRemove, setConfirmRemove] = useState<string | null>(null);
 
