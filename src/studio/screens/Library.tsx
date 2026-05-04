@@ -1,23 +1,20 @@
+import { useState } from "react";
 import { useStudio } from "../StudioContext";
 import { StudioLayout } from "../Layout";
 import { Btn, StatusPill, Tag } from "../ui";
+import { PromptDialog } from "../PromptDialog";
 
 export function LibraryScreen() {
   const { pillars, selectedPillarId, setSelectedPillar, selectedTopicId, setSelectedTopic, setView, newTopic, newModule } = useStudio();
+  const [dialog, setDialog] = useState<null | "topic" | "module">(null);
   const pillar = pillars.find(p => p.id === selectedPillarId);
   if (!pillar) return <StudioLayout title="Content Library"><div className="p-8 text-sm text-[#666680]">Loading…</div></StudioLayout>;
   const topic = pillar.topics.find(t => t.id === selectedTopicId);
 
-  async function handleAddTopic() {
-    const name = window.prompt("New topic name")?.trim();
-    if (!name) return;
-    await newTopic(pillar!.id, name);
-  }
-  async function handleAddModule() {
+  function openAddTopic() { setDialog("topic"); }
+  function openAddModule() {
     if (!topic) { alert("Select a topic first."); return; }
-    const name = window.prompt("New module name")?.trim();
-    if (!name) return;
-    await newModule(topic.id, name);
+    setDialog("module");
   }
 
   return (
@@ -63,7 +60,7 @@ export function LibraryScreen() {
               </button>
             );
           })}
-          <button onClick={handleAddTopic} className="mt-2 w-full rounded-[8px] border border-dashed border-[#D8D8E8] px-3 py-2.5 text-sm font-semibold text-[#7B2FBE] hover:bg-[#F8F8FC]">+ Add Topic</button>
+          <button onClick={openAddTopic} className="mt-2 w-full rounded-[8px] border border-dashed border-[#D8D8E8] px-3 py-2.5 text-sm font-semibold text-[#7B2FBE] hover:bg-[#F8F8FC]">+ Add Topic</button>
         </Panel>
 
         {/* Panel 3 — Modules */}
@@ -81,9 +78,25 @@ export function LibraryScreen() {
               </button>
             );
           }) : <div className="px-3 py-8 text-center text-sm text-[#888]">No modules yet.</div>}
-          <button onClick={handleAddModule} className="mt-2 w-full rounded-[8px] border border-dashed border-[#D8D8E8] px-3 py-2.5 text-sm font-semibold text-[#7B2FBE] hover:bg-[#F8F8FC]">+ Add Module</button>
+          <button onClick={openAddModule} className="mt-2 w-full rounded-[8px] border border-dashed border-[#D8D8E8] px-3 py-2.5 text-sm font-semibold text-[#7B2FBE] hover:bg-[#F8F8FC]">+ Add Module</button>
         </Panel>
       </div>
+      <PromptDialog
+        open={dialog === "topic"}
+        title="New topic"
+        label="Topic name"
+        placeholder="e.g. Self-awareness"
+        onCancel={() => setDialog(null)}
+        onSubmit={async (name) => { await newTopic(pillar.id, name); setDialog(null); }}
+      />
+      <PromptDialog
+        open={dialog === "module"}
+        title="New module"
+        label="Module name"
+        placeholder="e.g. Identity foundations"
+        onCancel={() => setDialog(null)}
+        onSubmit={async (name) => { if (topic) await newModule(topic.id, name); setDialog(null); }}
+      />
     </StudioLayout>
   );
 }

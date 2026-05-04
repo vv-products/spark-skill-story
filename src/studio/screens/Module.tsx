@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { useStudio } from "../StudioContext";
 import { StudioLayout } from "../Layout";
 import { Btn, StatusPill, Chip } from "../ui";
+import { PromptDialog } from "../PromptDialog";
 import { TASK_BY_CODE, type AgeGroup } from "../data";
 
 export function ModuleScreen() {
@@ -10,10 +12,12 @@ export function ModuleScreen() {
   const topic = pillar.topics.find(t => t.id === view.topicId)!;
   const module = topic.modules.find(m => m.id === view.moduleId)!;
 
-  async function handleAddClass() {
-    const title = window.prompt("New class title", "Untitled class")?.trim();
-    if (title === undefined) return;
-    const id = await newClass(module.id, title || "Untitled class");
+  const [addOpen, setAddOpen] = useState(false);
+
+  function openAddClass() { setAddOpen(true); }
+  async function submitAddClass(title: string) {
+    const id = await newClass(module.id, title);
+    setAddOpen(false);
     if (id) setView({ kind: "class", pillarId: pillar.id, topicId: topic.id, moduleId: module.id, classId: id });
   }
 
@@ -71,9 +75,18 @@ export function ModuleScreen() {
               </div>
             );
           })}
-          <button onClick={handleAddClass} className="mt-1 w-full rounded-[12px] border border-dashed border-[#D8D8E8] py-3 text-sm font-semibold text-[#7B2FBE] hover:bg-white">+ Add Class</button>
+          <button onClick={openAddClass} className="mt-1 w-full rounded-[12px] border border-dashed border-[#D8D8E8] py-3 text-sm font-semibold text-[#7B2FBE] hover:bg-white">+ Add Class</button>
         </div>
       </div>
+      <PromptDialog
+        open={addOpen}
+        title="New class"
+        label="Class title"
+        placeholder="e.g. What is identity?"
+        defaultValue="Untitled class"
+        onCancel={() => setAddOpen(false)}
+        onSubmit={submitAddClass}
+      />
     </StudioLayout>
   );
 }
