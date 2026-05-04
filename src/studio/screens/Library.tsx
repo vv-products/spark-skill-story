@@ -1,23 +1,20 @@
+import { useState } from "react";
 import { useStudio } from "../StudioContext";
 import { StudioLayout } from "../Layout";
 import { Btn, StatusPill, Tag } from "../ui";
+import { PromptDialog } from "../PromptDialog";
 
 export function LibraryScreen() {
   const { pillars, selectedPillarId, setSelectedPillar, selectedTopicId, setSelectedTopic, setView, newTopic, newModule } = useStudio();
+  const [dialog, setDialog] = useState<null | "topic" | "module">(null);
   const pillar = pillars.find(p => p.id === selectedPillarId);
   if (!pillar) return <StudioLayout title="Content Library"><div className="p-8 text-sm text-[#666680]">Loading…</div></StudioLayout>;
   const topic = pillar.topics.find(t => t.id === selectedTopicId);
 
-  async function handleAddTopic() {
-    const name = window.prompt("New topic name")?.trim();
-    if (!name) return;
-    await newTopic(pillar!.id, name);
-  }
-  async function handleAddModule() {
+  function openAddTopic() { setDialog("topic"); }
+  function openAddModule() {
     if (!topic) { alert("Select a topic first."); return; }
-    const name = window.prompt("New module name")?.trim();
-    if (!name) return;
-    await newModule(topic.id, name);
+    setDialog("module");
   }
 
   return (
