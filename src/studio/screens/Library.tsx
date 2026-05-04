@@ -81,7 +81,7 @@ export function LibraryScreen() {
               </button>
             );
           }) : <div className="px-3 py-8 text-center text-sm text-[#888]">No modules yet.</div>}
-          <button className="mt-2 w-full rounded-[8px] border border-dashed border-[#D8D8E8] px-3 py-2.5 text-sm font-semibold text-[#7B2FBE] hover:bg-[#F8F8FC]">+ Add Module</button>
+          <button onClick={handleAddModule} className="mt-2 w-full rounded-[8px] border border-dashed border-[#D8D8E8] px-3 py-2.5 text-sm font-semibold text-[#7B2FBE] hover:bg-[#F8F8FC]">+ Add Module</button>
         </Panel>
       </div>
     </StudioLayout>
