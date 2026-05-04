@@ -63,7 +63,7 @@ export function LibraryScreen() {
               </button>
             );
           })}
-          <button className="mt-2 w-full rounded-[8px] border border-dashed border-[#D8D8E8] px-3 py-2.5 text-sm font-semibold text-[#7B2FBE] hover:bg-[#F8F8FC]">+ Add Topic</button>
+          <button onClick={handleAddTopic} className="mt-2 w-full rounded-[8px] border border-dashed border-[#D8D8E8] px-3 py-2.5 text-sm font-semibold text-[#7B2FBE] hover:bg-[#F8F8FC]">+ Add Topic</button>
         </Panel>
 
         {/* Panel 3 — Modules */}
