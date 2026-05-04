@@ -1,5 +1,6 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
 import { SEED_PILLARS, TASK_BY_CODE, type Pillar, type AgeGroup, type Layer, type Class, type Status } from "./data";
+import { saveClassToDb } from "./db";
 import { toast } from "sonner";
 
 type View =
@@ -103,15 +104,26 @@ export function StudioProvider({ children }: { children: ReactNode }) {
   function updateClass(patch: Partial<Class>) {
     mutateClass(c => ({ ...c, ...patch }));
   }
-  function save() {
-    setUnsaved(false);
-    toast.success("Saved");
+  async function save() {
+    if (!currentClass) return;
+    try {
+      await saveClassToDb(currentClass, { publish: false });
+      setUnsaved(false);
+      toast.success("Saved to database");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Save failed");
+    }
   }
-  function publish() {
+  async function publish() {
     if (!currentClass || currentClass.layers.length === 0) return;
-    mutateClass(c => ({ ...c, status: "Published" as Status }));
-    setUnsaved(false);
-    toast.success("Published");
+    try {
+      await saveClassToDb(currentClass, { publish: true });
+      mutateClass(c => ({ ...c, status: "Published" as Status }));
+      setUnsaved(false);
+      toast.success("Published");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Publish failed");
+    }
   }
 
   return (

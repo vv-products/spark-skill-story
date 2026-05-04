@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Toaster } from "@/components/ui/sonner";
 import { StudioProvider, useStudio } from "@/studio/StudioContext";
+import { StudioAuthProvider } from "@/studio/auth";
+import { AuthGate } from "@/studio/AuthGate";
 import { DashboardScreen } from "@/studio/screens/Dashboard";
 import { LibraryScreen } from "@/studio/screens/Library";
 import { ModuleScreen } from "@/studio/screens/Module";
@@ -30,9 +32,13 @@ function Router() {
 
 function StudioPage() {
   return (
-    <StudioProvider>
-      <Router />
-      <Toaster position="bottom-right" richColors />
-    </StudioProvider>
+    <StudioAuthProvider>
+      <AuthGate>
+        <StudioProvider>
+          <Router />
+          <Toaster position="bottom-right" richColors />
+        </StudioProvider>
+      </AuthGate>
+    </StudioAuthProvider>
   );
 }

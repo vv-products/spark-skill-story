@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { useStudio } from "./StudioContext";
+import { useStudioAuth } from "./auth";
 import { Btn } from "./ui";
 
 const NAV = [
@@ -13,6 +14,7 @@ const NAV = [
 
 export function StudioLayout({ children, title, actions }: { children: ReactNode; title: string; actions?: ReactNode }) {
   const { view, setView, unsaved, save } = useStudio();
+  const { user, roles, signOut } = useStudioAuth();
   const active =
     view.kind === "dashboard" ? "dashboard" :
     view.kind === "task-types" ? "task-types" :
@@ -47,12 +49,22 @@ export function StudioLayout({ children, title, actions }: { children: ReactNode
             );
           })}
         </nav>
-        <div className="mx-3 mb-4 flex items-center gap-3 rounded-[8px] bg-white/5 p-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#7B2FBE] text-sm font-bold text-white">SM</div>
-          <div className="min-w-0 flex-1">
-            <div className="truncate text-sm font-semibold text-white">Sofia Martín</div>
-            <div className="text-[11px] text-[#AAAACC]">Content Editor</div>
+        <div className="mx-3 mb-4 rounded-[8px] bg-white/5 p-3">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#7B2FBE] text-sm font-bold uppercase text-white">
+              {(user?.email ?? "?").slice(0, 2)}
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="truncate text-sm font-semibold text-white">{user?.email ?? "Guest"}</div>
+              <div className="text-[11px] text-[#AAAACC] capitalize">{roles.join(" · ") || "no role"}</div>
+            </div>
           </div>
+          <button
+            onClick={() => signOut()}
+            className="mt-3 w-full rounded-[6px] border border-white/10 px-2 py-1.5 text-[11px] font-semibold text-[#AAAACC] hover:bg-white/5 hover:text-white"
+          >
+            Sign out
+          </button>
         </div>
       </aside>
 
