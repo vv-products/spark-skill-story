@@ -69,8 +69,8 @@ export function PromptDialog({
           />
         </Field>
         <div className="mt-6 flex items-center justify-end gap-2">
-          <Btn variant="ghost" onClick={onCancel}>Cancel</Btn>
-          <Btn type="submit" variant="primary" disabled={!value.trim() || busy}>
+          <Btn variant="ghost" onClick={onCancel} disabled={busy}>Cancel</Btn>
+          <Btn type="submit" variant="primary" disabled={!value.trim()} loading={busy}>
             {busy ? "Saving…" : submitLabel}
           </Btn>
         </div>

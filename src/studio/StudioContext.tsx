@@ -36,6 +36,8 @@ type Ctx = {
   updateLayerField: (id: string, key: string, value: any) => void;
   updateClass: (patch: Partial<Class>) => void;
   unsaved: boolean;
+  saving: boolean;
+  publishing: boolean;
   save: () => Promise<void>;
   publish: () => Promise<void>;
 
@@ -60,6 +62,8 @@ export function StudioProvider({ children }: { children: ReactNode }) {
   const [ageGroup, setAgeGroup] = useState<AgeGroup>("Explorer");
   const [expandedLayerId, setExpandedLayerId] = useState<string | null>(null);
   const [unsaved, setUnsaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [publishing, setPublishing] = useState(false);
   // local working copy of the class being edited (so edits don't clobber other classes)
   const [editing, setEditing] = useState<HClass | null>(null);
 
@@ -133,16 +137,19 @@ export function StudioProvider({ children }: { children: ReactNode }) {
   }
 
   async function save() {
-    if (!currentClass) return;
+    if (!currentClass || saving) return;
+    setSaving(true);
     try {
       await saveClass(currentClass);
       setUnsaved(false);
       toast.success("Saved");
       await reload();
     } catch (e: any) { toast.error(e?.message ?? "Save failed"); }
+    finally { setSaving(false); }
   }
   async function publish() {
-    if (!currentClass || currentClass.layers.length === 0) return;
+    if (!currentClass || currentClass.layers.length === 0 || publishing) return;
+    setPublishing(true);
     try {
       await saveClass(currentClass, { publish: true });
       setEditing((prev) => prev ? { ...prev, status: "Published" as Status } : prev);
@@ -150,15 +157,16 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       toast.success("Published");
       await reload();
     } catch (e: any) { toast.error(e?.message ?? "Publish failed"); }
+    finally { setPublishing(false); }
   }
 
   async function newTopic(pillarId: string, name: string) {
     try { await createTopic(pillarId, name); toast.success("Topic added"); await reload(); }
-    catch (e: any) { toast.error(e?.message ?? "Failed"); }
+    catch (e: any) { toast.error(e?.message ?? "Failed to add topic"); throw e; }
   }
   async function newModule(topicId: string, name: string) {
     try { await createModule(topicId, name); toast.success("Module added"); await reload(); }
-    catch (e: any) { toast.error(e?.message ?? "Failed"); }
+    catch (e: any) { toast.error(e?.message ?? "Failed to add module"); throw e; }
   }
   async function newClass(moduleId: string, title: string) {
     try {
@@ -171,11 +179,11 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       toast.success("Class created");
       await reload();
       return id;
-    } catch (e: any) { toast.error(e?.message ?? "Failed"); return null; }
+    } catch (e: any) { toast.error(e?.message ?? "Failed to create class"); throw e; }
   }
   async function removeClass(classId: string) {
     try { await deleteClass(classId); toast.success("Class deleted"); await reload(); }
-    catch (e: any) { toast.error(e?.message ?? "Failed"); }
+    catch (e: any) { toast.error(e?.message ?? "Failed to delete class"); throw e; }
   }
 
   return (
@@ -184,7 +192,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       selectedPillarId, selectedTopicId, setSelectedPillar, setSelectedTopic,
       ageGroup, setAgeGroup, expandedLayerId, setExpandedLayerId,
       addLayer, removeLayer, reorderLayer, updateLayerField, updateClass,
-      unsaved, save, publish, currentClass, classXp,
+      unsaved, saving, publishing, save, publish, currentClass, classXp,
       newTopic, newModule, newClass, removeClass,
     }}>{children}</StudioCtx.Provider>
   );
