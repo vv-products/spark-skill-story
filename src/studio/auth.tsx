@@ -27,19 +27,24 @@ export function StudioAuthProvider({ children }: { children: ReactNode }) {
   // Set up listener BEFORE getSession (order matters)
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
+      setLoading(true);
       setSession(s);
       setUser(s?.user ?? null);
       if (s?.user) {
         // defer to avoid recursive calls inside the listener
-        setTimeout(() => loadRoles(s.user.id), 0);
+        setTimeout(() => {
+          loadRoles(s.user.id).finally(() => setLoading(false));
+        }, 0);
       } else {
         setRoles([]);
+        setLoading(false);
       }
     });
-    supabase.auth.getSession().then(({ data }) => {
+    supabase.auth.getSession().then(async ({ data }) => {
       setSession(data.session);
       setUser(data.session?.user ?? null);
-      if (data.session?.user) loadRoles(data.session.user.id);
+      if (data.session?.user) await loadRoles(data.session.user.id);
+      else setRoles([]);
       setLoading(false);
     });
     return () => sub.subscription.unsubscribe();
@@ -55,18 +60,24 @@ export function StudioAuthProvider({ children }: { children: ReactNode }) {
   }
 
   async function signIn(email: string, password: string) {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    setLoading(true);
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (!error && data.user) await loadRoles(data.user.id);
+    setLoading(false);
     return error ? { error: error.message } : {};
   }
 
   async function signUp(email: string, password: string, displayName?: string) {
-    const { error } = await supabase.auth.signUp({
+    setLoading(true);
+    const { data, error } = await supabase.auth.signUp({
       email, password,
       options: {
         emailRedirectTo: `${window.location.origin}/studio`,
         data: displayName ? { display_name: displayName } : undefined,
       },
     });
+    if (!error && data.user) await loadRoles(data.user.id);
+    setLoading(false);
     return error ? { error: error.message } : {};
   }
 
@@ -75,7 +86,12 @@ export function StudioAuthProvider({ children }: { children: ReactNode }) {
   }
 
   const canEdit = roles.includes("admin") || roles.includes("editor");
-  const refreshRoles = async () => { if (user) await loadRoles(user.id); };
+  const refreshRoles = async () => {
+    if (!user) return;
+    setLoading(true);
+    await loadRoles(user.id);
+    setLoading(false);
+  };
 
   return (
     <Ctx.Provider value={{ loading, user, session, roles, canEdit, refreshRoles, signIn, signUp, signOut }}>
