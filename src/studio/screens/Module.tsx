@@ -4,11 +4,18 @@ import { Btn, StatusPill, Chip } from "../ui";
 import { TASK_BY_CODE, type AgeGroup } from "../data";
 
 export function ModuleScreen() {
-  const { view, pillars, setView, ageGroup, setAgeGroup } = useStudio();
+  const { view, pillars, setView, ageGroup, setAgeGroup, newClass } = useStudio();
   if (view.kind !== "module") return null;
   const pillar = pillars.find(p => p.id === view.pillarId)!;
   const topic = pillar.topics.find(t => t.id === view.topicId)!;
   const module = topic.modules.find(m => m.id === view.moduleId)!;
+
+  async function handleAddClass() {
+    const title = window.prompt("New class title", "Untitled class")?.trim();
+    if (title === undefined) return;
+    const id = await newClass(module.id, title || "Untitled class");
+    if (id) setView({ kind: "class", pillarId: pillar.id, topicId: topic.id, moduleId: module.id, classId: id });
+  }
 
   return (
     <StudioLayout
@@ -49,7 +56,7 @@ export function ModuleScreen() {
                 <span className="cursor-grab text-[#CCC]">⋮⋮</span>
                 <span className="w-8 text-center text-xs font-bold text-[#666680] tabular-nums">{String(c.number).padStart(2, "0")}</span>
                 {empty ? (
-                  <button onClick={() => alert("New class draft created.")} className="flex-1 text-left text-sm font-semibold text-[#888]">+ Empty — click to build this class.</button>
+                  <button onClick={() => setView({ kind: "class", pillarId: pillar.id, topicId: topic.id, moduleId: module.id, classId: c.id })} className="flex-1 text-left text-sm font-semibold text-[#888]">+ Empty — click to build this class.</button>
                 ) : (
                   <>
                     <div className="min-w-0 flex-1">
@@ -64,7 +71,7 @@ export function ModuleScreen() {
               </div>
             );
           })}
-          <button className="mt-1 w-full rounded-[12px] border border-dashed border-[#D8D8E8] py-3 text-sm font-semibold text-[#7B2FBE] hover:bg-white">+ Add Class</button>
+          <button onClick={handleAddClass} className="mt-1 w-full rounded-[12px] border border-dashed border-[#D8D8E8] py-3 text-sm font-semibold text-[#7B2FBE] hover:bg-white">+ Add Class</button>
         </div>
       </div>
     </StudioLayout>

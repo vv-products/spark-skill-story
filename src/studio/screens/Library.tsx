@@ -3,9 +3,22 @@ import { StudioLayout } from "../Layout";
 import { Btn, StatusPill, Tag } from "../ui";
 
 export function LibraryScreen() {
-  const { pillars, selectedPillarId, setSelectedPillar, selectedTopicId, setSelectedTopic, setView } = useStudio();
-  const pillar = pillars.find(p => p.id === selectedPillarId)!;
+  const { pillars, selectedPillarId, setSelectedPillar, selectedTopicId, setSelectedTopic, setView, newTopic, newModule } = useStudio();
+  const pillar = pillars.find(p => p.id === selectedPillarId);
+  if (!pillar) return <StudioLayout title="Content Library"><div className="p-8 text-sm text-[#666680]">Loading…</div></StudioLayout>;
   const topic = pillar.topics.find(t => t.id === selectedTopicId);
+
+  async function handleAddTopic() {
+    const name = window.prompt("New topic name")?.trim();
+    if (!name) return;
+    await newTopic(pillar!.id, name);
+  }
+  async function handleAddModule() {
+    if (!topic) { alert("Select a topic first."); return; }
+    const name = window.prompt("New module name")?.trim();
+    if (!name) return;
+    await newModule(topic.id, name);
+  }
 
   return (
     <StudioLayout title="Content Library">
@@ -50,7 +63,7 @@ export function LibraryScreen() {
               </button>
             );
           })}
-          <button className="mt-2 w-full rounded-[8px] border border-dashed border-[#D8D8E8] px-3 py-2.5 text-sm font-semibold text-[#7B2FBE] hover:bg-[#F8F8FC]">+ Add Topic</button>
+          <button onClick={handleAddTopic} className="mt-2 w-full rounded-[8px] border border-dashed border-[#D8D8E8] px-3 py-2.5 text-sm font-semibold text-[#7B2FBE] hover:bg-[#F8F8FC]">+ Add Topic</button>
         </Panel>
 
         {/* Panel 3 — Modules */}
@@ -68,7 +81,7 @@ export function LibraryScreen() {
               </button>
             );
           }) : <div className="px-3 py-8 text-center text-sm text-[#888]">No modules yet.</div>}
-          <button className="mt-2 w-full rounded-[8px] border border-dashed border-[#D8D8E8] px-3 py-2.5 text-sm font-semibold text-[#7B2FBE] hover:bg-[#F8F8FC]">+ Add Module</button>
+          <button onClick={handleAddModule} className="mt-2 w-full rounded-[8px] border border-dashed border-[#D8D8E8] px-3 py-2.5 text-sm font-semibold text-[#7B2FBE] hover:bg-[#F8F8FC]">+ Add Module</button>
         </Panel>
       </div>
     </StudioLayout>
