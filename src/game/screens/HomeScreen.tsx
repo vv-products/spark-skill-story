@@ -86,6 +86,7 @@ export function HomeScreen() {
             tags={["Decisions", "Episode 3"]}
             cta="Continue →"
             ctaVariant="primary"
+            onClick={() => setStep("intro")}
           />
           <JourneyCard
             image={pip}
@@ -94,6 +95,7 @@ export function HomeScreen() {
             tags={["Curiosity", "Episode 2"]}
             cta="Start →"
             ctaVariant="dark"
+            onClick={() => setStep("intro")}
           />
         </div>
 
@@ -107,6 +109,7 @@ export function HomeScreen() {
             tags={["Reading", "Episode 1"]}
             cta="Start →"
             ctaVariant="dark"
+            onClick={() => setStep("intro")}
           />
           <JourneyCard
             image={pip}
@@ -115,6 +118,7 @@ export function HomeScreen() {
             tags={["Curiosity", "Episode 2"]}
             cta="Continue →"
             ctaVariant="primary"
+            onClick={() => setStep("intro")}
           />
         </div>
 
@@ -127,6 +131,7 @@ export function HomeScreen() {
             title="Meet the Characters"
             description="Get to know your friends and their stories."
             cta="Explore →"
+            onClick={() => setStep("intro")}
           />
           <ActivityCard
             bg="bg-[#E8E0F8]"
@@ -134,6 +139,7 @@ export function HomeScreen() {
             title="Live Events"
             description="Join live shows, challenges, and special events."
             cta="Join Now →"
+            onClick={() => setStep("intro")}
           />
         </div>
 
@@ -264,8 +270,8 @@ function JourneyCard({
 }
 
 function ActivityCard({
-  bg, image, title, description, cta,
-}: { bg: string; image: string; title: string; description: string; cta: string }) {
+  bg, image, title, description, cta, onClick,
+}: { bg: string; image: string; title: string; description: string; cta: string; onClick?: () => void }) {
   return (
     <div className={`relative flex h-56 w-[300px] shrink-0 flex-col justify-end overflow-hidden rounded-[20px] ${bg} p-4 shadow-card`}>
       <img
@@ -276,7 +282,10 @@ function ActivityCard({
       <div className="relative">
         <p className="text-base font-black text-foreground">{title}</p>
         <p className="mt-1 text-[11px] font-bold text-text-secondary">{description}</p>
-        <button className="mt-3 w-full rounded-pill bg-foreground py-2.5 text-xs font-extrabold text-primary-foreground transition-transform active:scale-[0.97]">
+        <button
+          onClick={onClick}
+          className="mt-3 w-full rounded-pill bg-foreground py-2.5 text-xs font-extrabold text-primary-foreground transition-transform active:scale-[0.97]"
+        >
           {cta}
         </button>
       </div>
