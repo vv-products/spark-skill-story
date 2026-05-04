@@ -3,9 +3,22 @@ import { StudioLayout } from "../Layout";
 import { Btn, StatusPill, Tag } from "../ui";
 
 export function LibraryScreen() {
-  const { pillars, selectedPillarId, setSelectedPillar, selectedTopicId, setSelectedTopic, setView } = useStudio();
-  const pillar = pillars.find(p => p.id === selectedPillarId)!;
+  const { pillars, selectedPillarId, setSelectedPillar, selectedTopicId, setSelectedTopic, setView, newTopic, newModule } = useStudio();
+  const pillar = pillars.find(p => p.id === selectedPillarId);
+  if (!pillar) return <StudioLayout title="Content Library"><div className="p-8 text-sm text-[#666680]">Loading…</div></StudioLayout>;
   const topic = pillar.topics.find(t => t.id === selectedTopicId);
+
+  async function handleAddTopic() {
+    const name = window.prompt("New topic name")?.trim();
+    if (!name) return;
+    await newTopic(pillar!.id, name);
+  }
+  async function handleAddModule() {
+    if (!topic) { alert("Select a topic first."); return; }
+    const name = window.prompt("New module name")?.trim();
+    if (!name) return;
+    await newModule(topic.id, name);
+  }
 
   return (
     <StudioLayout title="Content Library">
