@@ -214,36 +214,119 @@ export function ClassEditorScreen() {
           onConfirm={() => { removeLayer(confirmRemove); setConfirmRemove(null); }}
         />
       )}
+      {/* Catalog create / rename via PromptDialog. On thrown error, dialog stays open (toast already shown). */}
       <PromptDialog
-        open={addDialog === "topic"}
-        title={`New topic in ${pillar.name}`}
+        open={addDialog?.target === "topic"}
+        title={addDialog?.action === "rename" ? `Rename topic “${topic.name}”` : `New topic in ${pillar.name}`}
         label="Topic name"
         placeholder="e.g. Self-awareness"
-        onCancel={() => setAddDialog(null)}
-        onSubmit={async (name) => { await newTopic(pillar.id, name); setAddDialog(null); }}
+        defaultValue={addDialog?.action === "rename" ? topic.name : ""}
+        submitLabel={addDialog?.action === "rename" ? "Save" : "Create"}
+        onCancel={closeAddDialog}
+        onSubmit={async (name) => {
+          if (addDialog?.action === "rename") await editTopic(topic.id, name);
+          else await newTopic(pillar.id, name);
+          closeAddDialog();
+        }}
       />
       <PromptDialog
-        open={addDialog === "module"}
-        title={`New module in ${topic.name}`}
+        open={addDialog?.target === "module"}
+        title={addDialog?.action === "rename" ? `Rename module “${module.name}”` : `New module in ${topic.name}`}
         label="Module name"
         placeholder="e.g. Identity foundations"
-        onCancel={() => setAddDialog(null)}
-        onSubmit={async (name) => { await newModule(topic.id, name); setAddDialog(null); }}
+        defaultValue={addDialog?.action === "rename" ? module.name : ""}
+        submitLabel={addDialog?.action === "rename" ? "Save" : "Create"}
+        onCancel={closeAddDialog}
+        onSubmit={async (name) => {
+          if (addDialog?.action === "rename") await editModule(module.id, name);
+          else await newModule(topic.id, name);
+          closeAddDialog();
+        }}
       />
       <PromptDialog
-        open={addDialog === "class"}
-        title={`New class in ${module.name}`}
+        open={addDialog?.target === "class"}
+        title={addDialog?.action === "rename" ? `Rename class “${currentClass.title || "Untitled"}”` : `New class in ${module.name}`}
         label="Class title"
         placeholder="e.g. What is identity?"
-        defaultValue="Untitled class"
-        onCancel={() => setAddDialog(null)}
+        defaultValue={addDialog?.action === "rename" ? (currentClass.title || "") : "Untitled class"}
+        submitLabel={addDialog?.action === "rename" ? "Save" : "Create"}
+        onCancel={closeAddDialog}
         onSubmit={async (name) => {
-          const id = await newClass(module.id, name);
-          setAddDialog(null);
-          if (id) setView({ kind: "class", pillarId: pillar.id, topicId: topic.id, moduleId: module.id, classId: id });
+          if (addDialog?.action === "rename") {
+            await editClass(currentClass.id, name);
+            updateClass({ title: name });
+            closeAddDialog();
+          } else {
+            const id = await newClass(module.id, name);
+            closeAddDialog();
+            if (id) setView({ kind: "class", pillarId: pillar.id, topicId: topic.id, moduleId: module.id, classId: id });
+          }
+        }}
+      />
+
+      {/* Catalog deletion confirms */}
+      <ConfirmDialog
+        open={confirmCatalog?.target === "topic"}
+        title={`Delete topic “${topic.name}”?`}
+        message="This permanently removes the topic and every module, class, and layer inside it."
+        confirmLabel="Delete topic"
+        destructive
+        onCancel={closeConfirm}
+        onConfirm={async () => {
+          await removeTopic(topic.id);
+          closeConfirm();
+          setView({ kind: "library" });
+        }}
+      />
+      <ConfirmDialog
+        open={confirmCatalog?.target === "module"}
+        title={`Delete module “${module.name}”?`}
+        message="This permanently removes the module and every class and layer inside it."
+        confirmLabel="Delete module"
+        destructive
+        onCancel={closeConfirm}
+        onConfirm={async () => {
+          await removeModule(module.id);
+          closeConfirm();
+          setView({ kind: "library" });
+        }}
+      />
+      <ConfirmDialog
+        open={confirmCatalog?.target === "class"}
+        title={`Delete this class?`}
+        message="This permanently removes the class and all its layers."
+        confirmLabel="Delete class"
+        destructive
+        onCancel={closeConfirm}
+        onConfirm={async () => {
+          await removeClass(currentClass.id);
+          closeConfirm();
+          setView({ kind: "module", pillarId: pillar.id, topicId: topic.id, moduleId: module.id });
         }}
       />
     </StudioLayout>
+  );
+}
+
+function MenuSection({ label, sub, children }: { label: string; sub: string; children: React.ReactNode }) {
+  return (
+    <div className="border-b border-[#F0F0FA] py-1 last:border-b-0">
+      <div className="px-3 pb-1 pt-1 text-[10px] font-bold uppercase tracking-wider text-[#888]">
+        {label} <span className="font-semibold normal-case tracking-normal text-[#666680]">· {sub}</span>
+      </div>
+      {children}
+    </div>
+  );
+}
+function MenuItem({ children, onClick, destructive = false }: { children: React.ReactNode; onClick: () => void; destructive?: boolean }) {
+  return (
+    <button
+      role="menuitem"
+      onClick={onClick}
+      className={`block w-full truncate px-3 py-1.5 text-left text-[13px] hover:bg-[#F8F8FC] ${destructive ? "text-[#E5484D]" : "text-[#1A1A2E]"}`}
+    >
+      {children}
+    </button>
   );
 }
 
