@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import { TASK_BY_CODE, type AgeGroup, type Class, type Status } from "./data";
 import {
   loadFullCatalog, saveClass, createTopic, createModule, createClass, deleteClass,
-  renameTopic, renameModule, renameClass, deleteTopic, deleteModule,
+  renameTopic, renameModule, renameClass, deleteTopic, deleteModule, updateTopic,
   type HPillar, type HClass,
 } from "./catalog";
 import { toast } from "sonner";
@@ -48,6 +48,7 @@ type Ctx = {
   newClass: (moduleId: string, title: string) => Promise<string | null>;
   removeClass: (classId: string) => Promise<void>;
   editTopic: (topicId: string, name: string) => Promise<void>;
+  editTopicMeta: (topicId: string, patch: { name?: string; ages?: AgeGroup[] }) => Promise<void>;
   editModule: (moduleId: string, name: string) => Promise<void>;
   editClass: (classId: string, title: string) => Promise<void>;
   removeTopic: (topicId: string) => Promise<void>;
@@ -62,7 +63,18 @@ const StudioCtx = createContext<Ctx | null>(null);
 export function StudioProvider({ children }: { children: ReactNode }) {
   const [pillars, setPillars] = useState<HPillar[]>([]);
   const [loadingCatalog, setLoadingCatalog] = useState(true);
-  const [view, setView] = useState<View>({ kind: "dashboard" });
+  const [view, setViewState] = useState<View>(() => {
+    if (typeof window === "undefined") return { kind: "dashboard" };
+    try {
+      const raw = window.sessionStorage.getItem("studio.view");
+      if (raw) return JSON.parse(raw) as View;
+    } catch {}
+    return { kind: "dashboard" };
+  });
+  const setView = useCallback((v: View) => {
+    setViewState(v);
+    try { window.sessionStorage.setItem("studio.view", JSON.stringify(v)); } catch {}
+  }, []);
   const [selectedPillarId, setSelectedPillar] = useState<string>("");
   const [selectedTopicId, setSelectedTopic] = useState<string>("");
   const [ageGroup, setAgeGroup] = useState<AgeGroup>("Explorer");
@@ -196,6 +208,10 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     try { await renameTopic(topicId, name); toast.success("Topic renamed"); await reload(); }
     catch (e: any) { toast.error(e?.message ?? "Failed to rename topic"); throw e; }
   }
+  async function editTopicMeta(topicId: string, patch: { name?: string; ages?: AgeGroup[] }) {
+    try { await updateTopic(topicId, patch); toast.success("Topic updated"); await reload(); }
+    catch (e: any) { toast.error(e?.message ?? "Failed to update topic"); throw e; }
+  }
   async function editModule(moduleId: string, name: string) {
     try { await renameModule(moduleId, name); toast.success("Module renamed"); await reload(); }
     catch (e: any) { toast.error(e?.message ?? "Failed to rename module"); throw e; }
@@ -221,7 +237,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       addLayer, removeLayer, reorderLayer, updateLayerField, updateClass,
       unsaved, saving, publishing, save, publish, currentClass, classXp,
       newTopic, newModule, newClass, removeClass,
-      editTopic, editModule, editClass, removeTopic, removeModule,
+      editTopic, editTopicMeta, editModule, editClass, removeTopic, removeModule,
     }}>{children}</StudioCtx.Provider>
   );
 }

@@ -255,6 +255,7 @@ export type Database = {
       }
       topics: {
         Row: {
+          age_groups: string[]
           created_at: string
           id: string
           pillar_id: string
@@ -265,6 +266,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          age_groups?: string[]
           created_at?: string
           id?: string
           pillar_id: string
@@ -275,6 +277,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          age_groups?: string[]
           created_at?: string
           id?: string
           pillar_id?: string

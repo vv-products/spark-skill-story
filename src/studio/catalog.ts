@@ -26,7 +26,7 @@ export type DbClass = {
 };
 
 export type DbModule = { id: string; topic_id: string; slug: string; title: string; subtitle: string | null; position: number };
-export type DbTopic = { id: string; pillar_id: string; slug: string; title: string; subtitle: string | null; position: number };
+export type DbTopic = { id: string; pillar_id: string; slug: string; title: string; subtitle: string | null; position: number; age_groups: string[] | null };
 export type DbPillar = { id: string; slug: string; title: string; subtitle: string | null; emoji: string | null; position: number };
 
 // Compose hierarchy types matching the old shape used by Studio screens
@@ -121,7 +121,7 @@ export async function loadFullCatalog(): Promise<HPillar[]> {
       id: t.id,
       slug: t.slug,
       name: t.title,
-      ages: ["Explorer", "Builder", "Leader"],
+      ages: ((t.age_groups ?? ["Explorer", "Builder", "Leader"]) as AgeGroup[]),
       modules: (modulesByTopic.get(t.id) ?? []).map<HModule>((m) => {
         const cls = (classesByModule.get(m.id) ?? []).map<HClass>((c) => ({
           id: c.id,
@@ -184,6 +184,14 @@ export async function deleteClass(classId: string) {
 
 export async function renameTopic(topicId: string, name: string) {
   const { error } = await supabase.from("topics").update({ title: name }).eq("id", topicId);
+  if (error) throw error;
+}
+export async function updateTopic(topicId: string, patch: { name?: string; ages?: AgeGroup[] }) {
+  const update: { title?: string; age_groups?: string[] } = {};
+  if (patch.name !== undefined) update.title = patch.name;
+  if (patch.ages !== undefined) update.age_groups = patch.ages;
+  if (Object.keys(update).length === 0) return;
+  const { error } = await supabase.from("topics").update(update).eq("id", topicId);
   if (error) throw error;
 }
 export async function renameModule(moduleId: string, name: string) {
