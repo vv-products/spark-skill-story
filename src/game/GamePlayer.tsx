@@ -13,7 +13,10 @@ import leoImg from "@/assets/leo.jpg";
 import mayaImg from "@/assets/maya.jpg";
 import dashImg from "@/assets/dash.jpg";
 import pipImg from "@/assets/pip.jpg";
-import fairgroundImg from "@/assets/fairground.jpg";
+import activityCharactersImg from "@/assets/activity-characters.jpg";
+import activityEventsImg from "@/assets/activity-events.jpg";
+import missionStorytimeImg from "@/assets/mission-storytime.jpg";
+import missionTreasureImg from "@/assets/mission-treasure.jpg";
 
 const FALLBACK_IMAGES = [leoImg, mayaImg, dashImg, pipImg];
 const classImage = (c: DbClass) => c.hero_image_url || FALLBACK_IMAGES[c.position % FALLBACK_IMAGES.length];
