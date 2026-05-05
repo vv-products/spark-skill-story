@@ -119,27 +119,29 @@ export function GameHome() {
           <div className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full bg-white/10" />
           <div className="pointer-events-none absolute -bottom-12 -left-8 h-36 w-36 rounded-full bg-white/10" />
 
-          <div className="relative flex items-stretch gap-3 min-h-[240px]">
-            <div className="flex-1 pt-1">
+          <div className="relative flex items-stretch min-h-[260px]">
+            <div className="relative z-10 flex w-[58%] flex-col pt-1">
               <p className="text-[14px] font-semibold text-white/90">Welcome back,</p>
               <p className="text-[18px] font-extrabold text-text-accent drop-shadow-sm">
                 {greetName} <span>👋</span>
               </p>
-              <h2 className="mt-4 text-[28px] font-black leading-[1.1] drop-shadow-md">
-                Leo needs your<br />help today...
+              <h2 className="mt-4 text-[26px] font-black leading-[1.1] drop-shadow-md">
+                Leo needs your help today...
               </h2>
-              <Link
-                to={continueClass ? "/play/$slug" : "/"}
-                params={continueClass ? { slug: continueClass.slug } : undefined}
-                className="mt-5 inline-flex items-center gap-1 rounded-pill bg-white px-7 py-3 text-[15px] font-extrabold text-primary shadow-card transition-transform active:scale-[0.97]"
-              >
-                Start →
-              </Link>
+              <div className="mt-auto pt-5">
+                <Link
+                  to={continueClass ? "/play/$slug" : "/"}
+                  params={continueClass ? { slug: continueClass.slug } : undefined}
+                  className="inline-flex items-center gap-1 rounded-pill bg-white px-7 py-3 text-[15px] font-extrabold text-primary shadow-card transition-transform active:scale-[0.97]"
+                >
+                  Start →
+                </Link>
+              </div>
             </div>
             <img
               src={leoHeroImg}
               alt=""
-              className="pointer-events-none absolute right-[-20px] bottom-[-20px] h-[260px] w-auto select-none object-contain"
+              className="pointer-events-none absolute right-[-24px] bottom-[-20px] h-[270px] w-auto select-none object-contain"
             />
           </div>
         </div>
