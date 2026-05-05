@@ -223,6 +223,8 @@ export function ClassPlayer({ slug }: { slug: string }) {
   const [data, setData] = useState<{ cls: any; layers: any[] } | null | "missing">(null);
   const [idx, setIdx] = useState(0);
   const [earned, setEarned] = useState(0);
+  const [playerAvatar, setPlayerAvatar] = useState<AvatarConfig | null>(null);
+  const [playerName, setPlayerName] = useState<string | null>(null);
 
   useEffect(() => {
     import("@/studio/catalog").then(async ({ loadPublishedClass }) => {
@@ -230,6 +232,16 @@ export function ClassPlayer({ slug }: { slug: string }) {
       setData(r ?? "missing");
     });
   }, [slug]);
+
+  useEffect(() => {
+    if (!user) { setPlayerAvatar(null); setPlayerName(null); return; }
+    loadProfile(user.id)
+      .then((p) => {
+        setPlayerAvatar(p?.avatar_config ?? avatarFromSeed(user.id));
+        setPlayerName(p?.display_name ?? user.user_metadata?.display_name ?? user.email?.split("@")[0] ?? null);
+      })
+      .catch(() => setPlayerAvatar(avatarFromSeed(user.id)));
+  }, [user]);
 
   const totalXp = useMemo(() => data && data !== "missing" ? data.layers.reduce((s, l) => s + (l.xp_reward ?? 0), 0) : 0, [data]);
 
