@@ -4,7 +4,8 @@ import { StudioLayout } from "../Layout";
 import { Btn, StatusPill, Tag, Field, Input, Textarea, Select, Toggle, Chip, FamilyBadge } from "../ui";
 import { PromptDialog } from "../PromptDialog";
 import { ConfirmDialog } from "../ConfirmDialog";
-import { TASK_BY_CODE, TASK_TYPES, FAMILY_COLOR, type Character, type Family, type AgeGroup } from "../data";
+import { TASK_BY_CODE, FAMILY_COLOR, type Character, type Family, type AgeGroup } from "../data";
+import { useTaskTypes } from "../taskTypes";
 
 const CHARACTERS: Character[] = ["Maya", "Leo", "Dash", "Pip"];
 
