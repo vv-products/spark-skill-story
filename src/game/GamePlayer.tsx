@@ -17,6 +17,9 @@ import activityCharactersImg from "@/assets/activity-characters.jpg";
 import activityEventsImg from "@/assets/activity-events.jpg";
 import missionStorytimeImg from "@/assets/mission-storytime.jpg";
 import missionTreasureImg from "@/assets/mission-treasure.jpg";
+import iconStar from "@/assets/icon-star.png";
+import iconTrophy from "@/assets/icon-trophy.png";
+import iconFire from "@/assets/icon-fire.png";
 
 const FALLBACK_IMAGES = [leoImg, mayaImg, dashImg, pipImg];
 const classImage = (c: DbClass) => c.hero_image_url || FALLBACK_IMAGES[c.position % FALLBACK_IMAGES.length];
