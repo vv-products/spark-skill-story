@@ -187,7 +187,7 @@ export async function renameTopic(topicId: string, name: string) {
   if (error) throw error;
 }
 export async function updateTopic(topicId: string, patch: { name?: string; ages?: AgeGroup[] }) {
-  const update: Record<string, any> = {};
+  const update: { title?: string; age_groups?: string[] } = {};
   if (patch.name !== undefined) update.title = patch.name;
   if (patch.ages !== undefined) update.age_groups = patch.ages;
   if (Object.keys(update).length === 0) return;
