@@ -7,6 +7,8 @@ import { loadUserProgress, type UserProgress } from "./progress";
 import { Avatar } from "./avatar/Avatar";
 import { avatarFromSeed, type AvatarConfig } from "./avatar/config";
 import { loadProfile } from "./profileApi";
+import { Leaderboard, ProfilePreviewCard } from "./Leaderboard";
+import type { LeaderboardEntry } from "./profileApi";
 
 const EMPTY_PROGRESS: UserProgress = {
   totalXp: 0, completedClassIds: new Set(), perClass: new Map(), streakDays: 0,
@@ -20,6 +22,7 @@ export function GameHome() {
   const [progress, setProgress] = useState<UserProgress>(EMPTY_PROGRESS);
   const [avatarCfg, setAvatarCfg] = useState<AvatarConfig | null>(null);
   const [displayName, setDisplayName] = useState<string | null>(null);
+  const [previewEntry, setPreviewEntry] = useState<LeaderboardEntry | null>(null);
 
   useEffect(() => {
     Promise.all([loadPublishedClasses(), loadPublishedClassXpTotals()])
@@ -31,11 +34,16 @@ export function GameHome() {
     loadUserProgress(user.id).then(setProgress).catch(() => setProgress(EMPTY_PROGRESS));
     loadProfile(user.id)
       .then((p) => {
+        // First-time onboarding: brand-new account → send to avatar setup before showing Home.
+        if (!p?.avatar_config && !p?.display_name) {
+          navigate({ to: "/profile" });
+          return;
+        }
         setAvatarCfg(p?.avatar_config ?? avatarFromSeed(user.id));
         setDisplayName(p?.display_name ?? null);
       })
       .catch(() => setAvatarCfg(avatarFromSeed(user.id)));
-  }, [user]);
+  }, [user, navigate]);
 
   // "Continue" = the most-recently-touched class that isn't completed yet.
   // Fallback for a brand-new signed-in user: first non-completed published class.
@@ -187,6 +195,15 @@ export function GameHome() {
           </div>
         )}
       </section>
+
+      <section className="px-5 pb-20">
+        <h2 className="mb-3 text-base font-extrabold text-[#1A1A2E]">Leaderboard</h2>
+        <Leaderboard currentUserId={user?.id ?? null} onSelect={setPreviewEntry} />
+      </section>
+
+      {previewEntry && (
+        <ProfilePreviewCard entry={previewEntry} onClose={() => setPreviewEntry(null)} />
+      )}
     </div>
   );
 }
@@ -206,6 +223,8 @@ export function ClassPlayer({ slug }: { slug: string }) {
   const [data, setData] = useState<{ cls: any; layers: any[] } | null | "missing">(null);
   const [idx, setIdx] = useState(0);
   const [earned, setEarned] = useState(0);
+  const [playerAvatar, setPlayerAvatar] = useState<AvatarConfig | null>(null);
+  const [playerName, setPlayerName] = useState<string | null>(null);
 
   useEffect(() => {
     import("@/studio/catalog").then(async ({ loadPublishedClass }) => {
@@ -213,6 +232,16 @@ export function ClassPlayer({ slug }: { slug: string }) {
       setData(r ?? "missing");
     });
   }, [slug]);
+
+  useEffect(() => {
+    if (!user) { setPlayerAvatar(null); setPlayerName(null); return; }
+    loadProfile(user.id)
+      .then((p) => {
+        setPlayerAvatar(p?.avatar_config ?? avatarFromSeed(user.id));
+        setPlayerName(p?.display_name ?? user.user_metadata?.display_name ?? user.email?.split("@")[0] ?? null);
+      })
+      .catch(() => setPlayerAvatar(avatarFromSeed(user.id)));
+  }, [user]);
 
   const totalXp = useMemo(() => data && data !== "missing" ? data.layers.reduce((s, l) => s + (l.xp_reward ?? 0), 0) : 0, [data]);
 
@@ -241,11 +270,17 @@ export function ClassPlayer({ slug }: { slug: string }) {
   }
 
   if (idx >= data.layers.length) {
+    const greetName = playerName ?? "friend";
     return (
       <div className="min-h-[100dvh] bg-gradient-to-b from-[#7B2FBE] to-[#3D1568] p-6 text-center text-white">
-        <div className="mt-12 text-6xl">🎉</div>
-        <h1 className="mt-4 text-2xl font-black">Class complete!</h1>
-        <p className="mt-2 text-sm opacity-90">You earned</p>
+        <div className="mt-10 flex justify-center">
+          <div className="relative h-28 w-28 overflow-hidden rounded-full ring-4 ring-white/40 shadow-[0_8px_24px_rgba(0,0,0,0.25)]">
+            <Avatar config={playerAvatar} size={112} />
+          </div>
+        </div>
+        <div className="mt-3 text-4xl">🎉</div>
+        <h1 className="mt-2 text-2xl font-black">Great job, {greetName}!</h1>
+        <p className="mt-1 text-sm opacity-90">You earned</p>
         <div className="mt-1 text-5xl font-black">+{earned} XP</div>
         {!user && <p className="mt-4 text-xs text-white/70">Sign in next time to save your progress.</p>}
         <div className="mt-8 flex flex-col gap-3">
