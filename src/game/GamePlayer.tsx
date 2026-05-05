@@ -277,17 +277,22 @@ export function GameHome() {
 function StatCard({ bg, icon, label, value }: { bg: string; icon: string; label: string; value: string }) {
   return (
     <div
-      className={`flex flex-col items-start ${bg} shadow-card`}
+      className={`relative flex flex-col items-center ${bg} shadow-card`}
       style={{
         borderRadius: "var(--stat-card-radius)",
-        padding: "var(--stat-card-padding)",
+        paddingTop: "calc(var(--stat-card-icon-size) * 0.55)",
+        paddingLeft: "var(--stat-card-padding)",
+        paddingRight: "var(--stat-card-padding)",
+        paddingBottom: "var(--stat-card-padding)",
+        marginTop: "calc(var(--stat-card-icon-size) * 0.45)",
       }}
     >
       <div
-        className="flex shrink-0 items-center justify-start"
+        className="absolute left-1/2 -translate-x-1/2 flex shrink-0 items-center justify-center"
         style={{
           width: "var(--stat-card-icon-size)",
           height: "var(--stat-card-icon-size)",
+          top: "calc(var(--stat-card-icon-size) * -0.45)",
         }}
       >
         <img
@@ -296,20 +301,19 @@ function StatCard({ bg, icon, label, value }: { bg: string; icon: string; label:
           width={44}
           height={44}
           loading="lazy"
-          className="block h-full w-full object-contain"
+          className="block h-full w-full object-contain drop-shadow-md"
         />
       </div>
       <p
-        className="font-medium text-text-secondary leading-tight whitespace-nowrap"
+        className="font-medium text-text-secondary leading-tight whitespace-nowrap text-center"
         style={{
-          marginTop: "var(--stat-card-icon-gap)",
           fontSize: "var(--stat-card-label-size)",
         }}
       >
         {label}
       </p>
       <p
-        className="font-black text-foreground leading-none"
+        className="font-black text-foreground leading-none text-center"
         style={{
           marginTop: "var(--stat-card-label-gap)",
           fontSize: "var(--stat-card-value-size)",
