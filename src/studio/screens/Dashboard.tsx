@@ -18,6 +18,13 @@ const STATUS_LABEL: Record<NonNullable<ActivityItem["status"]>, "Draft" | "In Re
 
 export function DashboardScreen() {
   const { setView, pillars } = useStudio();
+  const [activity, setActivity] = useState<ActivityItem[] | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    loadRecentActivity(8).then((items) => { if (alive) setActivity(items); }).catch(() => { if (alive) setActivity([]); });
+    return () => { alive = false; };
+  }, [pillars]);
 
   // Compute stats from seed
   const allClasses = pillars.flatMap(p => p.topics.flatMap(t => t.modules.flatMap(m => m.classes)));
