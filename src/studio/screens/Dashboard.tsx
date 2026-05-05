@@ -1,9 +1,30 @@
+import { useEffect, useState } from "react";
 import { useStudio } from "../StudioContext";
 import { StudioLayout } from "../Layout";
-import { Card, Btn } from "../ui";
+import { Card, Btn, StatusPill } from "../ui";
+import { loadRecentActivity, relativeTime, type ActivityItem } from "../activity";
+
+const KIND_ICON: Record<ActivityItem["kind"], string> = {
+  class: "📘",
+  module: "📦",
+  topic: "📂",
+  pillar: "🏛",
+};
+const STATUS_LABEL: Record<NonNullable<ActivityItem["status"]>, "Draft" | "In Review" | "Published"> = {
+  draft: "Draft",
+  in_review: "In Review",
+  published: "Published",
+};
 
 export function DashboardScreen() {
   const { setView, pillars } = useStudio();
+  const [activity, setActivity] = useState<ActivityItem[] | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    loadRecentActivity(8).then((items) => { if (alive) setActivity(items); }).catch(() => { if (alive) setActivity([]); });
+    return () => { alive = false; };
+  }, [pillars]);
 
   // Compute stats from seed
   const allClasses = pillars.flatMap(p => p.topics.flatMap(t => t.modules.flatMap(m => m.classes)));
@@ -58,9 +79,32 @@ export function DashboardScreen() {
 
         {/* Activity */}
         <h2 className="mt-8 mb-3 text-[13px] font-semibold uppercase tracking-wide text-[#666680]">Recent Activity</h2>
-        <Card>
-          <div className="py-6 text-center text-sm text-[#888]">No recent activity yet.</div>
-        </Card>
+        {activity === null ? (
+          <Card><div className="py-6 text-center text-sm text-[#888]">Loading…</div></Card>
+        ) : activity.length === 0 ? (
+          <Card><div className="py-6 text-center text-sm text-[#888]">No recent activity yet.</div></Card>
+        ) : (
+          <Card padding="p-0">
+            <ul className="divide-y divide-[#EBEBF5]">
+              {activity.map((a) => (
+                <li key={a.id} className="flex items-center gap-4 px-5 py-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#F0F0FA] text-base">
+                    {KIND_ICON[a.kind]}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm text-[#1A1A2E]">
+                      <span className="font-semibold capitalize">{a.kind}</span>
+                      <span className="text-[#666680]"> updated · </span>
+                      <span className="font-semibold">{a.title}</span>
+                    </div>
+                    <div className="text-[12px] text-[#888]">{relativeTime(a.when)}</div>
+                  </div>
+                  {a.status && <StatusPill status={STATUS_LABEL[a.status]} />}
+                </li>
+              ))}
+            </ul>
+          </Card>
+        )}
       </div>
     </StudioLayout>
   );
