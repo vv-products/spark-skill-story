@@ -52,16 +52,24 @@ export function LibraryScreen() {
           {pillar.topics.map(t => {
             const active = t.id === selectedTopicId;
             return (
-              <button key={t.id} onClick={() => setSelectedTopic(t.id)}
-                className={`block w-full rounded-[8px] px-3 py-3 text-left transition-colors ${active ? "bg-[#F0F0FA]" : "hover:bg-[#F8F8FC]"}`}>
-                <div className="flex items-center justify-between">
-                  <span className={`text-sm ${active ? "font-bold text-[#7B2FBE]" : "font-semibold text-[#1A1A2E]"}`}>{t.name}</span>
+              <div key={t.id}
+                onClick={() => setSelectedTopic(t.id)}
+                className={`group block w-full cursor-pointer rounded-[8px] px-3 py-3 text-left transition-colors ${active ? "bg-[#F0F0FA]" : "hover:bg-[#F8F8FC]"}`}>
+                <div className="flex items-center justify-between gap-2">
+                  <span className={`flex-1 text-sm ${active ? "font-bold text-[#7B2FBE]" : "font-semibold text-[#1A1A2E]"}`}>{t.name}</span>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setEditing(t); }}
+                    className="rounded-[6px] px-1.5 py-0.5 text-[11px] text-[#7B2FBE] opacity-0 transition-opacity hover:bg-white group-hover:opacity-100"
+                    aria-label="Edit topic"
+                  >
+                    ✎ Edit
+                  </button>
                   <span className="rounded-[6px] bg-[#F0F0FA] px-2 py-0.5 text-[11px] font-semibold text-[#7B2FBE]">{t.modules.length} modules</span>
                 </div>
                 <div className="mt-1.5 flex gap-1">
                   {t.ages.map(a => <Tag key={a}>{a}</Tag>)}
                 </div>
-              </button>
+              </div>
             );
           })}
           <button onClick={openAddTopic} className="mt-2 w-full rounded-[8px] border border-dashed border-[#D8D8E8] px-3 py-2.5 text-sm font-semibold text-[#7B2FBE] hover:bg-[#F8F8FC]">+ Add Topic</button>
