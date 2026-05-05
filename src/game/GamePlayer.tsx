@@ -202,19 +202,43 @@ export function GameHome() {
           })}
         </div>
 
+        {/* Your Missions */}
+        <SectionHeader title="Your Missions" />
+        <div className="-mx-5 mt-2 flex gap-3 overflow-x-auto px-5 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <JourneyCard
+            slug={classes?.[0]?.slug ?? ""}
+            image={missionStorytimeImg}
+            title="Leo's Story Time"
+            subtitle="Reading Skills"
+            tags={["Reading", "Episode 1"]}
+            cta="Start →"
+            ctaVariant="dark"
+          />
+          <JourneyCard
+            slug={classes?.[1]?.slug ?? ""}
+            image={missionTreasureImg}
+            title="Pip's Treasure"
+            subtitle="Exploration Skills"
+            tags={["Curiosity", "Episode 2"]}
+            cta="Continue →"
+            ctaVariant="primary"
+            progress={45}
+          />
+        </div>
+
         {/* Fun Activities */}
         <SectionHeader title="Fun Activities" hideAll />
         <div className="-mx-5 mt-2 flex gap-3 overflow-x-auto px-5 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <ActivityCard
             bg="bg-card-gold"
-            image={dashImg}
+            image={activityCharactersImg}
             title="Meet the Characters"
             description="Get to know your friends and their stories."
             cta="Explore →"
           />
           <ActivityCard
             bg="bg-[#E8E0F8]"
-            image={fairgroundImg}
+            image={activityEventsImg}
             title="Live Events"
             description="Join live shows, challenges, and special events."
             cta="Join Now →"
