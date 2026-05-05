@@ -195,6 +195,15 @@ export function GameHome() {
           </div>
         )}
       </section>
+
+      <section className="px-5 pb-20">
+        <h2 className="mb-3 text-base font-extrabold text-[#1A1A2E]">Leaderboard</h2>
+        <Leaderboard currentUserId={user?.id ?? null} onSelect={setPreviewEntry} />
+      </section>
+
+      {previewEntry && (
+        <ProfilePreviewCard entry={previewEntry} onClose={() => setPreviewEntry(null)} />
+      )}
     </div>
   );
 }
