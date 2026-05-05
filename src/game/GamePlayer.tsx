@@ -17,6 +17,9 @@ import activityCharactersImg from "@/assets/activity-characters.jpg";
 import activityEventsImg from "@/assets/activity-events.jpg";
 import missionStorytimeImg from "@/assets/mission-storytime.jpg";
 import missionTreasureImg from "@/assets/mission-treasure.jpg";
+import iconStar from "@/assets/icon-star.png";
+import iconTrophy from "@/assets/icon-trophy.png";
+import iconFire from "@/assets/icon-fire.png";
 
 const FALLBACK_IMAGES = [leoImg, mayaImg, dashImg, pipImg];
 const classImage = (c: DbClass) => c.hero_image_url || FALLBACK_IMAGES[c.position % FALLBACK_IMAGES.length];
@@ -137,11 +140,11 @@ export function GameHome() {
 
         {/* Stat cards */}
         <div className="mt-4 grid grid-cols-3 gap-3">
-          <StatCard bg="bg-card-warm" icon="⭐" label="Your Stars" value={user ? progress.totalXp.toLocaleString() : "—"} />
-          <StatCard bg="bg-card-gold" icon="🏆" label="Your Level" value={user ? `Level ${Math.max(1, Math.floor(progress.totalXp / 200) + 1)}` : "—"} />
+          <StatCard bg="bg-card-warm" icon={iconStar} label="Your Stars" value={user ? progress.totalXp.toLocaleString() : "—"} />
+          <StatCard bg="bg-card-gold" icon={iconTrophy} label="Your Level" value={user ? `Level ${Math.max(1, Math.floor(progress.totalXp / 200) + 1)}` : "—"} />
           <StatCard
             bg="bg-card-warm"
-            icon="🔥"
+            icon={iconFire}
             label="Learning Streak"
             value={user ? `${progress.streakDays} ${progress.streakDays === 1 ? "day" : "days"}` : "—"}
           />
@@ -268,9 +271,9 @@ export function GameHome() {
 function StatCard({ bg, icon, label, value }: { bg: string; icon: string; label: string; value: string }) {
   return (
     <div className={`rounded-[20px] ${bg} p-4 shadow-card`}>
-      <div className="text-[32px] leading-none">{icon}</div>
-      <p className="mt-3 text-[11px] font-bold uppercase tracking-wide text-text-secondary leading-tight">{label}</p>
-      <p className="mt-1.5 text-[18px] font-black text-foreground leading-none">{value}</p>
+      <img src={icon} alt="" className="h-10 w-10 object-contain" loading="lazy" width={40} height={40} />
+      <p className="mt-3 text-[12px] font-medium text-text-secondary leading-tight">{label}</p>
+      <p className="mt-1 text-[18px] font-black text-foreground leading-none">{value}</p>
     </div>
   );
 }
