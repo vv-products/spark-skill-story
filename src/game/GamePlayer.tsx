@@ -34,11 +34,16 @@ export function GameHome() {
     loadUserProgress(user.id).then(setProgress).catch(() => setProgress(EMPTY_PROGRESS));
     loadProfile(user.id)
       .then((p) => {
+        // First-time onboarding: brand-new account → send to avatar setup before showing Home.
+        if (!p?.avatar_config && !p?.display_name) {
+          navigate({ to: "/profile" });
+          return;
+        }
         setAvatarCfg(p?.avatar_config ?? avatarFromSeed(user.id));
         setDisplayName(p?.display_name ?? null);
       })
       .catch(() => setAvatarCfg(avatarFromSeed(user.id)));
-  }, [user]);
+  }, [user, navigate]);
 
   // "Continue" = the most-recently-touched class that isn't completed yet.
   // Fallback for a brand-new signed-in user: first non-completed published class.
