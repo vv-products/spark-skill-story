@@ -109,6 +109,16 @@ export function LibraryScreen() {
         onCancel={() => setDialog(null)}
         onSubmit={async (name) => { if (topic) await newModule(topic.id, name); setDialog(null); }}
       />
+      <TopicEditDialog
+        open={editing !== null}
+        initialName={editing?.name ?? ""}
+        initialAges={editing?.ages ?? (["Explorer","Builder","Leader"] as AgeGroup[])}
+        onCancel={() => setEditing(null)}
+        onSubmit={async ({ name, ages }) => {
+          if (editing) await editTopicMeta(editing.id, { name, ages });
+          setEditing(null);
+        }}
+      />
     </StudioLayout>
   );
 }
