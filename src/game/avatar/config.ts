@@ -6,9 +6,11 @@ export type AvatarConfig = {
   hairStyle: string;  // option id from HAIR_STYLES
   hairColor: string;  // option id from HAIR_COLORS
   eyes: string;       // option id from EYES
-  mouth: string;      // option id from MOUTHS
-  accessory: string;  // option id from ACCESSORIES ("none" allowed)
-  background: string; // option id from BACKGROUNDS
+  expression: string; // option id from EXPRESSIONS — drives mouth + brows
+  // Legacy fields kept for back-compat with stored configs:
+  mouth?: string;
+  accessory?: string;
+  background?: string;
 };
 
 export const SKIN: { id: string; label: string; color: string }[] = [
@@ -24,65 +26,55 @@ export const HAIR_COLORS: { id: string; label: string; color: string }[] = [
   { id: "black",   label: "Black",   color: "#1F1A24" },
   { id: "brown",   label: "Brown",   color: "#5A3A22" },
   { id: "blonde",  label: "Blonde",  color: "#E8C770" },
-  { id: "ginger",  label: "Ginger",  color: "#C8552B" },
-  { id: "white",   label: "White",   color: "#EFEFEF" },
-  { id: "pink",    label: "Pink",    color: "#FF7AB6" },
-  { id: "purple",  label: "Purple",  color: "#8A4DD6" },
+  { id: "red",     label: "Red",     color: "#C8552B" },
+  { id: "auburn",  label: "Auburn",  color: "#8B3A1F" },
   { id: "blue",    label: "Blue",    color: "#3FA9F5" },
-  { id: "green",   label: "Green",   color: "#3FB97A" },
+  { id: "pink",    label: "Pink",    color: "#FF7AB6" },
 ];
 
 export const HAIR_STYLES: { id: string; label: string }[] = [
-  { id: "short",   label: "Short" },
-  { id: "long",    label: "Long" },
-  { id: "curly",   label: "Curly" },
-  { id: "buns",    label: "Space buns" },
-  { id: "mohawk",  label: "Mohawk" },
-  { id: "bald",    label: "Bald" },
+  { id: "shortCurly",   label: "Short curly" },
+  { id: "longStraight", label: "Long straight" },
+  { id: "braids",       label: "Braids" },
+  { id: "buzz",         label: "Buzz cut" },
+  { id: "ponytail",     label: "Ponytail" },
+  { id: "messy",        label: "Messy" },
 ];
 
 export const EYES: { id: string; label: string }[] = [
-  { id: "happy",    label: "Happy" },
-  { id: "round",    label: "Round" },
-  { id: "wink",     label: "Wink" },
-  { id: "stars",    label: "Stars" },
-  { id: "sleepy",   label: "Sleepy" },
+  { id: "round",   label: "Round" },
+  { id: "starry",  label: "Starry" },
+  { id: "sleepy",  label: "Sleepy-happy" },
+  { id: "wide",    label: "Wide curious" },
 ];
 
-export const MOUTHS: { id: string; label: string }[] = [
-  { id: "smile",    label: "Smile" },
-  { id: "grin",     label: "Grin" },
-  { id: "smirk",    label: "Smirk" },
-  { id: "open",     label: "Surprised" },
-  { id: "tongue",   label: "Tongue out" },
+export const EXPRESSIONS: { id: string; label: string; emoji: string }[] = [
+  { id: "happy",      label: "Happy",      emoji: "😊" },
+  { id: "excited",    label: "Excited",    emoji: "🤩" },
+  { id: "calm",       label: "Calm",       emoji: "😌" },
+  { id: "determined", label: "Determined", emoji: "😤" },
+  { id: "shy",        label: "Shy",        emoji: "☺️" },
 ];
 
-export const ACCESSORIES: { id: string; label: string }[] = [
-  { id: "none",     label: "None" },
-  { id: "glasses",  label: "Glasses" },
-  { id: "sunnies",  label: "Sunglasses" },
-  { id: "freckles", label: "Freckles" },
-  { id: "blush",    label: "Blush" },
-];
-
-export const BACKGROUNDS: { id: string; label: string; color: string }[] = [
-  { id: "purple",  label: "Purple",  color: "#7B2FBE" },
-  { id: "pink",    label: "Pink",    color: "#FF7AB6" },
-  { id: "teal",    label: "Teal",    color: "#3FB9B0" },
-  { id: "sun",     label: "Sun",     color: "#FFB23F" },
-  { id: "sky",     label: "Sky",     color: "#3FA9F5" },
-  { id: "mint",    label: "Mint",    color: "#7AD89C" },
-  { id: "slate",   label: "Slate",   color: "#3D4A66" },
-];
+// Backdrop gradients for the preview card. Keyed off the active hair color
+// so the card subtly shifts to complement the look.
+export const BACKDROPS: Record<string, [string, string]> = {
+  default: ["#9B5BE0", "#D9C2F2"],
+  black:   ["#7B2FBE", "#C9B0EA"],
+  brown:   ["#A567D6", "#E2CCF2"],
+  blonde:  ["#C97FE6", "#FFE0F0"],
+  red:     ["#E0639A", "#FFD0C2"],
+  auburn:  ["#C25A8A", "#F2C7D6"],
+  blue:    ["#6B7BE8", "#C7D3FF"],
+  pink:    ["#E263B0", "#FFD3EC"],
+};
 
 export const DEFAULT_AVATAR: AvatarConfig = {
   skin: "light",
-  hairStyle: "short",
+  hairStyle: "shortCurly",
   hairColor: "brown",
-  eyes: "happy",
-  mouth: "smile",
-  accessory: "none",
-  background: "purple",
+  eyes: "round",
+  expression: "happy",
 };
 
 export function colorOf<T extends { id: string; color: string }>(opts: T[], id: string, fallback: string) {
@@ -100,11 +92,39 @@ export function avatarFromSeed(seed: string): AvatarConfig {
   const pick = <T,>(arr: T[]) => { h = Math.imul(h ^ (h >>> 13), 16777619) >>> 0; return arr[h % arr.length]; };
   return {
     skin: pick(SKIN).id,
-    hairStyle: pick(HAIR_STYLES.filter((s) => s.id !== "bald")).id,
+    hairStyle: pick(HAIR_STYLES).id,
     hairColor: pick(HAIR_COLORS).id,
     eyes: pick(EYES).id,
-    mouth: pick(MOUTHS).id,
-    accessory: pick(ACCESSORIES).id,
-    background: pick(BACKGROUNDS).id,
+    expression: pick(EXPRESSIONS).id,
+  };
+}
+
+export function randomAvatar(): AvatarConfig {
+  return avatarFromSeed(`${Math.random()}-${Date.now()}`);
+}
+
+// Tolerate older saved configs that used legacy ids.
+export function normalizeAvatar(c: Partial<AvatarConfig> | null | undefined): AvatarConfig {
+  if (!c) return DEFAULT_AVATAR;
+  const hairStyleMap: Record<string, string> = {
+    short: "shortCurly", long: "longStraight", curly: "shortCurly",
+    buns: "braids", mohawk: "messy", bald: "buzz",
+  };
+  const eyesMap: Record<string, string> = {
+    happy: "round", round: "round", wink: "round",
+    stars: "starry", sleepy: "sleepy", curious: "wide",
+  };
+  const exprFromMouth: Record<string, string> = {
+    smile: "happy", grin: "excited", smirk: "determined",
+    open: "excited", tongue: "excited",
+  };
+  return {
+    skin: SKIN.find((s) => s.id === c.skin)?.id ?? DEFAULT_AVATAR.skin,
+    hairStyle: HAIR_STYLES.find((s) => s.id === c.hairStyle)?.id
+      ?? hairStyleMap[c.hairStyle ?? ""] ?? DEFAULT_AVATAR.hairStyle,
+    hairColor: HAIR_COLORS.find((s) => s.id === c.hairColor)?.id ?? DEFAULT_AVATAR.hairColor,
+    eyes: EYES.find((s) => s.id === c.eyes)?.id ?? eyesMap[c.eyes ?? ""] ?? DEFAULT_AVATAR.eyes,
+    expression: EXPRESSIONS.find((s) => s.id === c.expression)?.id
+      ?? exprFromMouth[c.mouth ?? ""] ?? DEFAULT_AVATAR.expression,
   };
 }
