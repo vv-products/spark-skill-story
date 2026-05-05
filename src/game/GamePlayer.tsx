@@ -271,9 +271,9 @@ export function GameHome() {
 function StatCard({ bg, icon, label, value }: { bg: string; icon: string; label: string; value: string }) {
   return (
     <div className={`rounded-[20px] ${bg} p-4 shadow-card`}>
-      <div className="text-[40px] leading-none">{icon}</div>
-      <p className="mt-3 text-[13px] font-medium text-text-secondary leading-tight">{label}</p>
-      <p className="mt-1 text-[20px] font-black text-foreground leading-none">{value}</p>
+      <img src={icon} alt="" className="h-10 w-10 object-contain" loading="lazy" width={40} height={40} />
+      <p className="mt-3 text-[12px] font-medium text-text-secondary leading-tight">{label}</p>
+      <p className="mt-1 text-[18px] font-black text-foreground leading-none">{value}</p>
     </div>
   );
 }
