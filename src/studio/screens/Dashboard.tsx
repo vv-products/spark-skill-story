@@ -1,7 +1,6 @@
 import { useStudio } from "../StudioContext";
 import { StudioLayout } from "../Layout";
-import { Card, Btn, StatusPill } from "../ui";
-import { RECENT_ACTIVITY } from "../data";
+import { Card, Btn } from "../ui";
 
 export function DashboardScreen() {
   const { setView, pillars } = useStudio();
@@ -59,23 +58,8 @@ export function DashboardScreen() {
 
         {/* Activity */}
         <h2 className="mt-8 mb-3 text-[13px] font-semibold uppercase tracking-wide text-[#666680]">Recent Activity</h2>
-        <Card padding="p-0">
-          <ul className="divide-y divide-[#EBEBF5]">
-            {RECENT_ACTIVITY.map((a, i) => (
-              <li key={i} className="flex items-center gap-4 px-5 py-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#F0F0FA] text-xs font-bold text-[#7B2FBE]">
-                  {a.who.split(" ").map(n => n[0]).join("")}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="text-sm text-[#1A1A2E]">
-                    <span className="font-semibold">{a.who}</span> <span className="text-[#666680]">{a.what}</span>
-                  </div>
-                  <div className="text-[12px] text-[#888]">{a.when}</div>
-                </div>
-                <StatusPill status={a.status} />
-              </li>
-            ))}
-          </ul>
+        <Card>
+          <div className="py-6 text-center text-sm text-[#888]">No recent activity yet.</div>
         </Card>
       </div>
     </StudioLayout>
