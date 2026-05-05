@@ -95,8 +95,12 @@ export function GameHome() {
       <div className="sticky top-0 z-20 flex items-center justify-between bg-background px-5 pt-5 pb-3">
         <h1 className="font-display text-3xl text-primary">Sementa</h1>
         <div className="flex items-center gap-2">
-          <button className="flex h-9 w-9 items-center justify-center rounded-full bg-card shadow-card text-base">🔍</button>
-          <button className="flex h-9 w-9 items-center justify-center rounded-full bg-card shadow-card text-base">🔔</button>
+          <button className="flex h-10 w-10 items-center justify-center rounded-full bg-card shadow-card text-foreground" aria-label="Search">
+            <Search className="h-[18px] w-[18px]" strokeWidth={2.25} />
+          </button>
+          <button className="flex h-10 w-10 items-center justify-center rounded-full bg-card shadow-card text-foreground" aria-label="Notifications">
+            <Bell className="h-[18px] w-[18px]" strokeWidth={2.25} />
+          </button>
           <button
             type="button"
             onClick={() => user && navigate({ to: "/profile" })}
