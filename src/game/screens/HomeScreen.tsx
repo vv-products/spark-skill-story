@@ -5,6 +5,7 @@ import zara from "@/assets/maya.jpg";
 import dash from "@/assets/dash.jpg";
 import pip from "@/assets/pip.jpg";
 import fairground from "@/assets/fairground.jpg";
+import meetCharacters from "@/assets/meet-characters.jpg";
 import leoAvatar from "@/assets/leo-avatar.png";
 import mayaAvatar from "@/assets/maya-avatar.png";
 import dashAvatar from "@/assets/dash-avatar.png";
@@ -127,7 +128,7 @@ export function HomeScreen() {
         <div className="-mx-5 mt-2 flex gap-3 overflow-x-auto px-5 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <ActivityCard
             bg="bg-card-gold"
-            image={dash}
+            image={meetCharacters}
             title="Meet the Characters"
             description="Get to know your friends and their stories."
             cta="Explore →"
