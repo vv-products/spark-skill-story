@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
+import { Search, Bell } from "lucide-react";
 import { usePlayerAuth } from "./PlayerAuth";
 import { PlayerSignIn } from "./PlayerSignIn";
 import { loadPublishedClasses, loadPublishedClassXpTotals, type DbClass } from "@/studio/catalog";
