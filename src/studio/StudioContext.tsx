@@ -237,7 +237,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       addLayer, removeLayer, reorderLayer, updateLayerField, updateClass,
       unsaved, saving, publishing, save, publish, currentClass, classXp,
       newTopic, newModule, newClass, removeClass,
-      editTopic, editModule, editClass, removeTopic, removeModule,
+      editTopic, editTopicMeta, editModule, editClass, removeTopic, removeModule,
     }}>{children}</StudioCtx.Provider>
   );
 }
