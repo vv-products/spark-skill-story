@@ -26,7 +26,7 @@ export type DbClass = {
 };
 
 export type DbModule = { id: string; topic_id: string; slug: string; title: string; subtitle: string | null; position: number };
-export type DbTopic = { id: string; pillar_id: string; slug: string; title: string; subtitle: string | null; position: number };
+export type DbTopic = { id: string; pillar_id: string; slug: string; title: string; subtitle: string | null; position: number; age_groups: string[] | null };
 export type DbPillar = { id: string; slug: string; title: string; subtitle: string | null; emoji: string | null; position: number };
 
 // Compose hierarchy types matching the old shape used by Studio screens
