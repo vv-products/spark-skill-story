@@ -33,7 +33,7 @@ export function StudioLayout({ children, title, actions }: { children: ReactNode
                 key={item.key}
                 onClick={() => {
                   if (item.key === "dashboard") setView({ kind: "dashboard" });
-                  else if (item.key === "library" || item.key === "pillars") setView({ kind: "library" });
+                  else if (item.key === "library") setView({ kind: "library" });
                   else if (item.key === "task-types") setView({ kind: "task-types" });
                 }}
                 className={`mb-1 flex w-full items-center gap-3 rounded-[8px] px-3 py-2.5 text-left text-sm font-medium transition-colors ${
