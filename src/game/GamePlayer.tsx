@@ -11,7 +11,7 @@ import { loadProfile } from "./profileApi";
 import { ProfilePreviewCard } from "./Leaderboard";
 import { loadLeaderboard, type LeaderboardEntry } from "./profileApi";
 import leoImg from "@/assets/leo.jpg";
-import leoHeroImg from "@/assets/leo-hero.png";
+import leoHeroImg from "@/assets/leo-hero.jpg";
 import mayaImg from "@/assets/maya.jpg";
 import dashImg from "@/assets/dash.jpg";
 import pipImg from "@/assets/pip.jpg";
@@ -115,11 +115,14 @@ export function GameHome() {
 
       <main className="flex-1 px-5 pb-24">
         {/* Hero */}
-        <div className="relative overflow-hidden rounded-[24px] [background:var(--gradient-hero)] p-5 text-primary-foreground shadow-pop">
-          <div className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full bg-white/10" />
-          <div className="pointer-events-none absolute -bottom-12 -left-8 h-36 w-36 rounded-full bg-white/10" />
+        <div className="relative overflow-hidden rounded-[24px] p-5 text-primary-foreground shadow-pop">
+          <img
+            src={leoHeroImg}
+            alt=""
+            className="pointer-events-none absolute inset-0 h-full w-full select-none object-cover object-right"
+          />
 
-          <div className="relative flex items-stretch min-h-[260px]">
+          <div className="relative flex items-stretch min-h-[240px]">
             <div className="relative z-10 flex w-[58%] flex-col pt-1">
               <p className="text-[14px] font-semibold text-white/90">Welcome back,</p>
               <p className="text-[18px] font-extrabold text-text-accent drop-shadow-sm">
@@ -138,11 +141,6 @@ export function GameHome() {
                 </Link>
               </div>
             </div>
-            <img
-              src={leoHeroImg}
-              alt=""
-              className="pointer-events-none absolute right-[-24px] bottom-[-20px] h-[270px] w-auto select-none object-contain"
-            />
           </div>
         </div>
 
