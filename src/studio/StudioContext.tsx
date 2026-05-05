@@ -48,6 +48,7 @@ type Ctx = {
   newClass: (moduleId: string, title: string) => Promise<string | null>;
   removeClass: (classId: string) => Promise<void>;
   editTopic: (topicId: string, name: string) => Promise<void>;
+  editTopicMeta: (topicId: string, patch: { name?: string; ages?: AgeGroup[] }) => Promise<void>;
   editModule: (moduleId: string, name: string) => Promise<void>;
   editClass: (classId: string, title: string) => Promise<void>;
   removeTopic: (topicId: string) => Promise<void>;
