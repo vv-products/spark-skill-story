@@ -1,6 +1,20 @@
+import { useEffect, useState } from "react";
 import { useStudio } from "../StudioContext";
 import { StudioLayout } from "../Layout";
-import { Card, Btn } from "../ui";
+import { Card, Btn, StatusPill } from "../ui";
+import { loadRecentActivity, relativeTime, type ActivityItem } from "../activity";
+
+const KIND_ICON: Record<ActivityItem["kind"], string> = {
+  class: "📘",
+  module: "📦",
+  topic: "📂",
+  pillar: "🏛",
+};
+const STATUS_LABEL: Record<NonNullable<ActivityItem["status"]>, "Draft" | "In Review" | "Published"> = {
+  draft: "Draft",
+  in_review: "In Review",
+  published: "Published",
+};
 
 export function DashboardScreen() {
   const { setView, pillars } = useStudio();
