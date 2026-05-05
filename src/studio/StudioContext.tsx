@@ -95,6 +95,23 @@ export function StudioProvider({ children }: { children: ReactNode }) {
         setSelectedPillar(data[0].id);
         if (data[0].topics[0]) setSelectedTopic(data[0].topics[0].id);
       }
+      // Reset view if it references entities that no longer exist
+      setViewState((v) => {
+        if (v.kind === "module" || v.kind === "class") {
+          const p = data.find((x) => x.id === v.pillarId);
+          const t = p?.topics.find((x) => x.id === v.topicId);
+          const m = t?.modules.find((x) => x.id === v.moduleId);
+          if (!m) {
+            try { window.sessionStorage.removeItem("studio.view"); } catch {}
+            return { kind: "dashboard" };
+          }
+          if (v.kind === "class" && !m.classes.find((c) => c.id === v.classId)) {
+            try { window.sessionStorage.removeItem("studio.view"); } catch {}
+            return { kind: "dashboard" };
+          }
+        }
+        return v;
+      });
     } catch (e: any) {
       toast.error(e?.message ?? "Failed to load catalog");
     } finally {
