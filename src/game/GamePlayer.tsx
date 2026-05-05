@@ -294,7 +294,7 @@ function StatCard({ bg, icon, label, value }: { bg: string; icon: string; label:
         />
       </div>
       <p
-        className="font-medium text-text-secondary leading-tight"
+        className="font-medium text-text-secondary leading-tight whitespace-nowrap"
         style={{
           marginTop: "var(--stat-card-icon-gap)",
           fontSize: "var(--stat-card-label-size)",
