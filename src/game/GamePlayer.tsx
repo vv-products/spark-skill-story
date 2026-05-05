@@ -163,7 +163,7 @@ export function GameHome() {
         )}
 
         {/* Your Journey */}
-        <SectionHeader title="Your Journey" />
+        <SectionHeader title="Your Journey" viewAllSlug={classes?.[0]?.slug} />
         <div className="-mx-5 mt-2 flex gap-3 overflow-x-auto px-5 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {classes == null ? (
             <div className="text-sm text-text-secondary">Loading…</div>
@@ -195,7 +195,7 @@ export function GameHome() {
         </div>
 
         {/* Your Missions */}
-        <SectionHeader title="Your Missions" />
+        <SectionHeader title="Your Missions" viewAllSlug={classes?.[0]?.slug} />
         <div className="-mx-5 mt-2 flex gap-3 overflow-x-auto px-5 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <JourneyCard
             slug={classes?.[0]?.slug ?? ""}
@@ -228,6 +228,7 @@ export function GameHome() {
             title="Meet the Characters"
             description="Get to know your friends and their stories."
             cta="Explore →"
+            to={classes?.[0]?.slug}
           />
           <ActivityCard
             bg="bg-[#AFB0FB]"
@@ -236,6 +237,7 @@ export function GameHome() {
             title="Live Events"
             description="Join live shows, challenges, and special events."
             cta="Join Now →"
+            to={classes?.[0]?.slug}
           />
         </div>
 
@@ -327,17 +329,21 @@ function StatCard({ bg, icon, label, value }: { bg: string; icon: string; label:
   );
 }
 
-function SectionHeader({ title, subtitle, hideAll }: { title: string; subtitle?: string; hideAll?: boolean }) {
+function SectionHeader({ title, subtitle, hideAll, viewAllSlug }: { title: string; subtitle?: string; hideAll?: boolean; viewAllSlug?: string }) {
   return (
     <div className="mt-6 flex items-end justify-between">
       <div>
         <h3 className="text-base font-extrabold text-foreground">{title}</h3>
         {subtitle && <p className="text-[11px] font-bold text-text-secondary">{subtitle}</p>}
       </div>
-      {!hideAll && (
-        <button className="rounded-pill border border-border bg-card px-3 py-1 text-[11px] font-extrabold text-foreground shadow-card">
+      {!hideAll && viewAllSlug && (
+        <Link
+          to="/play/$slug"
+          params={{ slug: viewAllSlug }}
+          className="rounded-pill border border-border bg-card px-3 py-1 text-[11px] font-extrabold text-foreground shadow-card"
+        >
           View All ›
-        </button>
+        </Link>
       )}
     </div>
   );
@@ -390,24 +396,27 @@ function JourneyCard({
 }
 
 function ActivityCard({
-  bg, image, title, description, cta, imageMode = "bleed",
-}: { bg: string; image: string; title: string; description: string; cta: string; imageMode?: "bleed" | "top" }) {
+  bg, image, title, description, cta, imageMode = "bleed", to,
+}: { bg: string; image: string; title: string; description: string; cta: string; imageMode?: "bleed" | "top"; to?: string }) {
+  const linkProps = to
+    ? { to: "/play/$slug" as const, params: { slug: to } }
+    : { to: "/" as const };
   if (imageMode === "top") {
     return (
-      <div className={`relative flex h-[456px] w-[300px] shrink-0 flex-col overflow-hidden rounded-[20px] ${bg} shadow-card`}>
+      <Link {...linkProps} className={`relative flex h-[456px] w-[300px] shrink-0 flex-col overflow-hidden rounded-[20px] ${bg} shadow-card`}>
         <img src={image} alt="" className="h-[280px] w-full shrink-0 object-cover object-top" />
         <div className="flex flex-1 flex-col px-6 pb-6 pt-2">
           <p className="text-[20px] font-black leading-tight text-foreground">{title}</p>
           <p className="mt-3 text-base font-bold leading-snug text-text-secondary">{description}</p>
-          <button className="mt-auto w-full rounded-pill bg-foreground py-4 text-lg font-extrabold text-primary-foreground transition-transform active:scale-[0.97]">
+          <div className="mt-auto w-full rounded-pill bg-foreground py-4 text-center text-lg font-extrabold text-primary-foreground transition-transform active:scale-[0.97]">
             {cta}
-          </button>
+          </div>
         </div>
-      </div>
+      </Link>
     );
   }
   return (
-    <div className={`relative flex h-56 w-[300px] shrink-0 flex-col justify-end overflow-hidden rounded-[20px] ${bg} p-4 shadow-card`}>
+    <Link {...linkProps} className={`relative flex h-56 w-[300px] shrink-0 flex-col justify-end overflow-hidden rounded-[20px] ${bg} p-4 shadow-card`}>
       <img
         src={image}
         alt=""
@@ -416,11 +425,11 @@ function ActivityCard({
       <div className="relative">
         <p className="text-base font-black text-foreground">{title}</p>
         <p className="mt-1 text-[11px] font-bold text-text-secondary">{description}</p>
-        <button className="mt-3 w-full rounded-pill bg-foreground py-2.5 text-xs font-extrabold text-primary-foreground transition-transform active:scale-[0.97]">
+        <div className="mt-3 w-full rounded-pill bg-foreground py-2.5 text-center text-xs font-extrabold text-primary-foreground transition-transform active:scale-[0.97]">
           {cta}
-        </button>
+        </div>
       </div>
-    </div>
+    </Link>
   );
 }
 
