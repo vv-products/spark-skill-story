@@ -140,11 +140,11 @@ export function GameHome() {
 
         {/* Stat cards */}
         <div className="mt-4 grid grid-cols-3 gap-3">
-          <StatCard bg="bg-card-warm" icon="⭐" label="Your Stars" value={user ? progress.totalXp.toLocaleString() : "—"} />
-          <StatCard bg="bg-card-gold" icon="🏆" label="Your Level" value={user ? `Level ${Math.max(1, Math.floor(progress.totalXp / 200) + 1)}` : "—"} />
+          <StatCard bg="bg-card-warm" icon={iconStar} label="Your Stars" value={user ? progress.totalXp.toLocaleString() : "—"} />
+          <StatCard bg="bg-card-gold" icon={iconTrophy} label="Your Level" value={user ? `Level ${Math.max(1, Math.floor(progress.totalXp / 200) + 1)}` : "—"} />
           <StatCard
             bg="bg-card-warm"
-            icon="🔥"
+            icon={iconFire}
             label="Learning Streak"
             value={user ? `${progress.streakDays} ${progress.streakDays === 1 ? "day" : "days"}` : "—"}
           />
