@@ -129,6 +129,7 @@ export function HomeScreen() {
           <ActivityCard
             bg="bg-card-gold"
             image={meetCharacters}
+            imageMode="top"
             title="Meet the Characters"
             description="Get to know your friends and their stories."
             cta="Explore →"
@@ -137,6 +138,7 @@ export function HomeScreen() {
           <ActivityCard
             bg="bg-[#E8E0F8]"
             image={fairground}
+            imageMode="bleed"
             title="Live Events"
             description="Join live shows, challenges, and special events."
             cta="Join Now →"

@@ -1,17 +1,15 @@
-## Compact stat cards with overflowing top icon
+## Fix "Meet the Characters" card layout
 
-Update `StatCard` in `src/game/GamePlayer.tsx` (lines 277–322) to match the reference where the icon sits centered on top of the card and visibly overflows above it, while the card body itself is shorter.
+The new image is wired up but the `ActivityCard` uses an absolute-positioned image with a fade mask that crops out the dog. The reference shows the full dog at top with text/button cleanly below on the yellow background.
 
-### Changes
+### Change
 
-1. Make card content centered (not left-aligned): `items-center`, `text-center` on label/value.
-2. Position the icon absolutely, half outside the card:
-   - `absolute left-1/2 -translate-x-1/2`, `top: calc(var(--stat-card-icon-size) * -0.45)`.
-   - Add `drop-shadow-md` for the floating look.
-3. Reduce overall box height:
-   - Use the small padding token for left/right/bottom.
-   - Top padding becomes ~55% of the icon size (just enough to clear the overflowing icon).
-   - Add `marginTop` ~45% of icon size on the card itself so the overflowing icon doesn't get clipped by the grid above.
-4. Drop the in-flow icon container; label and value flow normally, vertically tighter.
+In `src/game/screens/HomeScreen.tsx`, update the `ActivityCard` component (around lines 276–294) so the image sits naturally at the top of the card instead of being absolutely positioned with a gradient mask.
 
-No CSS token changes — only the component markup is updated.
+- Remove `absolute inset-0`, `object-cover`, and the `[mask-image:...]` fade.
+- Render the image as a normal flex child at the top, full-width, with `object-contain` (or `object-cover object-top`) so the whole character is visible.
+- Stack title → description → button below the image inside the same card.
+- Increase card height slightly (e.g. `h-[360px]`) to match the reference proportions.
+- Keep the existing `bg` (card-gold yellow) so it blends with the new image background.
+
+No changes needed for the `Live Events` card — same component, but the fairground image is meant to bleed, so I'll preserve that look by adding an optional `imageMode: "bleed" | "top"` prop and defaulting Live Events to `"bleed"` and Meet the Characters to `"top"`.
