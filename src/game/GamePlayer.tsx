@@ -114,38 +114,34 @@ export function GameHome() {
                 {greetName} <span>👋</span>
               </p>
               <h2 className="mt-3 text-2xl font-black leading-tight drop-shadow-md">
-                {continueClass ? (
-                  <>
-                    {isResume ? "Pick up where" : "Ready to start"}<br />
-                    you left off…
-                  </>
-                ) : (
-                  <>Grow your<br />inner world</>
-                )}
+                Leo needs your<br />help today...
               </h2>
-              {continueClass && (
-                <Link
-                  to="/play/$slug"
-                  params={{ slug: continueClass.slug }}
-                  className="mt-4 inline-flex items-center gap-1 rounded-pill bg-white px-5 py-2.5 text-sm font-extrabold text-primary shadow-card transition-transform active:scale-[0.97]"
-                >
-                  {isResume ? "Resume →" : "Start →"}
-                </Link>
-              )}
+              <Link
+                to={continueClass ? "/play/$slug" : "/"}
+                params={continueClass ? { slug: continueClass.slug } : undefined}
+                className="mt-4 inline-flex items-center gap-1 rounded-pill bg-white px-5 py-2.5 text-sm font-extrabold text-primary shadow-card transition-transform active:scale-[0.97]"
+              >
+                {continueClass && isResume ? "Resume →" : "Start →"}
+              </Link>
             </div>
             <img
               src={leoImg}
               alt=""
-              className="h-40 w-32 -mr-2 -mt-2 rounded-2xl object-cover shadow-pop animate-float-soft"
+              className="h-40 w-32 -mr-2 -mt-2 rounded-2xl object-cover object-top shadow-pop animate-float-soft"
             />
           </div>
         </div>
 
         {/* Stat cards */}
         <div className="mt-4 grid grid-cols-3 gap-3">
-          <StatCard bg="bg-card-warm" icon="⭐" label="Your XP" value={user ? String(progress.totalXp) : "—"} />
-          <StatCard bg="bg-card-gold" icon="🏆" label="Classes" value={user ? String(progress.completedClassIds.size) : "—"} />
-          <StatCard bg="bg-card-warm" icon="🔥" label="Streak" value={user ? `${progress.streakDays} days` : "—"} />
+          <StatCard bg="bg-card-warm" icon="⭐" label="Your Stars" value={user ? progress.totalXp.toLocaleString() : "—"} />
+          <StatCard bg="bg-card-gold" icon="🏆" label="Your Level" value={user ? `Level ${Math.max(1, Math.floor(progress.totalXp / 200) + 1)}` : "—"} />
+          <StatCard
+            bg="bg-card-warm"
+            icon="🔥"
+            label="Learning Streak"
+            value={user ? `${progress.streakDays} ${progress.streakDays === 1 ? "day" : "days"}` : "—"}
+          />
         </div>
 
         {!user && isGuest && (
