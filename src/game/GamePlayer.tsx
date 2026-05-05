@@ -222,7 +222,7 @@ export function GameHome() {
         <SectionHeader title="Fun Activities" hideAll />
         <div className="-mx-5 mt-2 flex gap-3 overflow-x-auto px-5 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <ActivityCard
-            bg="bg-card-gold"
+            bg="bg-card-amber"
             image={meetCharactersImg}
             imageMode="top"
             title="Meet the Characters"
@@ -393,14 +393,12 @@ function ActivityCard({
 }: { bg: string; image: string; title: string; description: string; cta: string; imageMode?: "bleed" | "top" }) {
   if (imageMode === "top") {
     return (
-      <div className={`relative flex h-[340px] w-[300px] shrink-0 flex-col overflow-hidden rounded-[20px] ${bg} shadow-card`}>
-        <div className="flex h-[55%] w-full items-end justify-center overflow-hidden">
-          <img src={image} alt="" className="h-full w-full object-contain object-bottom" />
-        </div>
-        <div className="flex flex-1 flex-col px-4 pb-4 pt-1">
-          <p className="text-base font-black text-foreground">{title}</p>
-          <p className="mt-1 text-[11px] font-bold text-text-secondary">{description}</p>
-          <button className="mt-auto w-full rounded-pill bg-foreground py-2.5 text-xs font-extrabold text-primary-foreground transition-transform active:scale-[0.97]">
+      <div className={`relative flex h-[456px] w-[300px] shrink-0 flex-col overflow-hidden rounded-[20px] ${bg} shadow-card`}>
+        <img src={image} alt="" className="h-[280px] w-full shrink-0 object-cover object-top" />
+        <div className="flex flex-1 flex-col px-6 pb-6 pt-2">
+          <p className="text-[20px] font-black leading-tight text-foreground">{title}</p>
+          <p className="mt-3 text-base font-bold leading-snug text-text-secondary">{description}</p>
+          <button className="mt-auto w-full rounded-pill bg-foreground py-4 text-lg font-extrabold text-primary-foreground transition-transform active:scale-[0.97]">
             {cta}
           </button>
         </div>
