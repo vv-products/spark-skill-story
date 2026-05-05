@@ -270,11 +270,17 @@ export function ClassPlayer({ slug }: { slug: string }) {
   }
 
   if (idx >= data.layers.length) {
+    const greetName = playerName ?? "friend";
     return (
       <div className="min-h-[100dvh] bg-gradient-to-b from-[#7B2FBE] to-[#3D1568] p-6 text-center text-white">
-        <div className="mt-12 text-6xl">🎉</div>
-        <h1 className="mt-4 text-2xl font-black">Class complete!</h1>
-        <p className="mt-2 text-sm opacity-90">You earned</p>
+        <div className="mt-10 flex justify-center">
+          <div className="relative h-28 w-28 overflow-hidden rounded-full ring-4 ring-white/40 shadow-[0_8px_24px_rgba(0,0,0,0.25)]">
+            <Avatar config={playerAvatar} size={112} />
+          </div>
+        </div>
+        <div className="mt-3 text-4xl">🎉</div>
+        <h1 className="mt-2 text-2xl font-black">Great job, {greetName}!</h1>
+        <p className="mt-1 text-sm opacity-90">You earned</p>
         <div className="mt-1 text-5xl font-black">+{earned} XP</div>
         {!user && <p className="mt-4 text-xs text-white/70">Sign in next time to save your progress.</p>}
         <div className="mt-8 flex flex-col gap-3">
