@@ -63,7 +63,18 @@ const StudioCtx = createContext<Ctx | null>(null);
 export function StudioProvider({ children }: { children: ReactNode }) {
   const [pillars, setPillars] = useState<HPillar[]>([]);
   const [loadingCatalog, setLoadingCatalog] = useState(true);
-  const [view, setView] = useState<View>({ kind: "dashboard" });
+  const [view, setViewState] = useState<View>(() => {
+    if (typeof window === "undefined") return { kind: "dashboard" };
+    try {
+      const raw = window.sessionStorage.getItem("studio.view");
+      if (raw) return JSON.parse(raw) as View;
+    } catch {}
+    return { kind: "dashboard" };
+  });
+  const setView = useCallback((v: View) => {
+    setViewState(v);
+    try { window.sessionStorage.setItem("studio.view", JSON.stringify(v)); } catch {}
+  }, []);
   const [selectedPillarId, setSelectedPillar] = useState<string>("");
   const [selectedTopicId, setSelectedTopic] = useState<string>("");
   const [ageGroup, setAgeGroup] = useState<AgeGroup>("Explorer");
