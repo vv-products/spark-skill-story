@@ -1,33 +1,39 @@
-## Problem
+## Sidebar changes (`src/studio/Layout.tsx`)
 
-The Content Library shows 11 pillars but should only show 4. The `pillars` table has duplicates (e.g. two "The Inner World", two "The Social World", two "The Action World", two "The Real World") plus three extras with no content ("With Others", "The World", "My Future").
+Update the `NAV` array and click handler:
 
-Current rows:
+- **Remove** "Pillars" entirely (it currently just opened the Library, duplicating that item).
+- **Remove** "Media" and "Settings". They are nav stubs with no handler — there is no screen, no state, and nothing in the codebase referencing them. They were placeholder items left over from the original mock and were never wired to anything. Rather than leave dead buttons, I'll remove them. If you later want either:
+  - **Media** would typically be an asset library (uploaded images/audio/video used in layer fields like Story Video, Drawing, Voice Recording).
+  - **Settings** would typically be Studio preferences (default age group, publish defaults, role/team management).
+  
+  If you want me to scaffold one or both instead of removing, tell me and I'll add it to the plan.
 
-```text
-inner-world       The Inner World    5 topics   ← duplicate
-inner             The Inner World    5 topics   ← KEEP (canonical)
-social-world      The Social World   3 topics   ← duplicate
-social            The Social World   5 topics   ← KEEP
-with-others       With Others        0 topics   ← DELETE
-action-world      The Action World   3 topics   ← duplicate
-the-world         The World          0 topics   ← DELETE
-action            The Action World   5 topics   ← KEEP
-real              The Real World     5 topics   ← KEEP
-real-world        The Real World     3 topics   ← duplicate
-my-future         My Future          0 topics   ← DELETE
-```
+Final sidebar: Dashboard · Content Library · Task Types.
 
-## Changes
+## Task Types screen (`src/studio/screens/TaskTypesRef.tsx`)
 
-Single SQL migration:
+Two additions:
 
-1. Re-parent topics from each duplicate pillar to its canonical counterpart (`inner-world` → `inner`, `social-world` → `social`, `action-world` → `action`, `real-world` → `real`).
-2. Delete the 4 duplicate pillars and the 3 empty extras (`with-others`, `the-world`, `my-future`).
-3. Re-number `position` so the remaining 4 are 1–4: Inner (1), Social (2), Action (3), Real (4).
+### 1. "Active classes" count per task type
+- Pull `pillars` from `useStudio()`.
+- Compute, for each task `code`, the number of layers across all classes whose `taskCode === code` (walk `pillars → topics → modules → classes → layers`).
+- Render a badge on each task card: `Used in N layers · M classes`.
 
-No code changes needed — `loadFullCatalog()` reads pillars by `position`, so the Library will automatically show 4.
+### 2. "Add Task Type" button (top right of screen)
+- Opens a small dialog: name, code (auto-suggested e.g. `T16`, `T17`…), emoji, family (select from existing 6 families), description, XP, age groups.
+- Custom types are persisted to `localStorage` under `studio.customTaskTypes` and merged into `TASK_TYPES` / `TASK_BY_CODE` at runtime via a new `useTaskTypes()` hook.
+- Why localStorage and not the database: task codes are referenced as strings throughout layer config and the existing built-in list is hardcoded in `src/studio/data.ts`. A DB-backed task-type table would require a schema migration and a wider refactor of `catalog.ts` (`layerTypeForTask`, `guessTaskCodeFromType`). Local persistence keeps this change scoped; we can promote it to the DB later if you want custom types to be shared across users.
+- Custom types become immediately available in the Class Editor's task picker (it already iterates `TASK_TYPES`).
 
-## Notes
+### 3. Minor
+- Update screen subtitle from "All 15 task types" to "All N task types" (computed).
+- Each card shows whether it's built-in or custom (small chip).
 
-Topics keep their existing slugs/positions; if any slug collisions appear when re-parenting, I'll resolve them (rename the duplicate's topic slug with a suffix) before deletion. No class/layer data is lost.
+## Files touched
+- `src/studio/Layout.tsx` — trim NAV.
+- `src/studio/data.ts` — export a small `useTaskTypes()` hook + `addCustomTaskType()` helper backed by localStorage; keep `TASK_TYPES` as the built-in seed.
+- `src/studio/screens/TaskTypesRef.tsx` — counts, Add dialog, use the hook.
+- `src/studio/screens/ClassEditor.tsx` (light touch) — read task list from `useTaskTypes()` so custom types appear in the picker.
+
+No DB migration. No changes to Dashboard or Library.
