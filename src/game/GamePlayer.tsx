@@ -264,22 +264,31 @@ export function GameHome() {
         </div>
 
         {/* Leaderboard with podium */}
-        <SectionHeader title="Leaderboard" subtitle="All time" hideAll />
+        <SectionHeader
+          title="Leaderboard"
+          subtitle={new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" })}
+        />
         <PodiumLeaderboard currentUserId={user?.id ?? null} onSelect={setPreviewEntry} />
 
-        {/* Sign-out / footer */}
-        <div className="mt-6 flex items-center justify-between">
-          {user ? (
-            <button onClick={signOut} className="rounded-pill border border-border bg-card px-3 py-1.5 text-[11px] font-extrabold text-foreground shadow-card">
+        {/* Footer */}
+        <p className="mt-6 flex items-center justify-between text-[11px] font-bold text-text-secondary">
+          <span>© {new Date().getFullYear()} Copyright. All rights reserved.</span>
+          <span className="font-display text-base text-text-secondary">Sementa</span>
+        </p>
+        {user && (
+          <div className="mt-3 text-center">
+            <button onClick={signOut} className="text-[11px] font-bold text-text-secondary underline">
               Sign out
             </button>
-          ) : (
-            <button onClick={() => setGuest(false)} className="rounded-pill bg-primary px-3 py-1.5 text-[11px] font-extrabold text-primary-foreground">
+          </div>
+        )}
+        {!user && isGuest && (
+          <div className="mt-3 text-center">
+            <button onClick={() => setGuest(false)} className="text-[11px] font-bold text-primary underline">
               Sign in
             </button>
-          )}
-          <span className="font-display text-base text-text-secondary">Sementa</span>
-        </div>
+          </div>
+        )}
       </main>
 
       {previewEntry && (
