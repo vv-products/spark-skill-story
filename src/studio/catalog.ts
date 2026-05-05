@@ -186,6 +186,14 @@ export async function renameTopic(topicId: string, name: string) {
   const { error } = await supabase.from("topics").update({ title: name }).eq("id", topicId);
   if (error) throw error;
 }
+export async function updateTopic(topicId: string, patch: { name?: string; ages?: AgeGroup[] }) {
+  const update: Record<string, any> = {};
+  if (patch.name !== undefined) update.title = patch.name;
+  if (patch.ages !== undefined) update.age_groups = patch.ages;
+  if (Object.keys(update).length === 0) return;
+  const { error } = await supabase.from("topics").update(update).eq("id", topicId);
+  if (error) throw error;
+}
 export async function renameModule(moduleId: string, name: string) {
   const { error } = await supabase.from("modules").update({ title: name }).eq("id", moduleId);
   if (error) throw error;
