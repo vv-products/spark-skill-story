@@ -228,6 +228,7 @@ export function GameHome() {
             title="Meet the Characters"
             description="Get to know your friends and their stories."
             cta="Explore →"
+            to={classes?.[0]?.slug}
           />
           <ActivityCard
             bg="bg-[#AFB0FB]"
@@ -236,6 +237,7 @@ export function GameHome() {
             title="Live Events"
             description="Join live shows, challenges, and special events."
             cta="Join Now →"
+            to={classes?.[0]?.slug}
           />
         </div>
 
