@@ -230,7 +230,7 @@ export function GameHome() {
             cta="Explore →"
           />
           <ActivityCard
-            bg="bg-[#E8E0F8]"
+            bg="bg-[#AFB0FB]"
             image={liveEventsImg}
             imageMode="top"
             title="Live Events"
