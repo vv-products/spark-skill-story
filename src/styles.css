@@ -75,10 +75,10 @@
 
   /* Stat card design tokens (Home stat tiles) */
   --stat-card-radius: 20px;
-  --stat-card-padding: 16px;
-  --stat-card-icon-size: 44px;
-  --stat-card-icon-gap: 14px;
-  --stat-card-label-size: 13px;
+  --stat-card-padding: 14px;
+  --stat-card-icon-size: 40px;
+  --stat-card-icon-gap: 12px;
+  --stat-card-label-size: 11px;
   --stat-card-label-gap: 6px;
   --stat-card-value-size: 19px;
 }
