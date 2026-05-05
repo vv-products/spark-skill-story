@@ -145,7 +145,7 @@ export function GameHome() {
           <StatCard
             bg="bg-card-warm"
             icon={iconFire}
-            label="Learning\u00A0Streak"
+            label="Learning Streak"
             value={user ? `${progress.streakDays} ${progress.streakDays === 1 ? "day" : "days"}` : "—"}
           />
         </div>
@@ -298,10 +298,6 @@ function StatCard({ bg, icon, label, value }: { bg: string; icon: string; label:
         style={{
           marginTop: "var(--stat-card-icon-gap)",
           fontSize: "var(--stat-card-label-size)",
-          lineHeight: "var(--stat-card-label-line-height)",
-          letterSpacing: "0",
-          whiteSpace: "nowrap",
-          textWrap: "nowrap",
         }}
       >
         {label}
