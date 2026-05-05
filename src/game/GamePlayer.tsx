@@ -114,38 +114,34 @@ export function GameHome() {
                 {greetName} <span>👋</span>
               </p>
               <h2 className="mt-3 text-2xl font-black leading-tight drop-shadow-md">
-                {continueClass ? (
-                  <>
-                    {isResume ? "Pick up where" : "Ready to start"}<br />
-                    you left off…
-                  </>
-                ) : (
-                  <>Grow your<br />inner world</>
-                )}
+                Leo needs your<br />help today...
               </h2>
-              {continueClass && (
-                <Link
-                  to="/play/$slug"
-                  params={{ slug: continueClass.slug }}
-                  className="mt-4 inline-flex items-center gap-1 rounded-pill bg-white px-5 py-2.5 text-sm font-extrabold text-primary shadow-card transition-transform active:scale-[0.97]"
-                >
-                  {isResume ? "Resume →" : "Start →"}
-                </Link>
-              )}
+              <Link
+                to={continueClass ? "/play/$slug" : "/"}
+                params={continueClass ? { slug: continueClass.slug } : undefined}
+                className="mt-4 inline-flex items-center gap-1 rounded-pill bg-white px-5 py-2.5 text-sm font-extrabold text-primary shadow-card transition-transform active:scale-[0.97]"
+              >
+                {continueClass && isResume ? "Resume →" : "Start →"}
+              </Link>
             </div>
             <img
               src={leoImg}
               alt=""
-              className="h-40 w-32 -mr-2 -mt-2 rounded-2xl object-cover shadow-pop animate-float-soft"
+              className="h-40 w-32 -mr-2 -mt-2 rounded-2xl object-cover object-top shadow-pop animate-float-soft"
             />
           </div>
         </div>
 
         {/* Stat cards */}
         <div className="mt-4 grid grid-cols-3 gap-3">
-          <StatCard bg="bg-card-warm" icon="⭐" label="Your XP" value={user ? String(progress.totalXp) : "—"} />
-          <StatCard bg="bg-card-gold" icon="🏆" label="Classes" value={user ? String(progress.completedClassIds.size) : "—"} />
-          <StatCard bg="bg-card-warm" icon="🔥" label="Streak" value={user ? `${progress.streakDays} days` : "—"} />
+          <StatCard bg="bg-card-warm" icon="⭐" label="Your Stars" value={user ? progress.totalXp.toLocaleString() : "—"} />
+          <StatCard bg="bg-card-gold" icon="🏆" label="Your Level" value={user ? `Level ${Math.max(1, Math.floor(progress.totalXp / 200) + 1)}` : "—"} />
+          <StatCard
+            bg="bg-card-warm"
+            icon="🔥"
+            label="Learning Streak"
+            value={user ? `${progress.streakDays} ${progress.streakDays === 1 ? "day" : "days"}` : "—"}
+          />
         </div>
 
         {!user && isGuest && (
@@ -268,22 +264,31 @@ export function GameHome() {
         </div>
 
         {/* Leaderboard with podium */}
-        <SectionHeader title="Leaderboard" subtitle="All time" hideAll />
+        <SectionHeader
+          title="Leaderboard"
+          subtitle={new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" })}
+        />
         <PodiumLeaderboard currentUserId={user?.id ?? null} onSelect={setPreviewEntry} />
 
-        {/* Sign-out / footer */}
-        <div className="mt-6 flex items-center justify-between">
-          {user ? (
-            <button onClick={signOut} className="rounded-pill border border-border bg-card px-3 py-1.5 text-[11px] font-extrabold text-foreground shadow-card">
+        {/* Footer */}
+        <p className="mt-6 flex items-center justify-between text-[11px] font-bold text-text-secondary">
+          <span>© {new Date().getFullYear()} Copyright. All rights reserved.</span>
+          <span className="font-display text-base text-text-secondary">Sementa</span>
+        </p>
+        {user && (
+          <div className="mt-3 text-center">
+            <button onClick={signOut} className="text-[11px] font-bold text-text-secondary underline">
               Sign out
             </button>
-          ) : (
-            <button onClick={() => setGuest(false)} className="rounded-pill bg-primary px-3 py-1.5 text-[11px] font-extrabold text-primary-foreground">
+          </div>
+        )}
+        {!user && isGuest && (
+          <div className="mt-3 text-center">
+            <button onClick={() => setGuest(false)} className="text-[11px] font-bold text-primary underline">
               Sign in
             </button>
-          )}
-          <span className="font-display text-base text-text-secondary">Sementa</span>
-        </div>
+          </div>
+        )}
       </main>
 
       {previewEntry && (
