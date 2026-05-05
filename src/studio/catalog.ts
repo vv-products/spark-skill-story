@@ -121,7 +121,7 @@ export async function loadFullCatalog(): Promise<HPillar[]> {
       id: t.id,
       slug: t.slug,
       name: t.title,
-      ages: ["Explorer", "Builder", "Leader"],
+      ages: ((t.age_groups ?? ["Explorer", "Builder", "Leader"]) as AgeGroup[]),
       modules: (modulesByTopic.get(t.id) ?? []).map<HModule>((m) => {
         const cls = (classesByModule.get(m.id) ?? []).map<HClass>((c) => ({
           id: c.id,
