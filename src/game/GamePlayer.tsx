@@ -199,51 +199,6 @@ export function GameHome() {
           })}
         </div>
 
-        {/* All classes */}
-        <SectionHeader title="All classes" hideAll />
-        <div className="mt-2 space-y-3">
-          {classes == null ? (
-            <div className="text-sm text-text-secondary">Loading classes…</div>
-          ) : classes.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-border bg-card p-6 text-center text-sm text-text-secondary">
-              No published classes yet. Check back soon!
-            </div>
-          ) : classes.map((c) => {
-            const done = progress.completedClassIds.has(c.id);
-            const earnedHere = progress.perClass.get(c.id)?.xp ?? 0;
-            const totalHere = xpTotals.get(c.id) ?? 0;
-            const inProgress = !done && earnedHere > 0;
-            const pct = totalHere > 0 ? Math.min(100, Math.round((earnedHere / totalHere) * 100)) : 0;
-            return (
-              <Link key={c.id} to="/play/$slug" params={{ slug: c.slug }}
-                className="block rounded-2xl bg-card p-4 shadow-card border border-border">
-                <div className="flex items-center gap-3">
-                  <div className={`flex h-12 w-12 items-center justify-center rounded-xl text-xl ${done ? "bg-[#E8F5E9]" : inProgress ? "bg-card-gold" : "bg-muted"}`}>
-                    {done ? "✅" : inProgress ? "⏳" : "▶️"}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-primary">Class {String(c.position).padStart(2, "0")}</div>
-                    <div className="truncate text-base font-extrabold text-foreground">{c.title}</div>
-                    {c.subtitle && <div className="truncate text-xs text-text-secondary">{c.subtitle}</div>}
-                    {inProgress && totalHere > 0 && (
-                      <div className="mt-1.5 flex items-center gap-2">
-                        <div className="h-1 flex-1 overflow-hidden rounded-full bg-muted">
-                          <div className="h-full bg-primary transition-all" style={{ width: `${pct}%` }} />
-                        </div>
-                        <div className="text-[10px] font-bold text-text-secondary">{pct}%</div>
-                      </div>
-                    )}
-                    {done && totalHere > 0 && (
-                      <div className="mt-1 text-[10px] font-bold text-success">+{earnedHere} XP earned</div>
-                    )}
-                  </div>
-                  <span className="text-primary">→</span>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-
         {/* Fun Activities */}
         <SectionHeader title="Fun Activities" hideAll />
         <div className="-mx-5 mt-2 flex gap-3 overflow-x-auto px-5 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
