@@ -11,7 +11,7 @@ import { loadProfile } from "./profileApi";
 import { ProfilePreviewCard } from "./Leaderboard";
 import { loadLeaderboard, type LeaderboardEntry } from "./profileApi";
 import leoImg from "@/assets/leo.jpg";
-import leoHeroImg from "@/assets/leo-hero.jpg";
+import leoHeroImg from "@/assets/leo-hero.png";
 import mayaImg from "@/assets/maya.jpg";
 import dashImg from "@/assets/dash.jpg";
 import pipImg from "@/assets/pip.jpg";
