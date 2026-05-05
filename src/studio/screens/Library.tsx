@@ -3,10 +3,14 @@ import { useStudio } from "../StudioContext";
 import { StudioLayout } from "../Layout";
 import { Btn, StatusPill, Tag } from "../ui";
 import { PromptDialog } from "../PromptDialog";
+import { TopicEditDialog } from "../TopicEditDialog";
+import type { AgeGroup } from "../data";
+import type { HTopic } from "../catalog";
 
 export function LibraryScreen() {
-  const { pillars, selectedPillarId, setSelectedPillar, selectedTopicId, setSelectedTopic, setView, newTopic, newModule } = useStudio();
+  const { pillars, selectedPillarId, setSelectedPillar, selectedTopicId, setSelectedTopic, setView, newTopic, newModule, editTopicMeta } = useStudio();
   const [dialog, setDialog] = useState<null | "topic" | "module">(null);
+  const [editing, setEditing] = useState<HTopic | null>(null);
   const pillar = pillars.find(p => p.id === selectedPillarId);
   if (!pillar) return <StudioLayout title="Content Library"><div className="p-8 text-sm text-[#666680]">Loading…</div></StudioLayout>;
   const topic = pillar.topics.find(t => t.id === selectedTopicId);
