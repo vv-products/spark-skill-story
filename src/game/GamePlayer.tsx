@@ -16,7 +16,7 @@ import mayaImg from "@/assets/maya.jpg";
 import dashImg from "@/assets/dash.jpg";
 import pipImg from "@/assets/pip.jpg";
 import meetCharactersImg from "@/assets/meet-characters.jpg";
-import activityEventsImg from "@/assets/activity-events.jpg";
+import liveEventsImg from "@/assets/live-events.jpg";
 import missionStorytimeImg from "@/assets/mission-storytime.jpg";
 import missionTreasureImg from "@/assets/mission-treasure.jpg";
 import iconStar from "@/assets/icon-star.png";
@@ -231,7 +231,8 @@ export function GameHome() {
           />
           <ActivityCard
             bg="bg-[#E8E0F8]"
-            image={activityEventsImg}
+            image={liveEventsImg}
+            imageMode="top"
             title="Live Events"
             description="Join live shows, challenges, and special events."
             cta="Join Now →"

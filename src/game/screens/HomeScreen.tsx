@@ -4,7 +4,7 @@ import leo from "@/assets/leo.jpg";
 import zara from "@/assets/maya.jpg";
 import dash from "@/assets/dash.jpg";
 import pip from "@/assets/pip.jpg";
-import fairground from "@/assets/fairground.jpg";
+import liveEvents from "@/assets/live-events.jpg";
 import meetCharacters from "@/assets/meet-characters.jpg";
 import leoAvatar from "@/assets/leo-avatar.png";
 import mayaAvatar from "@/assets/maya-avatar.png";
@@ -137,8 +137,8 @@ export function HomeScreen() {
           />
           <ActivityCard
             bg="bg-[#E8E0F8]"
-            image={fairground}
-            imageMode="bleed"
+            image={liveEvents}
+            imageMode="top"
             title="Live Events"
             description="Join live shows, challenges, and special events."
             cta="Join Now →"
