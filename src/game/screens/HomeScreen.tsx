@@ -273,8 +273,27 @@ function JourneyCard({
 }
 
 function ActivityCard({
-  bg, image, title, description, cta, onClick,
-}: { bg: string; image: string; title: string; description: string; cta: string; onClick?: () => void }) {
+  bg, image, title, description, cta, onClick, imageMode = "bleed",
+}: { bg: string; image: string; title: string; description: string; cta: string; onClick?: () => void; imageMode?: "bleed" | "top" }) {
+  if (imageMode === "top") {
+    return (
+      <div className={`relative flex h-[340px] w-[300px] shrink-0 flex-col overflow-hidden rounded-[20px] ${bg} shadow-card`}>
+        <div className="flex h-[55%] w-full items-end justify-center overflow-hidden">
+          <img src={image} alt={title} className="h-full w-full object-contain object-bottom" />
+        </div>
+        <div className="flex flex-1 flex-col px-4 pb-4 pt-1">
+          <p className="text-base font-black text-foreground">{title}</p>
+          <p className="mt-1 text-[11px] font-bold text-text-secondary">{description}</p>
+          <button
+            onClick={onClick}
+            className="mt-auto w-full rounded-pill bg-foreground py-2.5 text-xs font-extrabold text-primary-foreground transition-transform active:scale-[0.97]"
+          >
+            {cta}
+          </button>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className={`relative flex h-56 w-[300px] shrink-0 flex-col justify-end overflow-hidden rounded-[20px] ${bg} p-4 shadow-card`}>
       <img
