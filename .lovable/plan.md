@@ -1,18 +1,17 @@
-## Use uploaded image as hero background
+## Compact stat cards with overflowing top icon
 
-Use the user's uploaded purple-background Leo image (already copied to `src/assets/leo-hero.jpg`) as the hero card background instead of the previous transparent PNG.
+Update `StatCard` in `src/game/GamePlayer.tsx` (lines 277–322) to match the reference where the icon sits centered on top of the card and visibly overflows above it, while the card body itself is shorter.
 
-### Changes (single file: `src/game/GamePlayer.tsx`)
+### Changes
 
-1. Update import:
-   - `import leoHeroImg from "@/assets/leo-hero.png";` → `import leoHeroImg from "@/assets/leo-hero.jpg";`
+1. Make card content centered (not left-aligned): `items-center`, `text-center` on label/value.
+2. Position the icon absolutely, half outside the card:
+   - `absolute left-1/2 -translate-x-1/2`, `top: calc(var(--stat-card-icon-size) * -0.45)`.
+   - Add `drop-shadow-md` for the floating look.
+3. Reduce overall box height:
+   - Use the small padding token for left/right/bottom.
+   - Top padding becomes ~55% of the icon size (just enough to clear the overflowing icon).
+   - Add `marginTop` ~45% of icon size on the card itself so the overflowing icon doesn't get clipped by the grid above.
+4. Drop the in-flow icon container; label and value flow normally, vertically tighter.
 
-2. Render the image as a full-bleed background of the hero card (covers the entire purple gradient area), with the text/CTA overlaid on the left:
-   - Make the hero card position container hold the `<img>` as `absolute inset-0 h-full w-full object-cover object-right`.
-   - Drop the separate gradient circle decorations (the image already provides background).
-   - Text column stays at ~55% width, sitting on top with `relative z-10`.
-   - Keep the lower min-height (~240px) so the card matches the reference proportions.
-
-### Result
-
-The character + purple background become a single image that perfectly matches the reference, with no transparency seams or pose mismatch.
+No CSS token changes — only the component markup is updated.
