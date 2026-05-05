@@ -119,19 +119,19 @@ export function GameHome() {
           <div className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full bg-white/10" />
           <div className="pointer-events-none absolute -bottom-12 -left-8 h-36 w-36 rounded-full bg-white/10" />
 
-          <div className="relative flex items-stretch gap-3 min-h-[220px]">
+          <div className="relative flex items-stretch gap-3 min-h-[240px]">
             <div className="flex-1 pt-1">
-              <p className="text-xs font-bold text-white/85">Welcome back,</p>
-              <p className="text-base font-extrabold text-text-accent drop-shadow-sm">
+              <p className="text-[14px] font-semibold text-white/90">Welcome back,</p>
+              <p className="text-[18px] font-extrabold text-text-accent drop-shadow-sm">
                 {greetName} <span>👋</span>
               </p>
-              <h2 className="mt-3 text-2xl font-black leading-tight drop-shadow-md">
+              <h2 className="mt-4 text-[28px] font-black leading-[1.1] drop-shadow-md">
                 Leo needs your<br />help today...
               </h2>
               <Link
                 to={continueClass ? "/play/$slug" : "/"}
                 params={continueClass ? { slug: continueClass.slug } : undefined}
-                className="mt-5 inline-flex items-center gap-1 rounded-pill bg-white px-6 py-2.5 text-sm font-extrabold text-primary shadow-card transition-transform active:scale-[0.97]"
+                className="mt-5 inline-flex items-center gap-1 rounded-pill bg-white px-7 py-3 text-[15px] font-extrabold text-primary shadow-card transition-transform active:scale-[0.97]"
               >
                 Start →
               </Link>
@@ -139,7 +139,7 @@ export function GameHome() {
             <img
               src={leoHeroImg}
               alt=""
-              className="pointer-events-none absolute -right-5 -bottom-5 h-[260px] w-auto object-contain object-bottom drop-shadow-[0_8px_16px_rgba(0,0,0,0.25)]"
+              className="pointer-events-none absolute right-[-20px] bottom-[-20px] h-[260px] w-auto select-none object-contain"
             />
           </div>
         </div>
