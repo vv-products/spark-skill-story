@@ -208,6 +208,10 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     try { await renameTopic(topicId, name); toast.success("Topic renamed"); await reload(); }
     catch (e: any) { toast.error(e?.message ?? "Failed to rename topic"); throw e; }
   }
+  async function editTopicMeta(topicId: string, patch: { name?: string; ages?: AgeGroup[] }) {
+    try { await updateTopic(topicId, patch); toast.success("Topic updated"); await reload(); }
+    catch (e: any) { toast.error(e?.message ?? "Failed to update topic"); throw e; }
+  }
   async function editModule(moduleId: string, name: string) {
     try { await renameModule(moduleId, name); toast.success("Module renamed"); await reload(); }
     catch (e: any) { toast.error(e?.message ?? "Failed to rename module"); throw e; }
