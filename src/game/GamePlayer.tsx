@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
+import { Search, Bell } from "lucide-react";
 import { usePlayerAuth } from "./PlayerAuth";
 import { PlayerSignIn } from "./PlayerSignIn";
 import { loadPublishedClasses, loadPublishedClassXpTotals, type DbClass } from "@/studio/catalog";
@@ -10,6 +11,7 @@ import { loadProfile } from "./profileApi";
 import { ProfilePreviewCard } from "./Leaderboard";
 import { loadLeaderboard, type LeaderboardEntry } from "./profileApi";
 import leoImg from "@/assets/leo.jpg";
+import leoHeroImg from "@/assets/leo-hero.jpg";
 import mayaImg from "@/assets/maya.jpg";
 import dashImg from "@/assets/dash.jpg";
 import pipImg from "@/assets/pip.jpg";
@@ -93,8 +95,12 @@ export function GameHome() {
       <div className="sticky top-0 z-20 flex items-center justify-between bg-background px-5 pt-5 pb-3">
         <h1 className="font-display text-3xl text-primary">Sementa</h1>
         <div className="flex items-center gap-2">
-          <button className="flex h-9 w-9 items-center justify-center rounded-full bg-card shadow-card text-base">🔍</button>
-          <button className="flex h-9 w-9 items-center justify-center rounded-full bg-card shadow-card text-base">🔔</button>
+          <button className="flex h-10 w-10 items-center justify-center rounded-full bg-card shadow-card text-foreground" aria-label="Search">
+            <Search className="h-[18px] w-[18px]" strokeWidth={2.25} />
+          </button>
+          <button className="flex h-10 w-10 items-center justify-center rounded-full bg-card shadow-card text-foreground" aria-label="Notifications">
+            <Bell className="h-[18px] w-[18px]" strokeWidth={2.25} />
+          </button>
           <button
             type="button"
             onClick={() => user && navigate({ to: "/profile" })}
@@ -113,7 +119,7 @@ export function GameHome() {
           <div className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full bg-white/10" />
           <div className="pointer-events-none absolute -bottom-12 -left-8 h-36 w-36 rounded-full bg-white/10" />
 
-          <div className="relative flex items-start justify-between gap-3">
+          <div className="relative flex items-stretch gap-3 min-h-[220px]">
             <div className="flex-1 pt-1">
               <p className="text-xs font-bold text-white/85">Welcome back,</p>
               <p className="text-base font-extrabold text-text-accent drop-shadow-sm">
@@ -125,15 +131,15 @@ export function GameHome() {
               <Link
                 to={continueClass ? "/play/$slug" : "/"}
                 params={continueClass ? { slug: continueClass.slug } : undefined}
-                className="mt-4 inline-flex items-center gap-1 rounded-pill bg-white px-5 py-2.5 text-sm font-extrabold text-primary shadow-card transition-transform active:scale-[0.97]"
+                className="mt-5 inline-flex items-center gap-1 rounded-pill bg-white px-6 py-2.5 text-sm font-extrabold text-primary shadow-card transition-transform active:scale-[0.97]"
               >
-                {continueClass && isResume ? "Resume →" : "Start →"}
+                Start →
               </Link>
             </div>
             <img
-              src={leoImg}
+              src={leoHeroImg}
               alt=""
-              className="h-40 w-32 -mr-2 -mt-2 rounded-2xl object-cover object-top shadow-pop animate-float-soft"
+              className="pointer-events-none absolute -right-5 -bottom-5 h-[260px] w-auto object-contain object-bottom drop-shadow-[0_8px_16px_rgba(0,0,0,0.25)]"
             />
           </div>
         </div>
