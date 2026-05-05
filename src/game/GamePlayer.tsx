@@ -7,8 +7,16 @@ import { loadUserProgress, type UserProgress } from "./progress";
 import { Avatar } from "./avatar/Avatar";
 import { avatarFromSeed, type AvatarConfig } from "./avatar/config";
 import { loadProfile } from "./profileApi";
-import { Leaderboard, ProfilePreviewCard } from "./Leaderboard";
-import type { LeaderboardEntry } from "./profileApi";
+import { ProfilePreviewCard } from "./Leaderboard";
+import { loadLeaderboard, type LeaderboardEntry } from "./profileApi";
+import leoImg from "@/assets/leo.jpg";
+import mayaImg from "@/assets/maya.jpg";
+import dashImg from "@/assets/dash.jpg";
+import pipImg from "@/assets/pip.jpg";
+import fairgroundImg from "@/assets/fairground.jpg";
+
+const FALLBACK_IMAGES = [leoImg, mayaImg, dashImg, pipImg];
+const classImage = (c: DbClass) => c.hero_image_url || FALLBACK_IMAGES[c.position % FALLBACK_IMAGES.length];
 
 const EMPTY_PROGRESS: UserProgress = {
   totalXp: 0, completedClassIds: new Set(), perClass: new Map(), streakDays: 0,
@@ -70,136 +78,213 @@ export function GameHome() {
   const continuePct = continueXpTotal > 0 ? Math.min(100, Math.round((continueXpEarned / continueXpTotal) * 100)) : 0;
   const isResume = continueClass ? (progress.perClass.get(continueClass.id)?.layersTouched ?? 0) > 0 : false;
 
+  const journeyClasses = (classes ?? []).slice(0, 5);
+  const greetName = displayName ?? user?.user_metadata?.display_name ?? user?.email?.split("@")[0] ?? "Explorer";
+
   return (
-    <div className="min-h-[100dvh] bg-gradient-to-b from-[#F0F0FA] to-white">
-      <header className="px-5 pt-6 pb-4">
-        <div className="flex items-center justify-between gap-3">
+    <div className="min-h-[100dvh] bg-background">
+      {/* Top bar */}
+      <div className="sticky top-0 z-20 flex items-center justify-between bg-background px-5 pt-5 pb-3">
+        <h1 className="font-display text-3xl text-primary">Sementa</h1>
+        <div className="flex items-center gap-2">
+          <button className="flex h-9 w-9 items-center justify-center rounded-full bg-card shadow-card text-base">🔍</button>
+          <button className="flex h-9 w-9 items-center justify-center rounded-full bg-card shadow-card text-base">🔔</button>
           <button
             type="button"
             onClick={() => user && navigate({ to: "/profile" })}
             disabled={!user}
-            className="flex items-center gap-3 rounded-full p-1 -m-1 text-left disabled:cursor-default"
+            className="h-10 w-10 overflow-hidden rounded-full ring-2 ring-card shadow-card disabled:cursor-default"
             aria-label="Edit your profile"
           >
-            <span className="block h-12 w-12 overflow-hidden rounded-full ring-2 ring-white shadow">
-              <Avatar config={avatarCfg} size={48} />
-            </span>
-            <span>
-              <span className="block text-xs font-semibold text-[#666]">Hello,</span>
-              <span className="block text-xl font-black text-[#1A1A2E]">
-                {displayName ?? user?.user_metadata?.display_name ?? user?.email?.split("@")[0] ?? "Explorer"}
-              </span>
-            </span>
+            <Avatar config={avatarCfg} size={40} />
           </button>
-          {user ? (
-            <button onClick={signOut} className="rounded-full bg-white px-3 py-1.5 text-xs font-bold text-[#7B2FBE] shadow border border-[#EBEBF5]">Sign out</button>
-          ) : (
-            <button onClick={() => setGuest(false)} className="rounded-full bg-[#7B2FBE] px-3 py-1.5 text-xs font-bold text-white">Sign in</button>
-          )}
         </div>
-        <div className="mt-4 grid grid-cols-3 gap-2">
-          <Stat label="XP" value={user ? progress.totalXp : "—"} />
-          <Stat label="Classes" value={user ? progress.completedClassIds.size : "—"} />
-          <Stat label="Streak" value={user ? (progress.streakDays > 0 ? `${progress.streakDays}🔥` : "0") : "—"} />
+      </div>
+
+      <main className="flex-1 px-5 pb-24">
+        {/* Hero */}
+        <div className="relative overflow-hidden rounded-[24px] [background:var(--gradient-hero)] p-5 text-primary-foreground shadow-pop">
+          <div className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full bg-white/10" />
+          <div className="pointer-events-none absolute -bottom-12 -left-8 h-36 w-36 rounded-full bg-white/10" />
+
+          <div className="relative flex items-start justify-between gap-3">
+            <div className="flex-1 pt-1">
+              <p className="text-xs font-bold text-white/85">Welcome back,</p>
+              <p className="text-base font-extrabold text-text-accent drop-shadow-sm">
+                {greetName} <span>👋</span>
+              </p>
+              <h2 className="mt-3 text-2xl font-black leading-tight drop-shadow-md">
+                {continueClass ? (
+                  <>
+                    {isResume ? "Pick up where" : "Ready to start"}<br />
+                    you left off…
+                  </>
+                ) : (
+                  <>Grow your<br />inner world</>
+                )}
+              </h2>
+              {continueClass && (
+                <Link
+                  to="/play/$slug"
+                  params={{ slug: continueClass.slug }}
+                  className="mt-4 inline-flex items-center gap-1 rounded-pill bg-white px-5 py-2.5 text-sm font-extrabold text-primary shadow-card transition-transform active:scale-[0.97]"
+                >
+                  {isResume ? "Resume →" : "Start →"}
+                </Link>
+              )}
+            </div>
+            <img
+              src={leoImg}
+              alt=""
+              className="h-40 w-32 -mr-2 -mt-2 rounded-2xl object-cover shadow-pop animate-float-soft"
+            />
+          </div>
         </div>
+
+        {/* Stat cards */}
+        <div className="mt-4 grid grid-cols-3 gap-3">
+          <StatCard bg="bg-card-warm" icon="⭐" label="Your XP" value={user ? String(progress.totalXp) : "—"} />
+          <StatCard bg="bg-card-gold" icon="🏆" label="Classes" value={user ? String(progress.completedClassIds.size) : "—"} />
+          <StatCard bg="bg-card-warm" icon="🔥" label="Streak" value={user ? `${progress.streakDays} days` : "—"} />
+        </div>
+
         {!user && isGuest && (
-          <div className="mt-3 rounded-xl bg-[#FFF8E8] px-3 py-2 text-[12px] font-semibold text-[#A66D00]">
+          <div className="mt-3 rounded-xl bg-card-gold px-3 py-2 text-[12px] font-semibold text-[#A66D00]">
             Playing as guest — your progress won't be saved.
           </div>
         )}
-      </header>
 
-      {/* Continue card — only for signed-in users with at least one class to play */}
-      {user && continueClass && (
-        <section className="px-5 pb-2">
-          <h2 className="mb-2 text-[11px] font-bold uppercase tracking-wider text-[#666]">
-            {isResume ? "Continue where you left off" : "Start your first class"}
-          </h2>
-          <Link
-            to="/play/$slug"
-            params={{ slug: continueClass.slug }}
-            className="block rounded-2xl bg-gradient-to-br from-[#7B2FBE] to-[#5A1F9A] p-5 text-white shadow-[0_8px_24px_rgba(123,47,190,0.35)]"
-          >
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0 flex-1">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-white/70">
-                  Class {String(continueClass.position).padStart(2, "0")}
-                </div>
-                <div className="mt-0.5 truncate text-lg font-black">{continueClass.title}</div>
-                {continueClass.subtitle && (
-                  <div className="mt-0.5 truncate text-xs text-white/80">{continueClass.subtitle}</div>
-                )}
+        {/* Continue progress strip */}
+        {user && continueClass && isResume && continueXpTotal > 0 && (
+          <div className="mt-4 rounded-2xl bg-card p-4 shadow-card">
+            <div className="flex items-center justify-between">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
+                Class {String(continueClass.position).padStart(2, "0")}
               </div>
-              <div className="rounded-full bg-white/15 px-3 py-1 text-[11px] font-bold backdrop-blur">
-                {isResume ? "Resume →" : "Start →"}
-              </div>
+              <div className="text-[10px] font-bold text-primary">{continuePct}%</div>
             </div>
-            {isResume && continueXpTotal > 0 && (
-              <>
-                <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-white/20">
-                  <div className="h-full bg-white transition-all" style={{ width: `${continuePct}%` }} />
-                </div>
-                <div className="mt-1.5 text-[11px] font-semibold text-white/80">
-                  {continueXpEarned} / {continueXpTotal} XP · {continuePct}%
-                </div>
-              </>
-            )}
-          </Link>
-        </section>
-      )}
-
-      <section className="px-5 pb-20 pt-4">
-        <h2 className="mb-3 text-base font-extrabold text-[#1A1A2E]">All classes</h2>
-        {classes == null ? (
-          <div className="text-sm text-[#666]">Loading classes…</div>
-        ) : classes.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-[#D8D8E8] bg-white p-6 text-center text-sm text-[#666]">
-            No published classes yet. Check back soon!
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {classes.map((c) => {
-              const done = progress.completedClassIds.has(c.id);
-              const earnedHere = progress.perClass.get(c.id)?.xp ?? 0;
-              const totalHere = xpTotals.get(c.id) ?? 0;
-              const inProgress = !done && earnedHere > 0;
-              const pct = totalHere > 0 ? Math.min(100, Math.round((earnedHere / totalHere) * 100)) : 0;
-              return (
-                <Link key={c.id} to="/play/$slug" params={{ slug: c.slug }}
-                  className="block rounded-2xl bg-white p-4 shadow border border-[#EBEBF5]">
-                  <div className="flex items-center gap-3">
-                    <div className={`flex h-12 w-12 items-center justify-center rounded-xl text-xl ${done ? "bg-[#E8F5E9]" : inProgress ? "bg-[#FFF3D9]" : "bg-[#F0F0FA]"}`}>
-                      {done ? "✅" : inProgress ? "⏳" : "▶️"}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="text-[10px] font-bold uppercase tracking-wider text-[#7B2FBE]">Class {String(c.position).padStart(2, "0")}</div>
-                      <div className="truncate text-base font-extrabold text-[#1A1A2E]">{c.title}</div>
-                      {c.subtitle && <div className="truncate text-xs text-[#666]">{c.subtitle}</div>}
-                      {inProgress && totalHere > 0 && (
-                        <div className="mt-1.5 flex items-center gap-2">
-                          <div className="h-1 flex-1 overflow-hidden rounded-full bg-[#F0F0FA]">
-                            <div className="h-full bg-[#7B2FBE] transition-all" style={{ width: `${pct}%` }} />
-                          </div>
-                          <div className="text-[10px] font-bold text-[#666]">{pct}%</div>
-                        </div>
-                      )}
-                      {done && totalHere > 0 && (
-                        <div className="mt-1 text-[10px] font-bold text-[#2E7D32]">+{earnedHere} XP earned</div>
-                      )}
-                    </div>
-                    <span className="text-[#7B2FBE]">→</span>
-                  </div>
-                </Link>
-              );
-            })}
+            <div className="mt-1 truncate text-sm font-extrabold text-foreground">{continueClass.title}</div>
+            <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-muted">
+              <div className="h-full bg-primary transition-all" style={{ width: `${continuePct}%` }} />
+            </div>
+            <div className="mt-1 text-[10px] font-bold text-text-secondary">{continueXpEarned} / {continueXpTotal} XP</div>
           </div>
         )}
-      </section>
 
-      <section className="px-5 pb-20">
-        <h2 className="mb-3 text-base font-extrabold text-[#1A1A2E]">Leaderboard</h2>
-        <Leaderboard currentUserId={user?.id ?? null} onSelect={setPreviewEntry} />
-      </section>
+        {/* Your Journey */}
+        <SectionHeader title="Your Journey" />
+        <div className="-mx-5 mt-2 flex gap-3 overflow-x-auto px-5 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {classes == null ? (
+            <div className="text-sm text-text-secondary">Loading…</div>
+          ) : journeyClasses.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-border bg-card p-6 text-center text-sm text-text-secondary">
+              No classes yet.
+            </div>
+          ) : journeyClasses.map((c) => {
+            const done = progress.completedClassIds.has(c.id);
+            const earnedHere = progress.perClass.get(c.id)?.xp ?? 0;
+            const totalHere = xpTotals.get(c.id) ?? 0;
+            const inProgress = !done && earnedHere > 0;
+            const pct = totalHere > 0 ? Math.min(100, Math.round((earnedHere / totalHere) * 100)) : 0;
+            return (
+              <JourneyCard
+                key={c.id}
+                slug={c.slug}
+                image={classImage(c)}
+                title={c.title}
+                subtitle={c.subtitle ?? `Class ${String(c.position).padStart(2, "0")}`}
+                tags={[done ? "Completed" : inProgress ? "In progress" : "New", `Class ${c.position}`]}
+                cta={done ? "Replay →" : inProgress ? "Continue →" : "Start →"}
+                ctaVariant={inProgress || done ? "primary" : "dark"}
+                progress={inProgress ? pct : undefined}
+                current={continueClass?.id === c.id}
+              />
+            );
+          })}
+        </div>
+
+        {/* All classes */}
+        <SectionHeader title="All classes" hideAll />
+        <div className="mt-2 space-y-3">
+          {classes == null ? (
+            <div className="text-sm text-text-secondary">Loading classes…</div>
+          ) : classes.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-border bg-card p-6 text-center text-sm text-text-secondary">
+              No published classes yet. Check back soon!
+            </div>
+          ) : classes.map((c) => {
+            const done = progress.completedClassIds.has(c.id);
+            const earnedHere = progress.perClass.get(c.id)?.xp ?? 0;
+            const totalHere = xpTotals.get(c.id) ?? 0;
+            const inProgress = !done && earnedHere > 0;
+            const pct = totalHere > 0 ? Math.min(100, Math.round((earnedHere / totalHere) * 100)) : 0;
+            return (
+              <Link key={c.id} to="/play/$slug" params={{ slug: c.slug }}
+                className="block rounded-2xl bg-card p-4 shadow-card border border-border">
+                <div className="flex items-center gap-3">
+                  <div className={`flex h-12 w-12 items-center justify-center rounded-xl text-xl ${done ? "bg-[#E8F5E9]" : inProgress ? "bg-card-gold" : "bg-muted"}`}>
+                    {done ? "✅" : inProgress ? "⏳" : "▶️"}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-primary">Class {String(c.position).padStart(2, "0")}</div>
+                    <div className="truncate text-base font-extrabold text-foreground">{c.title}</div>
+                    {c.subtitle && <div className="truncate text-xs text-text-secondary">{c.subtitle}</div>}
+                    {inProgress && totalHere > 0 && (
+                      <div className="mt-1.5 flex items-center gap-2">
+                        <div className="h-1 flex-1 overflow-hidden rounded-full bg-muted">
+                          <div className="h-full bg-primary transition-all" style={{ width: `${pct}%` }} />
+                        </div>
+                        <div className="text-[10px] font-bold text-text-secondary">{pct}%</div>
+                      </div>
+                    )}
+                    {done && totalHere > 0 && (
+                      <div className="mt-1 text-[10px] font-bold text-success">+{earnedHere} XP earned</div>
+                    )}
+                  </div>
+                  <span className="text-primary">→</span>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+
+        {/* Fun Activities */}
+        <SectionHeader title="Fun Activities" hideAll />
+        <div className="-mx-5 mt-2 flex gap-3 overflow-x-auto px-5 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <ActivityCard
+            bg="bg-card-gold"
+            image={dashImg}
+            title="Meet the Characters"
+            description="Get to know your friends and their stories."
+            cta="Explore →"
+          />
+          <ActivityCard
+            bg="bg-[#E8E0F8]"
+            image={fairgroundImg}
+            title="Live Events"
+            description="Join live shows, challenges, and special events."
+            cta="Join Now →"
+          />
+        </div>
+
+        {/* Leaderboard with podium */}
+        <SectionHeader title="Leaderboard" subtitle="All time" hideAll />
+        <PodiumLeaderboard currentUserId={user?.id ?? null} onSelect={setPreviewEntry} />
+
+        {/* Sign-out / footer */}
+        <div className="mt-6 flex items-center justify-between">
+          {user ? (
+            <button onClick={signOut} className="rounded-pill border border-border bg-card px-3 py-1.5 text-[11px] font-extrabold text-foreground shadow-card">
+              Sign out
+            </button>
+          ) : (
+            <button onClick={() => setGuest(false)} className="rounded-pill bg-primary px-3 py-1.5 text-[11px] font-extrabold text-primary-foreground">
+              Sign in
+            </button>
+          )}
+          <span className="font-display text-base text-text-secondary">Sementa</span>
+        </div>
+      </main>
 
       {previewEntry && (
         <ProfilePreviewCard entry={previewEntry} onClose={() => setPreviewEntry(null)} />
@@ -208,11 +293,188 @@ export function GameHome() {
   );
 }
 
-function Stat({ label, value }: { label: string; value: any }) {
+/* ---------- Sub components ---------- */
+
+function StatCard({ bg, icon, label, value }: { bg: string; icon: string; label: string; value: string }) {
   return (
-    <div className="rounded-xl bg-white p-3 text-center shadow-sm border border-[#EBEBF5]">
-      <div className="text-lg font-black text-[#1A1A2E]">{value}</div>
-      <div className="text-[10px] font-bold uppercase tracking-wider text-[#666]">{label}</div>
+    <div className={`rounded-2xl ${bg} p-3 shadow-card`}>
+      <div className="text-2xl">{icon}</div>
+      <p className="mt-1 text-[10px] font-bold uppercase tracking-wider text-text-secondary">{label}</p>
+      <p className="mt-0.5 text-sm font-black text-foreground">{value}</p>
+    </div>
+  );
+}
+
+function SectionHeader({ title, subtitle, hideAll }: { title: string; subtitle?: string; hideAll?: boolean }) {
+  return (
+    <div className="mt-6 flex items-end justify-between">
+      <div>
+        <h3 className="text-base font-extrabold text-foreground">{title}</h3>
+        {subtitle && <p className="text-[11px] font-bold text-text-secondary">{subtitle}</p>}
+      </div>
+      {!hideAll && (
+        <button className="rounded-pill border border-border bg-card px-3 py-1 text-[11px] font-extrabold text-foreground shadow-card">
+          View All ›
+        </button>
+      )}
+    </div>
+  );
+}
+
+function JourneyCard({
+  slug, image, title, subtitle, tags, cta, ctaVariant, progress, current,
+}: {
+  slug: string; image: string; title: string; subtitle: string; tags: string[]; cta: string;
+  ctaVariant: "primary" | "dark"; progress?: number; current?: boolean;
+}) {
+  return (
+    <Link
+      to="/play/$slug"
+      params={{ slug }}
+      className={`flex w-[260px] shrink-0 flex-col overflow-hidden rounded-2xl bg-card shadow-card ${current ? "ring-2 ring-primary" : ""}`}
+    >
+      <div className="relative h-32 w-full overflow-hidden">
+        <img src={image} alt="" className="h-full w-full object-cover" />
+        {progress !== undefined && (
+          <div className="absolute right-2 bottom-2 flex items-center gap-1 rounded-pill bg-black/55 px-2 py-1 text-[10px] font-extrabold text-white backdrop-blur-sm">
+            {Math.round(progress)}% <span className="text-white/70">◐</span>
+          </div>
+        )}
+      </div>
+      <div className="flex flex-1 flex-col p-3">
+        <p className="text-sm font-extrabold leading-tight text-foreground">{title}</p>
+        <p className="mt-0.5 text-[11px] font-bold text-text-secondary">{subtitle}</p>
+        <div
+          className={`mt-3 w-full rounded-pill py-2 text-center text-xs font-extrabold ${
+            ctaVariant === "primary"
+              ? "bg-primary text-primary-foreground shadow-pop"
+              : "bg-foreground text-primary-foreground"
+          }`}
+        >
+          {cta}
+        </div>
+        <div className="mt-2 flex items-center justify-between">
+          <div className="flex flex-wrap gap-1">
+            {tags.map((t) => (
+              <span key={t} className="rounded-pill bg-tag px-2 py-0.5 text-[10px] font-extrabold text-tag-foreground">
+                {t}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+function ActivityCard({
+  bg, image, title, description, cta,
+}: { bg: string; image: string; title: string; description: string; cta: string }) {
+  return (
+    <div className={`relative flex h-56 w-[300px] shrink-0 flex-col justify-end overflow-hidden rounded-[20px] ${bg} p-4 shadow-card`}>
+      <img
+        src={image}
+        alt=""
+        className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-95 [mask-image:linear-gradient(to_bottom,black_45%,transparent_85%)]"
+      />
+      <div className="relative">
+        <p className="text-base font-black text-foreground">{title}</p>
+        <p className="mt-1 text-[11px] font-bold text-text-secondary">{description}</p>
+        <button className="mt-3 w-full rounded-pill bg-foreground py-2.5 text-xs font-extrabold text-primary-foreground transition-transform active:scale-[0.97]">
+          {cta}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function PodiumLeaderboard({
+  currentUserId, onSelect,
+}: { currentUserId?: string | null; onSelect: (e: LeaderboardEntry) => void }) {
+  const [rows, setRows] = useState<LeaderboardEntry[] | null>(null);
+  useEffect(() => { loadLeaderboard(20).then(setRows).catch(() => setRows([])); }, []);
+
+  if (!rows) return <div className="mt-2 rounded-2xl bg-card p-4 text-sm text-text-secondary shadow-card">Loading leaderboard…</div>;
+  if (rows.length === 0) return <div className="mt-2 rounded-2xl bg-card p-4 text-sm text-text-secondary shadow-card">No players yet.</div>;
+
+  const top3 = rows.slice(0, 3);
+  const rest = rows.slice(3);
+  // Reorder podium so #1 is in the middle
+  const podium = [top3[1], top3[0], top3[2]].filter(Boolean);
+
+  return (
+    <div className="mt-2 rounded-[20px] bg-card p-4 shadow-card">
+      {/* Podium */}
+      <div className="grid grid-cols-3 items-end gap-2 pt-2">
+        {podium.map((entry) => {
+          const realRank = top3.indexOf(entry) + 1;
+          const isFirst = realRank === 1;
+          const height = isFirst ? "h-28" : realRank === 2 ? "h-20" : "h-16";
+          const color = isFirst
+            ? "[background:var(--gradient-hero)]"
+            : realRank === 2
+            ? "bg-gradient-to-b from-[#BFD7FF] to-[#8FB8FF]"
+            : "bg-gradient-to-b from-[#FFD9B0] to-[#FFB870]";
+          const cfg = entry.avatar_config ?? avatarFromSeed(entry.user_id);
+          return (
+            <button
+              key={entry.user_id}
+              type="button"
+              onClick={() => onSelect(entry)}
+              className="flex flex-col items-center text-center"
+            >
+              <div className="relative">
+                {isFirst && <div className="absolute -top-3 left-1/2 -translate-x-1/2 text-base">👑</div>}
+                <div className={`h-12 w-12 overflow-hidden rounded-full ring-4 ${isFirst ? "ring-primary" : "ring-card"} shadow-card`}>
+                  <Avatar config={cfg} size={48} />
+                </div>
+              </div>
+              <p className="mt-1.5 max-w-[6.5rem] truncate text-[11px] font-extrabold text-foreground">
+                {entry.display_name ?? "Explorer"}
+              </p>
+              <p className="text-[10px] font-bold text-text-secondary">{entry.total_xp} XP</p>
+              <div className={`mt-2 flex w-full items-start justify-center rounded-t-xl ${color} ${height} pt-2 text-base font-black text-white`}>
+                {realRank}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Rest of the list */}
+      {rest.length > 0 && (
+        <div className="mt-4 flex flex-col gap-2">
+          {rest.map((entry, i) => {
+            const cfg = entry.avatar_config ?? avatarFromSeed(entry.user_id);
+            const me = entry.user_id === currentUserId;
+            return (
+              <button
+                key={entry.user_id}
+                type="button"
+                onClick={() => onSelect(entry)}
+                className={`flex items-center gap-3 rounded-2xl p-2.5 text-left transition active:scale-[0.99] ${
+                  me ? "bg-[#F4ECFB] ring-1 ring-primary/30" : "bg-background/60"
+                }`}
+              >
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted text-[11px] font-black text-text-secondary">
+                  {i + 4}
+                </span>
+                <div className="h-9 w-9 overflow-hidden rounded-full ring-2 ring-card">
+                  <Avatar config={cfg} size={36} />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-extrabold text-foreground">
+                    {entry.display_name ?? "Explorer"}
+                    {me && <span className="ml-1 text-[10px] font-bold text-primary">YOU</span>}
+                  </p>
+                  <p className="text-[10px] font-bold text-text-secondary">{entry.total_xp} XP</p>
+                </div>
+                <span className="text-primary">→</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
