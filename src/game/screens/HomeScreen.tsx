@@ -136,7 +136,7 @@ export function HomeScreen() {
             onClick={() => setStep("intro")}
           />
           <ActivityCard
-            bg="bg-[#E8E0F8]"
+            bg="bg-[#AFB0FB]"
             image={liveEvents}
             imageMode="top"
             title="Live Events"
