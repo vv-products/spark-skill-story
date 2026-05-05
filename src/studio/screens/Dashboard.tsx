@@ -1,6 +1,6 @@
 import { useStudio } from "../StudioContext";
 import { StudioLayout } from "../Layout";
-import { Card, Btn, StatusPill } from "../ui";
+import { Card, Btn } from "../ui";
 
 export function DashboardScreen() {
   const { setView, pillars } = useStudio();
