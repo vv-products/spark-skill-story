@@ -7,6 +7,8 @@ import { loadUserProgress, type UserProgress } from "./progress";
 import { Avatar } from "./avatar/Avatar";
 import { avatarFromSeed, type AvatarConfig } from "./avatar/config";
 import { loadProfile } from "./profileApi";
+import { Leaderboard, ProfilePreviewCard } from "./Leaderboard";
+import type { LeaderboardEntry } from "./profileApi";
 
 const EMPTY_PROGRESS: UserProgress = {
   totalXp: 0, completedClassIds: new Set(), perClass: new Map(), streakDays: 0,
