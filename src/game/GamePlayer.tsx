@@ -22,6 +22,7 @@ export function GameHome() {
   const [progress, setProgress] = useState<UserProgress>(EMPTY_PROGRESS);
   const [avatarCfg, setAvatarCfg] = useState<AvatarConfig | null>(null);
   const [displayName, setDisplayName] = useState<string | null>(null);
+  const [previewEntry, setPreviewEntry] = useState<LeaderboardEntry | null>(null);
 
   useEffect(() => {
     Promise.all([loadPublishedClasses(), loadPublishedClassXpTotals()])
