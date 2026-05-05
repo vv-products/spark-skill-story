@@ -153,23 +153,6 @@ export function GameHome() {
           </div>
         )}
 
-        {/* Continue progress strip */}
-        {user && continueClass && isResume && continueXpTotal > 0 && (
-          <div className="mt-4 rounded-2xl bg-card p-4 shadow-card">
-            <div className="flex items-center justify-between">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
-                Class {String(continueClass.position).padStart(2, "0")}
-              </div>
-              <div className="text-[10px] font-bold text-primary">{continuePct}%</div>
-            </div>
-            <div className="mt-1 truncate text-sm font-extrabold text-foreground">{continueClass.title}</div>
-            <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-muted">
-              <div className="h-full bg-primary transition-all" style={{ width: `${continuePct}%` }} />
-            </div>
-            <div className="mt-1 text-[10px] font-bold text-text-secondary">{continueXpEarned} / {continueXpTotal} XP</div>
-          </div>
-        )}
-
         {/* Your Journey */}
         <SectionHeader title="Your Journey" />
         <div className="-mx-5 mt-2 flex gap-3 overflow-x-auto px-5 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
