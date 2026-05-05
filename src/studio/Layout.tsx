@@ -6,10 +6,7 @@ import { Btn } from "./ui";
 const NAV = [
   { key: "dashboard", label: "Dashboard", icon: "▦" },
   { key: "library", label: "Content Library", icon: "▤" },
-  { key: "pillars", label: "Pillars", icon: "◫" },
   { key: "task-types", label: "Task Types", icon: "◇" },
-  { key: "media", label: "Media", icon: "▣" },
-  { key: "settings", label: "Settings", icon: "⚙" },
 ] as const;
 
 export function StudioLayout({ children, title, actions }: { children: ReactNode; title: string; actions?: ReactNode }) {
