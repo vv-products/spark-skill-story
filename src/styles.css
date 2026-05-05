@@ -22,6 +22,7 @@
   --color-card-foreground: var(--card-foreground);
   --color-card-warm: var(--card-warm);
   --color-card-gold: var(--card-gold);
+  --color-card-amber: var(--card-amber);
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
@@ -93,6 +94,7 @@
   --card-foreground: #1A1A2E;
   --card-warm: #FFF0EE;
   --card-gold: #FFF8E8;
+  --card-amber: #FFC107;
 
   --popover: #FFFFFF;
   --popover-foreground: #1A1A2E;
