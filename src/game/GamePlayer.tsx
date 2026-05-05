@@ -145,7 +145,7 @@ export function GameHome() {
           <StatCard
             bg="bg-card-warm"
             icon={iconFire}
-            label="Learning Streak"
+            label={"Learning\u00A0Streak"}
             value={user ? `${progress.streakDays} ${progress.streakDays === 1 ? "day" : "days"}` : "—"}
           />
         </div>
