@@ -335,9 +335,10 @@ function TaskPicker({ onClose }: { onClose: () => void }) {
   const { addLayer, ageGroup } = useStudio();
   const [filter, setFilter] = useState<Family | "All">("All");
   const [selected, setSelected] = useState<string | null>(null);
+  const allTaskTypes = useTaskTypes();
 
   const families: (Family | "All")[] = ["All","Foundation","Knowledge Check","Simulation","Performance","Real-Life","Reflection"];
-  const filtered = TASK_TYPES.filter(t => filter === "All" || t.family === filter);
+  const filtered = allTaskTypes.filter(t => filter === "All" || t.family === filter);
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-black/50 p-6">
