@@ -270,10 +270,47 @@ export function GameHome() {
 
 function StatCard({ bg, icon, label, value }: { bg: string; icon: string; label: string; value: string }) {
   return (
-    <div className={`rounded-[20px] ${bg} p-4 shadow-card`}>
-      <img src={icon} alt="" className="h-10 w-10 object-contain" loading="lazy" width={40} height={40} />
-      <p className="mt-3 text-[12px] font-medium text-text-secondary leading-tight">{label}</p>
-      <p className="mt-1 text-[18px] font-black text-foreground leading-none">{value}</p>
+    <div
+      className={`flex flex-col items-start ${bg} shadow-card`}
+      style={{
+        borderRadius: "var(--stat-card-radius)",
+        padding: "var(--stat-card-padding)",
+      }}
+    >
+      <div
+        className="flex shrink-0 items-center justify-start"
+        style={{
+          width: "var(--stat-card-icon-size)",
+          height: "var(--stat-card-icon-size)",
+        }}
+      >
+        <img
+          src={icon}
+          alt=""
+          width={44}
+          height={44}
+          loading="lazy"
+          className="block h-full w-full object-contain"
+        />
+      </div>
+      <p
+        className="font-medium text-text-secondary leading-tight"
+        style={{
+          marginTop: "var(--stat-card-icon-gap)",
+          fontSize: "var(--stat-card-label-size)",
+        }}
+      >
+        {label}
+      </p>
+      <p
+        className="font-black text-foreground leading-none"
+        style={{
+          marginTop: "var(--stat-card-label-gap)",
+          fontSize: "var(--stat-card-value-size)",
+        }}
+      >
+        {value}
+      </p>
     </div>
   );
 }
