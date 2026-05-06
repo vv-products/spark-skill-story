@@ -156,8 +156,7 @@ export async function loadFullCatalog(): Promise<HPillar[]> {
 export async function createTopic(pillarId: string, name: string, ages?: AgeGroup[]) {
   const slug = slugify(name);
   const { count } = await supabase.from("topics").select("*", { count: "exact", head: true }).eq("pillar_id", pillarId);
-  const insert: Record<string, unknown> = { pillar_id: pillarId, slug, title: name, position: (count ?? 0) + 1 };
-  if (ages && ages.length) insert.age_groups = ages;
+  const insert = { pillar_id: pillarId, slug, title: name, position: (count ?? 0) + 1, ...(ages && ages.length ? { age_groups: ages } : {}) };
   const { error } = await supabase.from("topics").insert(insert);
   if (error) throw error;
 }
