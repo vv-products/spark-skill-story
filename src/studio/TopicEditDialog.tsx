@@ -93,21 +93,39 @@ export function TopicEditDialog({
           <p className="mt-2 text-[12px] text-[#C0392B]">Select at least one age group.</p>
         )}
 
-        <div className="mt-6 flex justify-end gap-2">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="rounded-[8px] px-4 py-2 text-sm font-semibold text-[#666680] hover:bg-[#F8F8FC]"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={busy || !name.trim() || ages.length === 0}
-            className="rounded-[8px] bg-[#7B2FBE] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
-          >
-            {busy ? "Saving…" : "Save"}
-          </button>
+        <div className="mt-6 flex items-center justify-between gap-2">
+          <div>
+            {onDelete && (
+              <button
+                type="button"
+                disabled={busy}
+                onClick={async () => {
+                  if (!confirm("Delete this topic? All its modules and classes will be removed.")) return;
+                  setBusy(true);
+                  try { await onDelete(); } finally { setBusy(false); }
+                }}
+                className="rounded-[8px] px-3 py-2 text-sm font-semibold text-[#C0392B] hover:bg-[#FBEAEA] disabled:opacity-50"
+              >
+                Delete topic
+              </button>
+            )}
+          </div>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={onCancel}
+              className="rounded-[8px] px-4 py-2 text-sm font-semibold text-[#666680] hover:bg-[#F8F8FC]"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={busy || !name.trim() || ages.length === 0}
+              className="rounded-[8px] bg-[#7B2FBE] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+            >
+              {busy ? "Saving…" : "Save"}
+            </button>
+          </div>
         </div>
       </form>
     </div>
