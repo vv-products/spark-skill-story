@@ -43,12 +43,32 @@ export function LayerRenderer({ layer, onComplete }: Props) {
 }
 
 // ---------- shared UI ----------
-function Frame({ title, subtitle, children, footer }: { title: string; subtitle?: string; children: React.ReactNode; footer?: React.ReactNode }) {
+function Frame({ title, subtitle, children, footer, speakText }: { title: string; subtitle?: string; children: React.ReactNode; footer?: React.ReactNode; speakText?: string }) {
+  const { level, autoRead } = useGame();
+  const showReadAloud = level === "Explorer";
+  const text = speakText ?? `${subtitle ? subtitle + ". " : ""}${title}`;
+  const { supported, speak, stop } = useReadAloud();
+
+  // Auto-read on mount / when text changes
+  useEffect(() => {
+    if (showReadAloud && autoRead && supported && text.trim()) {
+      const t = setTimeout(() => speak(text), 200);
+      return () => { clearTimeout(t); stop(); };
+    }
+    return () => stop();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [text, autoRead, showReadAloud, supported]);
+
   return (
     <div className="flex h-full flex-col">
       <div className="px-5 pt-4 pb-2">
-        <div className="text-[11px] font-bold uppercase tracking-wider text-[#7B2FBE]">{subtitle ?? "Layer"}</div>
-        <h2 className="mt-1 text-xl font-black text-[#1A1A2E]">{title}</h2>
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-[#7B2FBE]">{subtitle ?? "Layer"}</div>
+            <h2 className="mt-1 text-xl font-black text-[#1A1A2E]">{title}</h2>
+          </div>
+          {showReadAloud && <ReadAloudButton text={text} />}
+        </div>
       </div>
       <div className="flex-1 overflow-auto px-5 pb-4">{children}</div>
       {footer && <div className="border-t border-[#EBEBF5] bg-white p-4">{footer}</div>}
