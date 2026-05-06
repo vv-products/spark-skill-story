@@ -285,6 +285,16 @@ function T03Sort({ layer, xp, onComplete }: any) {
         </div>
       )}
 
+      {/* Celebration banner */}
+      {allCorrect && (
+        <div className="mt-3 flex items-center justify-center gap-2 rounded-xl border border-green-300 bg-green-50 px-3 py-2 animate-scale-in">
+          <span className="text-base">🎉</span>
+          <span className="text-sm font-extrabold text-green-700">Perfect sort! +{xp} XP</span>
+        </div>
+      )}
+
+      {celebrating && <Confetti />}
+
       {/* Buckets */}
       <div className="mt-4 grid grid-cols-2 gap-3">
         {buckets.map((b) => {
