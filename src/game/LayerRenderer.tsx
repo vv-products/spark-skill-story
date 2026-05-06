@@ -311,21 +311,41 @@ function T03Sort({ layer, xp, onComplete }: any) {
               <div className="flex flex-wrap gap-1.5">
                 {items.map((it, i) => {
                   if (placed[i] !== b.label) return null;
-                  const isWrong = allDone && placed[i] !== it.bucket;
+                  const isCorrect = placed[i] === it.bucket;
+                  const isWrong = allDone && !isCorrect;
                   return (
-                    <button
+                    <div
                       key={i}
-                      onClick={() => unplace(i)}
-                      className={`rounded-full px-2 py-1 text-[12px] font-semibold transition-all ${
-                        isWrong
-                          ? "bg-white text-red-700 ring-2 ring-red-400 hover:bg-red-50"
-                          : "bg-white/25 hover:bg-white/40"
-                      }`}
-                      title={isWrong ? "Not quite — tap to move back" : "Tap to move back to tray"}
+                      draggable
+                      onDragStart={(e) => {
+                        setDragIdx(i);
+                        e.dataTransfer.setData("text/plain", String(i));
+                        e.dataTransfer.effectAllowed = "move";
+                      }}
+                      onDragEnd={() => { setDragIdx(null); setOverBucket(null); }}
+                      onPointerDown={(e) => onPointerDown(e, i)}
+                      onPointerMove={onPointerMove}
+                      onPointerUp={onPointerUp}
+                      onClick={() => { if (!isCorrect) unplace(i); }}
+                      className={`select-none cursor-grab active:cursor-grabbing touch-none rounded-full px-2 py-1 text-[12px] font-semibold transition-all ${
+                        isCorrect
+                          ? "bg-green-400 text-green-950 ring-2 ring-green-200"
+                          : isWrong
+                            ? "bg-white text-red-700 ring-2 ring-red-400"
+                            : "bg-white/25 hover:bg-white/40"
+                      } ${dragIdx === i ? "opacity-40" : ""}`}
+                      title={
+                        isCorrect
+                          ? "Correct! Drag to another jar to move it."
+                          : isWrong
+                            ? "Not quite — drag to another jar or tap to send back"
+                            : "Drag to another jar or tap to send back"
+                      }
                     >
+                      {isCorrect && <span className="mr-1">✓</span>}
                       {isWrong && <span className="mr-1">✗</span>}
                       {it.label}
-                    </button>
+                    </div>
                   );
                 })}
               </div>
