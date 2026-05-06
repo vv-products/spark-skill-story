@@ -86,7 +86,48 @@ export function GameHome() {
   const continuePct = continueXpTotal > 0 ? Math.min(100, Math.round((continueXpEarned / continueXpTotal) * 100)) : 0;
   const isResume = continueClass ? (progress.perClass.get(continueClass.id)?.layersTouched ?? 0) > 0 : false;
 
-  const journeyClasses = (classes ?? []).slice(0, 5);
+  const journeyClasses = useMemo<DbClass[]>(() => {
+    const all = classes ?? [];
+    if (all.length === 0) return [];
+    const hasProgress = progress.perClass.size > 0 || progress.completedClassIds.size > 0;
+    if (!user || !hasProgress) return all.slice(0, 5);
+
+    const byId = new Map(all.map((c) => [c.id, c]));
+    const ordered: DbClass[] = [];
+    const seen = new Set<string>();
+    const push = (c?: DbClass | null) => {
+      if (!c || seen.has(c.id)) return;
+      seen.add(c.id);
+      ordered.push(c);
+    };
+
+    // 1. Current class
+    push(continueClass);
+
+    // 2. Other in-progress classes by recency
+    const inProgress = Array.from(progress.perClass.entries())
+      .filter(([id, info]) => info.xp > 0 && !progress.completedClassIds.has(id))
+      .sort((a, b) => b[1].lastAt - a[1].lastAt)
+      .map(([id]) => byId.get(id))
+      .filter((c): c is DbClass => !!c);
+    inProgress.forEach(push);
+
+    // 3. Recently completed
+    const completed = Array.from(progress.completedClassIds)
+      .map((id) => ({ c: byId.get(id), t: progress.perClass.get(id)?.lastAt ?? 0 }))
+      .filter((x): x is { c: DbClass; t: number } => !!x.c)
+      .sort((a, b) => b.t - a.t)
+      .map((x) => x.c);
+    completed.forEach(push);
+
+    // 4. Fill with up-next untouched classes in catalog order
+    for (const c of all) {
+      if (ordered.length >= 5) break;
+      push(c);
+    }
+
+    return ordered.slice(0, 5);
+  }, [classes, progress, continueClass, user]);
   const greetName = displayName ?? user?.user_metadata?.display_name ?? user?.email?.split("@")[0] ?? "Explorer";
 
   return (
