@@ -687,7 +687,7 @@ function T13Mission({ layer, xp, onComplete }: any) {
 function T14Reflection({ layer, xp, onComplete }: any) {
   const [text, setText] = useState("");
   return (
-    <Frame title={layer.title} subtitle="Reflection"
+    <Frame title={layer.title} subtitle="Reflection" speakText={layer.config?.prompt ?? "Share what's on your mind."}
       footer={<PrimaryBtn disabled={text.trim().length < 5} onClick={() => onComplete(xp)}>Save · +{xp} XP</PrimaryBtn>}>
       <p className="text-sm text-[#666]">{layer.config?.prompt ?? "Share what's on your mind."}</p>
       <textarea value={text} onChange={(e) => setText(e.target.value)} rows={6} placeholder="In your own words…"
