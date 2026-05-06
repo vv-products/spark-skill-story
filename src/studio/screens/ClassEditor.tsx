@@ -223,10 +223,11 @@ export function ClassEditorScreen() {
         placeholder="e.g. Self-awareness"
         defaultValue={addDialog?.action === "rename" ? topic.name : ""}
         submitLabel={addDialog?.action === "rename" ? "Save" : "Create"}
+        withAgeGroups={addDialog?.action !== "rename"}
         onCancel={closeAddDialog}
-        onSubmit={async (name) => {
+        onSubmit={async (name, ages) => {
           if (addDialog?.action === "rename") await editTopic(topic.id, name);
-          else await newTopic(pillar.id, name);
+          else await newTopic(pillar.id, name, ages);
           closeAddDialog();
         }}
       />
