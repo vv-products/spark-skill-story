@@ -518,6 +518,7 @@ function T07Branching({ layer, xp, onComplete }: any) {
   const [picked, setPicked] = useState<number | null>(null);
   return (
     <Frame title={layer.title} subtitle="Make your choice"
+      speakText={`${layer.config?.decisionPrompt ?? "What would you do?"} Your options are: ${opts.map((o, i) => `${String.fromCharCode(65 + i)}: ${o.label}`).join(". ")}`}
       footer={picked != null ? <PrimaryBtn onClick={() => onComplete(xp)}>Continue · +{xp} XP</PrimaryBtn> : undefined}>
       <p className="text-sm text-[#666]">{layer.config?.decisionPrompt ?? "What would you do?"}</p>
       <div className="mt-4 space-y-3">
