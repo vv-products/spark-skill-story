@@ -43,7 +43,7 @@ type Ctx = {
   publish: () => Promise<void>;
 
   // catalog mutations
-  newTopic: (pillarId: string, name: string) => Promise<void>;
+  newTopic: (pillarId: string, name: string, ages?: AgeGroup[]) => Promise<void>;
   newModule: (topicId: string, name: string) => Promise<void>;
   newClass: (moduleId: string, title: string) => Promise<string | null>;
   removeClass: (classId: string) => Promise<void>;
@@ -195,8 +195,8 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     finally { setPublishing(false); }
   }
 
-  async function newTopic(pillarId: string, name: string) {
-    try { await createTopic(pillarId, name); toast.success("Topic added"); await reload(); }
+  async function newTopic(pillarId: string, name: string, ages?: AgeGroup[]) {
+    try { await createTopic(pillarId, name, ages); toast.success("Topic added"); await reload(); }
     catch (e: any) { toast.error(e?.message ?? "Failed to add topic"); throw e; }
   }
   async function newModule(topicId: string, name: string) {
