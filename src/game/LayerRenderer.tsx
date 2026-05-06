@@ -256,6 +256,7 @@ function T03Sort({ layer, xp, onComplete }: any) {
 
   return (
     <Frame title={layer.title} subtitle="Sort it out"
+      speakText={`${layer.title}. Drag each item into the right jar. The items are: ${items.map((it) => it.label).join(", ")}. The jars are: ${buckets.map((b) => b.label).join(", ")}.`}
       footer={<PrimaryBtn disabled={!allDone || wrongCount > 0} onClick={() => onComplete(xp)}>
         {!allDone
           ? "Drag all items into a jar"
