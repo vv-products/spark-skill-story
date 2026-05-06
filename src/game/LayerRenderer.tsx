@@ -142,53 +142,151 @@ function T02MicroClip({ layer, xp, onComplete }: any) {
 // ---------- T03: Drag & Drop Sort ----------
 function T03Sort({ layer, xp, onComplete }: any) {
   const items: { label: string; bucket: string }[] = layer.config?.items ?? [
-    { label: "A warm hug", bucket: "Happy" }, { label: "Lost toy", bucket: "Sad" },
-    { label: "Surprise gift", bucket: "Happy" }, { label: "Goodbye to a friend", bucket: "Sad" },
+    { label: "Getting a warm hug", bucket: "Happy" },
+    { label: "Finding a surprise present", bucket: "Happy" },
+    { label: "Someone takes your turn", bucket: "Sad" },
+    { label: "Missing your grandma", bucket: "Sad" },
+    { label: "A big dog suddenly barks", bucket: "Scared" },
+    { label: "Losing your favourite toy", bucket: "Angry" },
   ];
   const buckets: { label: string; colour?: string }[] = layer.config?.buckets ?? [
-    { label: "Happy", colour: "#F5A623" }, { label: "Sad", colour: "#1565C0" },
+    { label: "Happy", colour: "#F5A623" },
+    { label: "Sad", colour: "#1565C0" },
+    { label: "Scared", colour: "#7B2FBE" },
+    { label: "Angry", colour: "#C0392B" },
   ];
   const [placed, setPlaced] = useState<Record<number, string>>({});
+  const [dragIdx, setDragIdx] = useState<number | null>(null);
+  const [overBucket, setOverBucket] = useState<string | null>(null);
+  const [flash, setFlash] = useState<{ bucket: string; ok: boolean } | null>(null);
+  const [touchPos, setTouchPos] = useState<{ x: number; y: number } | null>(null);
+  const touchLabel = useRef<string>("");
+
   const allDone = items.every((_, i) => placed[i] != null);
   const correct = items.filter((it, i) => placed[i] === it.bucket).length;
+
+  function place(idx: number, bucket: string) {
+    const ok = items[idx].bucket === bucket;
+    setPlaced((p) => ({ ...p, [idx]: bucket }));
+    setFlash({ bucket, ok });
+    setTimeout(() => setFlash(null), 500);
+  }
+
+  function unplace(idx: number) {
+    setPlaced((p) => {
+      const n = { ...p };
+      delete n[idx];
+      return n;
+    });
+  }
+
+  // ---- touch / pointer drag fallback ----
+  function onPointerDown(e: React.PointerEvent, idx: number) {
+    if (e.pointerType === "mouse") return; // let HTML5 DnD handle mouse
+    setDragIdx(idx);
+    touchLabel.current = items[idx].label;
+    setTouchPos({ x: e.clientX, y: e.clientY });
+    (e.target as Element).setPointerCapture?.(e.pointerId);
+  }
+  function onPointerMove(e: React.PointerEvent) {
+    if (dragIdx == null || e.pointerType === "mouse") return;
+    setTouchPos({ x: e.clientX, y: e.clientY });
+    const el = document.elementFromPoint(e.clientX, e.clientY);
+    const bucket = el?.closest<HTMLElement>("[data-bucket]")?.dataset.bucket ?? null;
+    setOverBucket(bucket);
+  }
+  function onPointerUp(e: React.PointerEvent) {
+    if (dragIdx == null || e.pointerType === "mouse") return;
+    const el = document.elementFromPoint(e.clientX, e.clientY);
+    const bucket = el?.closest<HTMLElement>("[data-bucket]")?.dataset.bucket;
+    if (bucket) place(dragIdx, bucket);
+    setDragIdx(null);
+    setOverBucket(null);
+    setTouchPos(null);
+  }
 
   return (
     <Frame title={layer.title} subtitle="Sort it out"
       footer={<PrimaryBtn disabled={!allDone} onClick={() => onComplete(xp)}>
-        {allDone ? `${correct}/${items.length} correct · +${xp} XP` : "Sort all items first"}
+        {allDone ? `${correct}/${items.length} correct · +${xp} XP` : "Drag all items into a jar"}
       </PrimaryBtn>}>
-      <div className="flex flex-wrap gap-2">
-        {items.map((it, i) => placed[i] ? null : (
-          <div key={i} className="rounded-full bg-white px-3 py-2 text-sm font-semibold shadow border border-[#EBEBF5]">{it.label}</div>
+
+      {/* Tray of unplaced items */}
+      <div className="flex flex-wrap gap-2 min-h-[44px]">
+        {items.every((_, i) => placed[i] != null) ? (
+          <div className="text-xs text-[#888] italic">All sorted — tap a pill in a jar to move it back.</div>
+        ) : items.map((it, i) => placed[i] ? null : (
+          <div
+            key={i}
+            draggable
+            onDragStart={(e) => {
+              setDragIdx(i);
+              e.dataTransfer.setData("text/plain", String(i));
+              e.dataTransfer.effectAllowed = "move";
+            }}
+            onDragEnd={() => { setDragIdx(null); setOverBucket(null); }}
+            onPointerDown={(e) => onPointerDown(e, i)}
+            onPointerMove={onPointerMove}
+            onPointerUp={onPointerUp}
+            className={`select-none rounded-full bg-white px-3 py-2 text-sm font-semibold shadow border border-[#EBEBF5] cursor-grab active:cursor-grabbing touch-none ${
+              dragIdx === i ? "opacity-40" : ""
+            }`}
+          >
+            {it.label}
+          </div>
         ))}
       </div>
+
+      {/* Buckets */}
       <div className="mt-4 grid grid-cols-2 gap-3">
-        {buckets.map((b) => (
-          <div key={b.label} className="min-h-[140px] rounded-2xl p-3 text-white"
-            style={{ background: b.colour ?? "#7B2FBE" }}>
-            <div className="mb-2 text-sm font-extrabold">{b.label}</div>
-            <div className="flex flex-wrap gap-1.5">
-              {items.map((it, i) => placed[i] === b.label ? (
-                <span key={i} className="rounded-full bg-white/25 px-2 py-1 text-[12px] font-semibold">{it.label}</span>
-              ) : null)}
+        {buckets.map((b) => {
+          const isOver = overBucket === b.label || (flash?.bucket === b.label);
+          const ringClass = flash?.bucket === b.label
+            ? (flash.ok ? "ring-4 ring-green-300" : "ring-4 ring-red-300")
+            : isOver ? "ring-4 ring-white/70 scale-[1.02]" : "";
+          return (
+            <div
+              key={b.label}
+              data-bucket={b.label}
+              onDragOver={(e) => { e.preventDefault(); setOverBucket(b.label); }}
+              onDragLeave={() => setOverBucket((cur) => (cur === b.label ? null : cur))}
+              onDrop={(e) => {
+                e.preventDefault();
+                const idx = Number(e.dataTransfer.getData("text/plain"));
+                if (!Number.isNaN(idx)) place(idx, b.label);
+                setOverBucket(null);
+                setDragIdx(null);
+              }}
+              className={`min-h-[140px] rounded-2xl p-3 text-white transition-all ${ringClass}`}
+              style={{ background: b.colour ?? "#7B2FBE" }}
+            >
+              <div className="mb-2 text-sm font-extrabold">{b.label}</div>
+              <div className="flex flex-wrap gap-1.5">
+                {items.map((it, i) => placed[i] === b.label ? (
+                  <button
+                    key={i}
+                    onClick={() => unplace(i)}
+                    className="rounded-full bg-white/25 px-2 py-1 text-[12px] font-semibold hover:bg-white/40"
+                    title="Tap to move back to tray"
+                  >
+                    {it.label}
+                  </button>
+                ) : null)}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
-      <div className="mt-4 grid grid-cols-2 gap-2">
-        {items.map((it, i) => placed[i] ? null : (
-          <div key={i} className="rounded-xl border border-[#EBEBF5] bg-white p-2">
-            <div className="text-xs font-bold text-[#1A1A2E]">{it.label}</div>
-            <div className="mt-1 flex gap-1">
-              {buckets.map((b) => (
-                <button key={b.label} onClick={() => setPlaced({ ...placed, [i]: b.label })}
-                  className="flex-1 rounded-md px-2 py-1 text-[11px] font-bold text-white"
-                  style={{ background: b.colour ?? "#7B2FBE" }}>{b.label}</button>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
+
+      {/* Floating ghost while touch-dragging */}
+      {touchPos && dragIdx != null && (
+        <div
+          className="pointer-events-none fixed z-50 rounded-full bg-white px-3 py-2 text-sm font-semibold shadow-lg border border-[#EBEBF5]"
+          style={{ left: touchPos.x + 12, top: touchPos.y + 12 }}
+        >
+          {touchLabel.current}
+        </div>
+      )}
     </Frame>
   );
 }

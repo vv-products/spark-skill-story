@@ -1,23 +1,37 @@
-## Problem
+## Goal
 
-The `T01Video` layer in `src/game/LayerRenderer.tsx` renders the video using a native `<video src={url}>` tag. That element only plays direct media files (mp4/webm/ogg). The URL saved in Studio is a YouTube watch link (`https://www.youtube.com/watch?v=Kv6qKvCtszA`), which YouTube serves as an HTML page, not a video file — so the player shows a black box and never starts.
+Replace the current "tap a colored button under each item" UX in `T03Sort` (`src/game/LayerRenderer.tsx`, lines ~142–194) with a real drag-and-drop interaction, matching the screenshot: items live in a tray, the user drags each pill into one of the 4 jar/bucket cards.
 
-## Fix (single file: `src/game/LayerRenderer.tsx`)
+## Approach
 
-Update `T01Video` to detect the URL type and render the right element:
+Use the native HTML5 Drag & Drop API plus pointer events for touch — no new dependency required. (We avoid `react-dnd` / `dnd-kit` to keep the bundle lean; the task is small.)
 
-1. Add a small helper `getEmbedUrl(url)` that:
-   - Detects YouTube (`youtube.com/watch?v=`, `youtu.be/`, `youtube.com/shorts/`) → returns `https://www.youtube.com/embed/{id}?rel=0&modestbranding=1`.
-   - Detects Vimeo (`vimeo.com/{id}`) → returns `https://player.vimeo.com/video/{id}`.
-   - Otherwise returns `null` (treat as a direct media file).
+### UI changes inside `T03Sort`
 
-2. In `T01Video`:
-   - If `getEmbedUrl(url)` returns an embed URL → render an `<iframe>` (with `allow="autoplay; encrypted-media; picture-in-picture"`, `allowFullScreen`, `referrerPolicy="strict-origin-when-cross-origin"`) inside the existing aspect-video container. Since iframes don't fire `onEnded`, enable the Continue button after a short watch threshold (e.g. show a "Mark as watched" button immediately, since requiring the user to actually finish a YouTube embed isn't feasible without the YouTube IFrame API).
-   - If it's a direct media file → keep the current `<video controls onEnded>` behaviour.
-   - If no URL → keep the current placeholder.
+1. **Remove** the bottom "select" grid (lines 178–191) — the per-item rows of bucket buttons.
+2. **Item tray** (top): render each unplaced item as a draggable pill (`draggable`, `onDragStart` sets `dataTransfer` payload = item index; also pointer-event handlers for touch).
+3. **Bucket cards**: each becomes a drop target (`onDragOver` preventDefault, `onDrop` reads index → `setPlaced`). On drop:
+   - place the item into the bucket (visual pill inside the card as today)
+   - briefly flash the card border green/red based on `placed === item.bucket`
+4. **Touch fallback**: HTML5 DnD is desktop-only on mobile. Add a small `usePointerDrag` helper:
+   - `onPointerDown` on a pill captures the item, renders a floating clone following the pointer (`position: fixed`)
+   - on `pointerup`, `document.elementFromPoint` finds the bucket under the finger (buckets get `data-bucket="Happy"` etc.) and we call the same place handler.
+5. **Undo**: tapping a placed pill inside a bucket sends it back to the tray (so users can correct mistakes before pressing Continue).
+6. Keep the existing footer/progress logic (`allDone`, `correct`, `onComplete(xp)`) unchanged.
 
-3. No DB changes. No changes to Studio. Existing classes that store direct mp4 URLs continue to work.
+### Visual polish (match screenshot)
 
-## Optional follow-up (not in this change)
+- Tray pills: white rounded-full, subtle shadow, `cursor-grab` / `active:cursor-grabbing`.
+- Bucket card while a drag is over it: thicker ring (`ring-4 ring-white/60`) and slight scale.
+- Placed pills: translucent white chip inside the colored card (already done).
+- Layout: 2-column grid of buckets (Happy / Sad / Scared / Angry), tray above.
 
-If you want strict "must watch to the end" gating for YouTube, we'd need to load the YouTube IFrame Player API and listen for the `ended` state — happy to add that as a follow-up if needed.
+## Files to edit
+
+- `src/game/LayerRenderer.tsx` — rewrite the `T03Sort` component only. No other components, no DB, no Studio changes. Existing `layer.config.items` / `layer.config.buckets` shape is preserved.
+
+## Out of scope
+
+- No drag-reorder within a bucket.
+- No animation library; just CSS transitions.
+- Studio editor for the sort task is unchanged.
