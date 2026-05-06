@@ -132,6 +132,7 @@ export async function loadFullCatalog(): Promise<HPillar[]> {
           subtitle: c.subtitle ?? undefined,
           status: STATUS_FROM_DB[c.status],
           emotionTag: c.subtitle ?? undefined,
+          heroImageUrl: c.hero_image_url ?? null,
           layers: (layersByClass.get(c.id) ?? []).map(layerToHLayer),
         }));
         // Module status = highest among its classes (Published > In Review > Draft); default Draft
