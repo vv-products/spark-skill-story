@@ -349,6 +349,7 @@ function T03Sort({ layer, xp, onComplete }: any) {
                       onPointerMove={onPointerMove}
                       onPointerUp={onPointerUp}
                       onClick={() => { if (!isCorrect) unplace(i); }}
+                      style={celebrating && isCorrect ? { animation: `scale-in 0.3s ease-out ${i * 80}ms both` } : undefined}
                       className={`select-none cursor-grab active:cursor-grabbing touch-none rounded-full px-2 py-1 text-[12px] font-semibold transition-all ${
                         isCorrect
                           ? "bg-green-400 text-green-950 ring-2 ring-green-200"
