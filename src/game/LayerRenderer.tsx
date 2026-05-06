@@ -234,7 +234,7 @@ function T03Sort({ layer, xp, onComplete }: any) {
 
   return (
     <Frame title={layer.title} subtitle="Sort it out"
-      footer={<PrimaryBtn disabled={!allDone || wrongCount > 0} onClick={() => onComplete(xp)} className={allCorrect ? "animate-pulse" : undefined}>
+      footer={<PrimaryBtn disabled={!allDone || wrongCount > 0} onClick={() => onComplete(xp)}>
         {!allDone
           ? "Drag all items into a jar"
           : wrongCount > 0
