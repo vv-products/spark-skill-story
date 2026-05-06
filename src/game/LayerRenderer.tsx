@@ -632,7 +632,7 @@ function T11Draw({ layer, xp, onComplete }: any) {
   }
   function end() { drawing.current = false; }
   return (
-    <Frame title={layer.title} subtitle="Draw it"
+    <Frame title={layer.title} subtitle="Draw it" speakText={layer.config?.prompt ?? "Draw what you feel."}
       footer={<PrimaryBtn disabled={!touched} onClick={() => onComplete(xp)}>{touched ? `Save · +${xp} XP` : "Draw something"}</PrimaryBtn>}>
       <p className="text-sm text-[#666]">{layer.config?.prompt ?? "Draw what you feel."}</p>
       <canvas ref={cvs} width={320} height={320} onPointerDown={start} onPointerMove={move} onPointerUp={end} onPointerLeave={end}
