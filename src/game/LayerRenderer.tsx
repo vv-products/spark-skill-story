@@ -1,6 +1,8 @@
 // Renders any layer based on its taskCode. Calls onComplete with the XP earned.
 import { useEffect, useRef, useState } from "react";
 import { Confetti } from "./Effects";
+import { ReadAloudButton, useReadAloud } from "./useReadAloud";
+import { useGame } from "./GameContext";
 
 export type RenderableLayer = {
   id: string;
@@ -41,12 +43,32 @@ export function LayerRenderer({ layer, onComplete }: Props) {
 }
 
 // ---------- shared UI ----------
-function Frame({ title, subtitle, children, footer }: { title: string; subtitle?: string; children: React.ReactNode; footer?: React.ReactNode }) {
+function Frame({ title, subtitle, children, footer, speakText }: { title: string; subtitle?: string; children: React.ReactNode; footer?: React.ReactNode; speakText?: string }) {
+  const { level, autoRead } = useGame();
+  const showReadAloud = level === "Explorer";
+  const text = speakText ?? `${subtitle ? subtitle + ". " : ""}${title}`;
+  const { supported, speak, stop } = useReadAloud();
+
+  // Auto-read on mount / when text changes
+  useEffect(() => {
+    if (showReadAloud && autoRead && supported && text.trim()) {
+      const t = setTimeout(() => speak(text), 200);
+      return () => { clearTimeout(t); stop(); };
+    }
+    return () => stop();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [text, autoRead, showReadAloud, supported]);
+
   return (
     <div className="flex h-full flex-col">
       <div className="px-5 pt-4 pb-2">
-        <div className="text-[11px] font-bold uppercase tracking-wider text-[#7B2FBE]">{subtitle ?? "Layer"}</div>
-        <h2 className="mt-1 text-xl font-black text-[#1A1A2E]">{title}</h2>
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-[#7B2FBE]">{subtitle ?? "Layer"}</div>
+            <h2 className="mt-1 text-xl font-black text-[#1A1A2E]">{title}</h2>
+          </div>
+          {showReadAloud && <ReadAloudButton text={text} />}
+        </div>
       </div>
       <div className="flex-1 overflow-auto px-5 pb-4">{children}</div>
       {footer && <div className="border-t border-[#EBEBF5] bg-white p-4">{footer}</div>}
@@ -234,6 +256,7 @@ function T03Sort({ layer, xp, onComplete }: any) {
 
   return (
     <Frame title={layer.title} subtitle="Sort it out"
+      speakText={`${layer.title}. Drag each item into the right jar. The items are: ${items.map((it) => it.label).join(", ")}. The jars are: ${buckets.map((b) => b.label).join(", ")}.`}
       footer={<PrimaryBtn disabled={!allDone || wrongCount > 0} onClick={() => onComplete(xp)}>
         {!allDone
           ? "Drag all items into a jar"
@@ -411,7 +434,7 @@ function T04RapidFire({ layer, xp, onComplete }: any) {
     }, 600);
   }
   return (
-    <Frame title={layer.title} subtitle={`Question ${i + 1} of ${qs.length}`}>
+    <Frame title={layer.title} subtitle={`Question ${i + 1} of ${qs.length}`} speakText={q.prompt}>
       <div className="rounded-2xl bg-white p-6 text-center shadow border border-[#EBEBF5]">
         <p className="text-base font-bold text-[#1A1A2E]">{q.prompt}</p>
       </div>
@@ -451,7 +474,7 @@ function T05Cards({ layer, xp, onComplete }: any) {
     }, 600);
   }
   return (
-    <Frame title={layer.title} subtitle={`Card ${i + 1} of ${cards.length}`}>
+    <Frame title={layer.title} subtitle={`Card ${i + 1} of ${cards.length}`} speakText={card.scenario}>
       <div className="aspect-[3/4] rounded-3xl bg-gradient-to-br from-white to-[#F8F8FC] p-6 shadow-xl border border-[#EBEBF5] flex items-center justify-center text-center">
         <p className="text-lg font-bold text-[#1A1A2E]">{card.scenario}</p>
       </div>
@@ -495,6 +518,7 @@ function T07Branching({ layer, xp, onComplete }: any) {
   const [picked, setPicked] = useState<number | null>(null);
   return (
     <Frame title={layer.title} subtitle="Make your choice"
+      speakText={`${layer.config?.decisionPrompt ?? "What would you do?"} Your options are: ${opts.map((o, i) => `${String.fromCharCode(65 + i)}: ${o.label}`).join(". ")}`}
       footer={picked != null ? <PrimaryBtn onClick={() => onComplete(xp)}>Continue · +{xp} XP</PrimaryBtn> : undefined}>
       <p className="text-sm text-[#666]">{layer.config?.decisionPrompt ?? "What would you do?"}</p>
       <div className="mt-4 space-y-3">
@@ -608,7 +632,7 @@ function T11Draw({ layer, xp, onComplete }: any) {
   }
   function end() { drawing.current = false; }
   return (
-    <Frame title={layer.title} subtitle="Draw it"
+    <Frame title={layer.title} subtitle="Draw it" speakText={layer.config?.prompt ?? "Draw what you feel."}
       footer={<PrimaryBtn disabled={!touched} onClick={() => onComplete(xp)}>{touched ? `Save · +${xp} XP` : "Draw something"}</PrimaryBtn>}>
       <p className="text-sm text-[#666]">{layer.config?.prompt ?? "Draw what you feel."}</p>
       <canvas ref={cvs} width={320} height={320} onPointerDown={start} onPointerMove={move} onPointerUp={end} onPointerLeave={end}
@@ -663,7 +687,7 @@ function T13Mission({ layer, xp, onComplete }: any) {
 function T14Reflection({ layer, xp, onComplete }: any) {
   const [text, setText] = useState("");
   return (
-    <Frame title={layer.title} subtitle="Reflection"
+    <Frame title={layer.title} subtitle="Reflection" speakText={layer.config?.prompt ?? "Share what's on your mind."}
       footer={<PrimaryBtn disabled={text.trim().length < 5} onClick={() => onComplete(xp)}>Save · +{xp} XP</PrimaryBtn>}>
       <p className="text-sm text-[#666]">{layer.config?.prompt ?? "Share what's on your mind."}</p>
       <textarea value={text} onChange={(e) => setText(e.target.value)} rows={6} placeholder="In your own words…"
@@ -676,7 +700,7 @@ function T14Reflection({ layer, xp, onComplete }: any) {
 function T15Rating({ layer, xp, onComplete }: any) {
   const [v, setV] = useState<number | null>(null);
   return (
-    <Frame title={layer.title} subtitle="Self-rating"
+    <Frame title={layer.title} subtitle="Self-rating" speakText={layer.config?.prompt ?? "How would you rate yourself today?"}
       footer={<PrimaryBtn disabled={v == null} onClick={() => onComplete(xp)}>Save · +{xp} XP</PrimaryBtn>}>
       <p className="text-sm text-[#666]">{layer.config?.prompt ?? "How would you rate yourself today?"}</p>
       <div className="mt-6 flex justify-between">
