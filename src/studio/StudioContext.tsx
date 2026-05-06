@@ -43,7 +43,7 @@ type Ctx = {
   publish: () => Promise<void>;
 
   // catalog mutations
-  newTopic: (pillarId: string, name: string) => Promise<void>;
+  newTopic: (pillarId: string, name: string, ages?: AgeGroup[]) => Promise<void>;
   newModule: (topicId: string, name: string) => Promise<void>;
   newClass: (moduleId: string, title: string) => Promise<string | null>;
   removeClass: (classId: string) => Promise<void>;
