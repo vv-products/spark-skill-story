@@ -98,7 +98,7 @@ function T01Video({ layer, xp, onComplete }: any) {
   const [done, setDone] = useState(false);
   return (
     <Frame title={layer.title} subtitle="Story video"
-      footer={<PrimaryBtn disabled={!done} onClick={() => onComplete(xp)}>{done ? `Continue · +${xp} XP` : "Watch, then mark as watched"}</PrimaryBtn>}>
+      footer={<PrimaryBtn disabled={!done} onClick={() => onComplete(xp)}>{done ? `Continue · +${xp} XP` : "Watch the video to continue"}</PrimaryBtn>}>
       <div className="aspect-video w-full overflow-hidden rounded-2xl bg-black">
         {embedUrl ? (
           <iframe
@@ -116,8 +116,11 @@ function T01Video({ layer, xp, onComplete }: any) {
         )}
       </div>
       {(!url || embedUrl) && (
-        <button onClick={() => setDone(true)} className="mt-3 text-xs font-bold text-[#7B2FBE]">
-          {done ? "✓ Marked as watched" : "Mark as watched"}
+        <button
+          onClick={() => setDone(true)}
+          disabled={done}
+          className="mt-3 w-full rounded-full border-2 border-[#7B2FBE] py-2.5 text-sm font-extrabold text-[#7B2FBE] disabled:border-[#D8D8E8] disabled:text-[#999]">
+          {done ? "✓ Marked as watched" : "I've watched it — mark as watched"}
         </button>
       )}
       {layer.config?.transcript && <p className="mt-3 text-sm text-[#666]">{layer.config.transcript}</p>}
