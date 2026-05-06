@@ -98,8 +98,9 @@ export function LibraryScreen() {
         title="New topic"
         label="Topic name"
         placeholder="e.g. Self-awareness"
+        withAgeGroups
         onCancel={() => setDialog(null)}
-        onSubmit={async (name) => { await newTopic(pillar.id, name); setDialog(null); }}
+        onSubmit={async (name, ages) => { await newTopic(pillar.id, name, ages); setDialog(null); }}
       />
       <PromptDialog
         open={dialog === "module"}
