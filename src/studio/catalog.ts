@@ -235,6 +235,7 @@ export async function saveClass(c: HClass, opts: { publish?: boolean } = {}) {
     subtitle: c.emotionTag ?? c.subtitle ?? null,
     status,
     position: c.number,
+    hero_image_url: c.heroImageUrl ?? null,
   }).eq("id", c.id);
   if (error) throw error;
 
