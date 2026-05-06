@@ -1,6 +1,8 @@
 // Renders any layer based on its taskCode. Calls onComplete with the XP earned.
 import { useEffect, useRef, useState } from "react";
 import { Confetti } from "./Effects";
+import { ReadAloudButton, useReadAloud } from "./useReadAloud";
+import { useGame } from "./GameContext";
 
 export type RenderableLayer = {
   id: string;
