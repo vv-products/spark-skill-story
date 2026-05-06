@@ -170,7 +170,7 @@ function T03Sort({ layer, xp, onComplete }: any) {
   const wrongCount = items.filter((it, i) => placed[i] && placed[i] !== it.bucket).length;
   const allCorrect = allDone && wrongCount === 0;
 
-  function useHint() {
+  function revealHint() {
     if (hintsUsed >= HINT_LIMIT) return;
     const wrongIdx = items.findIndex((it, i) => placed[i] && placed[i] !== it.bucket);
     if (wrongIdx === -1) return;
