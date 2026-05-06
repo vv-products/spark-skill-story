@@ -165,11 +165,22 @@ function T03Sort({ layer, xp, onComplete }: any) {
   const [hintsUsed, setHintsUsed] = useState(0);
   const [hintTarget, setHintTarget] = useState<{ idx: number; wrongBucket: string; rightBucket: string } | null>(null);
   const HINT_LIMIT = 2;
+  const [celebrating, setCelebrating] = useState(false);
+  const celebratedRef = useRef(false);
 
   const allDone = items.every((_, i) => placed[i] != null);
   const correct = items.filter((it, i) => placed[i] === it.bucket).length;
   const wrongCount = items.filter((it, i) => placed[i] && placed[i] !== it.bucket).length;
   const allCorrect = allDone && wrongCount === 0;
+
+  useEffect(() => {
+    if (allCorrect && !celebratedRef.current) {
+      celebratedRef.current = true;
+      setCelebrating(true);
+      const t = setTimeout(() => setCelebrating(false), 2500);
+      return () => clearTimeout(t);
+    }
+  }, [allCorrect]);
 
   function revealHint() {
     if (hintsUsed >= HINT_LIMIT) return;
