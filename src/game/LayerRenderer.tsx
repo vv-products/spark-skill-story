@@ -700,7 +700,7 @@ function T14Reflection({ layer, xp, onComplete }: any) {
 function T15Rating({ layer, xp, onComplete }: any) {
   const [v, setV] = useState<number | null>(null);
   return (
-    <Frame title={layer.title} subtitle="Self-rating"
+    <Frame title={layer.title} subtitle="Self-rating" speakText={layer.config?.prompt ?? "How would you rate yourself today?"}
       footer={<PrimaryBtn disabled={v == null} onClick={() => onComplete(xp)}>Save · +{xp} XP</PrimaryBtn>}>
       <p className="text-sm text-[#666]">{layer.config?.prompt ?? "How would you rate yourself today?"}</p>
       <div className="mt-6 flex justify-between">
