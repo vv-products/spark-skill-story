@@ -62,6 +62,7 @@ export type Class = {
   storyRecapUrl?: string;
   characterFocus?: Character[];
   emotionTag?: string;
+  heroImageUrl?: string | null;
 };
 
 export type Module = {

@@ -6,6 +6,8 @@ import { PromptDialog } from "../PromptDialog";
 import { ConfirmDialog } from "../ConfirmDialog";
 import { TASK_BY_CODE, FAMILY_COLOR, type Character, type Family, type AgeGroup } from "../data";
 import { useTaskTypes } from "../taskTypes";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const CHARACTERS: Character[] = ["Maya", "Leo", "Dash", "Pip"];
 
@@ -126,6 +128,13 @@ export function ClassEditorScreen() {
                   );
                 })}
               </div>
+            </Field>
+            <Field label="Hero Image">
+              <HeroImagePicker
+                classId={currentClass.id}
+                value={currentClass.heroImageUrl ?? null}
+                onChange={(url) => updateClass({ heroImageUrl: url })}
+              />
             </Field>
             <Field label="Age Group">
               <div className="rounded-[8px] bg-[#F0F0FA] px-3 py-2 text-sm text-[#7B2FBE] font-semibold">{ageGroup}</div>
@@ -579,4 +588,52 @@ function LayerFields({ taskCode, fields, onChange }: { taskCode: string; fields:
     );
     default: return <div className="text-sm text-[#666680]">No fields defined for this task type.</div>;
   }
+}
+
+function HeroImagePicker({ classId, value, onChange }: { classId: string; value: string | null; onChange: (url: string | null) => void }) {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (!file.type.startsWith("image/")) { toast.error("Please choose an image file."); return; }
+    if (file.size > 5 * 1024 * 1024) { toast.error("Image must be 5MB or smaller."); return; }
+    setUploading(true);
+    try {
+      const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
+      const path = `${classId}/${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from("class-hero").upload(path, file, { upsert: true, cacheControl: "3600", contentType: file.type });
+      if (error) throw error;
+      const { data } = supabase.storage.from("class-hero").getPublicUrl(path);
+      onChange(data.publicUrl);
+      toast.success("Hero image uploaded — remember to Save.");
+    } catch (err: any) {
+      toast.error(err?.message ?? "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  return (
+    <div className="space-y-2">
+      <div className="aspect-video w-full overflow-hidden rounded-[8px] border border-dashed border-[#EBEBF5] bg-[#F8F8FC]">
+        {value ? (
+          <img src={value} alt="Class hero" className="h-full w-full object-cover" />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center text-[12px] text-[#888]">No image</div>
+        )}
+      </div>
+      <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
+      <div className="flex gap-2">
+        <Btn size="sm" variant="outline" onClick={() => fileRef.current?.click()} loading={uploading} disabled={uploading}>
+          {uploading ? "Uploading…" : value ? "Replace" : "Upload image"}
+        </Btn>
+        {value && !uploading && (
+          <Btn size="sm" variant="ghost" onClick={() => onChange(null)}>Remove</Btn>
+        )}
+      </div>
+    </div>
+  );
 }

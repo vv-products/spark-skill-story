@@ -41,6 +41,7 @@ export type HClass = {
   emotionTag?: string;
   slug: string;
   subtitle?: string;
+  heroImageUrl?: string | null;
 };
 export type HLayer = { id: string; taskCode: string; preview: string; fields: Record<string, any> };
 export type HModule = { id: string; name: string; slug: string; status: Status; ages: AgeGroup[]; classes: HClass[] };
@@ -131,6 +132,7 @@ export async function loadFullCatalog(): Promise<HPillar[]> {
           subtitle: c.subtitle ?? undefined,
           status: STATUS_FROM_DB[c.status],
           emotionTag: c.subtitle ?? undefined,
+          heroImageUrl: c.hero_image_url ?? null,
           layers: (layersByClass.get(c.id) ?? []).map(layerToHLayer),
         }));
         // Module status = highest among its classes (Published > In Review > Draft); default Draft
@@ -233,6 +235,7 @@ export async function saveClass(c: HClass, opts: { publish?: boolean } = {}) {
     subtitle: c.emotionTag ?? c.subtitle ?? null,
     status,
     position: c.number,
+    hero_image_url: c.heroImageUrl ?? null,
   }).eq("id", c.id);
   if (error) throw error;
 
