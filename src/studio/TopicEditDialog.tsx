@@ -9,12 +9,14 @@ export function TopicEditDialog({
   initialAges,
   onCancel,
   onSubmit,
+  onDelete,
 }: {
   open: boolean;
   initialName: string;
   initialAges: AgeGroup[];
   onCancel: () => void;
   onSubmit: (patch: { name: string; ages: AgeGroup[] }) => Promise<void> | void;
+  onDelete?: () => Promise<void> | void;
 }) {
   const [name, setName] = useState(initialName);
   const [ages, setAges] = useState<AgeGroup[]>(initialAges);
