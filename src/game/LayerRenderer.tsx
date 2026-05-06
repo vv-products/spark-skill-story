@@ -434,7 +434,7 @@ function T04RapidFire({ layer, xp, onComplete }: any) {
     }, 600);
   }
   return (
-    <Frame title={layer.title} subtitle={`Question ${i + 1} of ${qs.length}`}>
+    <Frame title={layer.title} subtitle={`Question ${i + 1} of ${qs.length}`} speakText={q.prompt}>
       <div className="rounded-2xl bg-white p-6 text-center shadow border border-[#EBEBF5]">
         <p className="text-base font-bold text-[#1A1A2E]">{q.prompt}</p>
       </div>
