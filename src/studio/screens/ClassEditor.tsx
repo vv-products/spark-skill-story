@@ -6,6 +6,8 @@ import { PromptDialog } from "../PromptDialog";
 import { ConfirmDialog } from "../ConfirmDialog";
 import { TASK_BY_CODE, FAMILY_COLOR, type Character, type Family, type AgeGroup } from "../data";
 import { useTaskTypes } from "../taskTypes";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const CHARACTERS: Character[] = ["Maya", "Leo", "Dash", "Pip"];
 
