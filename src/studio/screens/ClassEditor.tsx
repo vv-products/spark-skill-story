@@ -129,6 +129,13 @@ export function ClassEditorScreen() {
                 })}
               </div>
             </Field>
+            <Field label="Hero Image">
+              <HeroImagePicker
+                classId={currentClass.id}
+                value={currentClass.heroImageUrl ?? null}
+                onChange={(url) => updateClass({ heroImageUrl: url })}
+              />
+            </Field>
             <Field label="Age Group">
               <div className="rounded-[8px] bg-[#F0F0FA] px-3 py-2 text-sm text-[#7B2FBE] font-semibold">{ageGroup}</div>
             </Field>
