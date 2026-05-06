@@ -62,17 +62,64 @@ function PrimaryBtn({ disabled, onClick, children }: { disabled?: boolean; onCli
 }
 
 // ---------- T01: Video ----------
+function getEmbedUrl(url?: string): string | null {
+  if (!url) return null;
+  try {
+    const u = new URL(url);
+    const host = u.hostname.replace(/^www\./, "");
+    if (host === "youtu.be") {
+      const id = u.pathname.slice(1);
+      return id ? `https://www.youtube.com/embed/${id}?rel=0&modestbranding=1` : null;
+    }
+    if (host === "youtube.com" || host === "m.youtube.com") {
+      if (u.pathname === "/watch") {
+        const id = u.searchParams.get("v");
+        return id ? `https://www.youtube.com/embed/${id}?rel=0&modestbranding=1` : null;
+      }
+      if (u.pathname.startsWith("/shorts/") || u.pathname.startsWith("/embed/")) {
+        const id = u.pathname.split("/")[2];
+        return id ? `https://www.youtube.com/embed/${id}?rel=0&modestbranding=1` : null;
+      }
+    }
+    if (host === "vimeo.com") {
+      const id = u.pathname.split("/").filter(Boolean)[0];
+      return id ? `https://player.vimeo.com/video/${id}` : null;
+    }
+    if (host === "player.vimeo.com") return url;
+  } catch {
+    return null;
+  }
+  return null;
+}
+
 function T01Video({ layer, xp, onComplete }: any) {
   const url = layer.config?.videoUrl as string | undefined;
+  const embedUrl = getEmbedUrl(url);
   const [done, setDone] = useState(false);
   return (
     <Frame title={layer.title} subtitle="Story video"
-      footer={<PrimaryBtn disabled={!done} onClick={() => onComplete(xp)}>{done ? `Continue · +${xp} XP` : "Watch to continue"}</PrimaryBtn>}>
+      footer={<PrimaryBtn disabled={!done} onClick={() => onComplete(xp)}>{done ? `Continue · +${xp} XP` : "Watch, then mark as watched"}</PrimaryBtn>}>
       <div className="aspect-video w-full overflow-hidden rounded-2xl bg-black">
-        {url ? <video src={url} controls className="h-full w-full" onEnded={() => setDone(true)} />
-          : <div className="flex h-full items-center justify-center text-white/60">📹 Story video</div>}
+        {embedUrl ? (
+          <iframe
+            src={embedUrl}
+            className="h-full w-full"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            referrerPolicy="strict-origin-when-cross-origin"
+            title={layer.title}
+          />
+        ) : url ? (
+          <video src={url} controls className="h-full w-full" onEnded={() => setDone(true)} />
+        ) : (
+          <div className="flex h-full items-center justify-center text-white/60">📹 Story video</div>
+        )}
       </div>
-      {!url && <button onClick={() => setDone(true)} className="mt-3 text-xs font-bold text-[#7B2FBE]">Mark as watched (demo)</button>}
+      {(!url || embedUrl) && (
+        <button onClick={() => setDone(true)} className="mt-3 text-xs font-bold text-[#7B2FBE]">
+          {done ? "✓ Marked as watched" : "Mark as watched"}
+        </button>
+      )}
       {layer.config?.transcript && <p className="mt-3 text-sm text-[#666]">{layer.config.transcript}</p>}
     </Frame>
   );
