@@ -161,9 +161,24 @@ function T03Sort({ layer, xp, onComplete }: any) {
   const [flash, setFlash] = useState<{ bucket: string; ok: boolean } | null>(null);
   const [touchPos, setTouchPos] = useState<{ x: number; y: number } | null>(null);
   const touchLabel = useRef<string>("");
+  const [hintsUsed, setHintsUsed] = useState(0);
+  const [hintTarget, setHintTarget] = useState<{ idx: number; wrongBucket: string; rightBucket: string } | null>(null);
+  const HINT_LIMIT = 2;
 
   const allDone = items.every((_, i) => placed[i] != null);
   const correct = items.filter((it, i) => placed[i] === it.bucket).length;
+  const wrongCount = items.filter((it, i) => placed[i] && placed[i] !== it.bucket).length;
+  const allCorrect = allDone && wrongCount === 0;
+
+  function useHint() {
+    if (hintsUsed >= HINT_LIMIT) return;
+    const wrongIdx = items.findIndex((it, i) => placed[i] && placed[i] !== it.bucket);
+    if (wrongIdx === -1) return;
+    const it = items[wrongIdx];
+    setHintTarget({ idx: wrongIdx, wrongBucket: placed[wrongIdx], rightBucket: it.bucket });
+    setHintsUsed((n) => n + 1);
+    setTimeout(() => setHintTarget(null), 1800);
+  }
 
   function place(idx: number, bucket: string) {
     const ok = items[idx].bucket === bucket;
