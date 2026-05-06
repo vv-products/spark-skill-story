@@ -195,8 +195,8 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     finally { setPublishing(false); }
   }
 
-  async function newTopic(pillarId: string, name: string) {
-    try { await createTopic(pillarId, name); toast.success("Topic added"); await reload(); }
+  async function newTopic(pillarId: string, name: string, ages?: AgeGroup[]) {
+    try { await createTopic(pillarId, name, ages); toast.success("Topic added"); await reload(); }
     catch (e: any) { toast.error(e?.message ?? "Failed to add topic"); throw e; }
   }
   async function newModule(topicId: string, name: string) {
