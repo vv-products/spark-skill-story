@@ -222,8 +222,12 @@ function T03Sort({ layer, xp, onComplete }: any) {
 
   return (
     <Frame title={layer.title} subtitle="Sort it out"
-      footer={<PrimaryBtn disabled={!allDone} onClick={() => onComplete(xp)}>
-        {allDone ? `${correct}/${items.length} correct · +${xp} XP` : "Drag all items into a jar"}
+      footer={<PrimaryBtn disabled={!allDone || wrongCount > 0} onClick={() => onComplete(xp)}>
+        {!allDone
+          ? "Drag all items into a jar"
+          : wrongCount > 0
+            ? "Fix wrong items to continue"
+            : `All correct · +${xp} XP`}
       </PrimaryBtn>}>
 
       {/* Tray of unplaced items */}
@@ -252,12 +256,33 @@ function T03Sort({ layer, xp, onComplete }: any) {
         ))}
       </div>
 
+      {/* Hint banner — shown only when everything is placed but some are wrong */}
+      {allDone && wrongCount > 0 && (
+        <div className="mt-3 flex items-center justify-between gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2">
+          <div className="text-xs font-semibold text-red-700">
+            Almost! {wrongCount} {wrongCount === 1 ? "item is" : "items are"} in the wrong jar. Tap a red pill to move it back.
+          </div>
+          <button
+            type="button"
+            onClick={revealHint}
+            disabled={hintsUsed >= HINT_LIMIT}
+            className="shrink-0 rounded-full border border-red-300 bg-white px-3 py-1 text-xs font-bold text-red-700 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {hintsUsed >= HINT_LIMIT ? "No more hints" : `💡 Hint (${HINT_LIMIT - hintsUsed} left)`}
+          </button>
+        </div>
+      )}
+
       {/* Buckets */}
       <div className="mt-4 grid grid-cols-2 gap-3">
         {buckets.map((b) => {
           const isOver = overBucket === b.label || (flash?.bucket === b.label);
+          const isHintWrong = hintTarget?.wrongBucket === b.label;
+          const isHintRight = hintTarget?.rightBucket === b.label;
           const ringClass = flash?.bucket === b.label
             ? (flash.ok ? "ring-4 ring-green-300" : "ring-4 ring-red-300")
+            : isHintRight ? "ring-4 ring-green-300 animate-pulse"
+            : isHintWrong ? "ring-4 ring-red-400 animate-pulse"
             : isOver ? "ring-4 ring-white/70 scale-[1.02]" : "";
           return (
             <div
@@ -272,21 +297,37 @@ function T03Sort({ layer, xp, onComplete }: any) {
                 setOverBucket(null);
                 setDragIdx(null);
               }}
-              className={`min-h-[140px] rounded-2xl p-3 text-white transition-all ${ringClass}`}
+              className={`relative min-h-[140px] rounded-2xl p-3 text-white transition-all ${ringClass}`}
               style={{ background: b.colour ?? "#7B2FBE" }}
             >
-              <div className="mb-2 text-sm font-extrabold">{b.label}</div>
+              <div className="mb-2 flex items-center justify-between text-sm font-extrabold">
+                <span>{b.label}</span>
+                {isHintRight && (
+                  <span className="rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-extrabold text-green-700">
+                    move it here
+                  </span>
+                )}
+              </div>
               <div className="flex flex-wrap gap-1.5">
-                {items.map((it, i) => placed[i] === b.label ? (
-                  <button
-                    key={i}
-                    onClick={() => unplace(i)}
-                    className="rounded-full bg-white/25 px-2 py-1 text-[12px] font-semibold hover:bg-white/40"
-                    title="Tap to move back to tray"
-                  >
-                    {it.label}
-                  </button>
-                ) : null)}
+                {items.map((it, i) => {
+                  if (placed[i] !== b.label) return null;
+                  const isWrong = allDone && placed[i] !== it.bucket;
+                  return (
+                    <button
+                      key={i}
+                      onClick={() => unplace(i)}
+                      className={`rounded-full px-2 py-1 text-[12px] font-semibold transition-all ${
+                        isWrong
+                          ? "bg-white text-red-700 ring-2 ring-red-400 hover:bg-red-50"
+                          : "bg-white/25 hover:bg-white/40"
+                      }`}
+                      title={isWrong ? "Not quite — tap to move back" : "Tap to move back to tray"}
+                    >
+                      {isWrong && <span className="mr-1">✗</span>}
+                      {it.label}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           );
