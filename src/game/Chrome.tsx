@@ -1,8 +1,9 @@
 import { useGame } from "./GameContext";
 
 export function TopBar({ layer, totalLayers }: { layer?: number; totalLayers?: number }) {
-  const { xp, totalXp, level, streak } = useGame();
+  const { xp, totalXp, level, streak, autoRead, setAutoRead } = useGame();
   const pct = Math.min(100, (xp / totalXp) * 100);
+  const showReadToggle = level === "Explorer";
 
   return (
     <div className="sticky top-0 z-20 bg-background/90 backdrop-blur-md">
@@ -23,6 +24,23 @@ export function TopBar({ layer, totalLayers }: { layer?: number; totalLayers?: n
             {xp}/{totalXp}
           </span>
         </div>
+
+        {showReadToggle && (
+          <button
+            type="button"
+            onClick={() => setAutoRead(!autoRead)}
+            aria-pressed={autoRead}
+            title={autoRead ? "Auto read aloud: On" : "Auto read aloud: Off"}
+            className={`flex items-center gap-1 rounded-pill px-2.5 py-1.5 shadow-card transition-colors ${
+              autoRead ? "bg-primary text-primary-foreground" : "bg-card text-foreground"
+            }`}
+          >
+            <span className="text-base">{autoRead ? "🔊" : "🔈"}</span>
+            <span className="text-[10px] font-extrabold uppercase tracking-wider">
+              {autoRead ? "On" : "Off"}
+            </span>
+          </button>
+        )}
 
         <div className="flex items-center gap-1 rounded-pill bg-card px-3 py-1.5 shadow-card">
           <span className="text-base">🔥</span>
