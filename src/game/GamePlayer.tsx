@@ -397,7 +397,7 @@ function JourneyCard({
     <Link
       to="/play/$slug"
       params={{ slug }}
-      className={`flex w-[260px] shrink-0 flex-col overflow-hidden rounded-2xl bg-card shadow-card ${current ? "ring-2 ring-primary" : ""}`}
+      className="flex w-[260px] shrink-0 flex-col overflow-hidden rounded-2xl bg-card shadow-card"
     >
       <div className="relative h-32 w-full overflow-hidden">
         <img src={image} alt="" className="h-full w-full object-cover" />
