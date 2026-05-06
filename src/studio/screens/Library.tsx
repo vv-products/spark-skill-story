@@ -132,6 +132,10 @@ export function LibraryScreen() {
           if (editing) await editTopicMeta(editing.id, { name, ages });
           setEditing(null);
         }}
+        onDelete={async () => {
+          if (editing) await removeTopic(editing.id);
+          setEditing(null);
+        }}
       />
     </StudioLayout>
   );
