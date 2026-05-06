@@ -8,7 +8,7 @@ import type { AgeGroup } from "../data";
 import type { HTopic } from "../catalog";
 
 export function LibraryScreen() {
-  const { pillars, selectedPillarId, setSelectedPillar, selectedTopicId, setSelectedTopic, setView, newTopic, newModule, editTopicMeta } = useStudio();
+  const { pillars, selectedPillarId, setSelectedPillar, selectedTopicId, setSelectedTopic, setView, newTopic, newModule, editTopicMeta, removeTopic, removeModule } = useStudio();
   const [dialog, setDialog] = useState<null | "topic" | "module">(null);
   const [editing, setEditing] = useState<HTopic | null>(null);
   const pillar = pillars.find(p => p.id === selectedPillarId);
