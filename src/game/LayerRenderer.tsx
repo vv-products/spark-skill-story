@@ -1,5 +1,6 @@
 // Renders any layer based on its taskCode. Calls onComplete with the XP earned.
 import { useEffect, useRef, useState } from "react";
+import { Confetti } from "./Effects";
 
 export type RenderableLayer = {
   id: string;
@@ -164,11 +165,22 @@ function T03Sort({ layer, xp, onComplete }: any) {
   const [hintsUsed, setHintsUsed] = useState(0);
   const [hintTarget, setHintTarget] = useState<{ idx: number; wrongBucket: string; rightBucket: string } | null>(null);
   const HINT_LIMIT = 2;
+  const [celebrating, setCelebrating] = useState(false);
+  const celebratedRef = useRef(false);
 
   const allDone = items.every((_, i) => placed[i] != null);
   const correct = items.filter((it, i) => placed[i] === it.bucket).length;
   const wrongCount = items.filter((it, i) => placed[i] && placed[i] !== it.bucket).length;
   const allCorrect = allDone && wrongCount === 0;
+
+  useEffect(() => {
+    if (allCorrect && !celebratedRef.current) {
+      celebratedRef.current = true;
+      setCelebrating(true);
+      const t = setTimeout(() => setCelebrating(false), 2500);
+      return () => clearTimeout(t);
+    }
+  }, [allCorrect]);
 
   function revealHint() {
     if (hintsUsed >= HINT_LIMIT) return;
@@ -273,6 +285,16 @@ function T03Sort({ layer, xp, onComplete }: any) {
         </div>
       )}
 
+      {/* Celebration banner */}
+      {allCorrect && (
+        <div className="mt-3 flex items-center justify-center gap-2 rounded-xl border border-green-300 bg-green-50 px-3 py-2 animate-scale-in">
+          <span className="text-base">🎉</span>
+          <span className="text-sm font-extrabold text-green-700">Perfect sort! +{xp} XP</span>
+        </div>
+      )}
+
+      {celebrating && <Confetti />}
+
       {/* Buckets */}
       <div className="mt-4 grid grid-cols-2 gap-3">
         {buckets.map((b) => {
@@ -327,6 +349,7 @@ function T03Sort({ layer, xp, onComplete }: any) {
                       onPointerMove={onPointerMove}
                       onPointerUp={onPointerUp}
                       onClick={() => { if (!isCorrect) unplace(i); }}
+                      style={celebrating && isCorrect ? { animation: `scale-in 0.3s ease-out ${i * 80}ms both` } : undefined}
                       className={`select-none cursor-grab active:cursor-grabbing touch-none rounded-full px-2 py-1 text-[12px] font-semibold transition-all ${
                         isCorrect
                           ? "bg-green-400 text-green-950 ring-2 ring-green-200"
