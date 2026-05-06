@@ -1,37 +1,58 @@
 ## Goal
 
-Replace the current "tap a colored button under each item" UX in `T03Sort` (`src/game/LayerRenderer.tsx`, lines ~142–194) with a real drag-and-drop interaction, matching the screenshot: items live in a tray, the user drags each pill into one of the 4 jar/bucket cards.
+After the player has placed all items into jars in the "Sort It Out" (T03) task, give them clear, gentle feedback about which placements are wrong — instead of just silently letting them press Continue with a low score. They should be nudged to fix mistakes, with an optional hint.
 
-## Approach
+## UX
 
-Use the native HTML5 Drag & Drop API plus pointer events for touch — no new dependency required. (We avoid `react-dnd` / `dnd-kit` to keep the bundle lean; the task is small.)
+When `allDone` becomes true and `correct < items.length`:
 
-### UI changes inside `T03Sort`
+1. **Wrong pills get marked** inside their (incorrect) jar:
+   - Red ring around the pill (`ring-2 ring-red-400`)
+   - Small ✗ icon prefix
+   - A subtle one-time shake animation
+   - Tooltip / aria-label: "Not quite — tap to move back"
+   - (Tapping still sends it back to the tray, same as today.)
 
-1. **Remove** the bottom "select" grid (lines 178–191) — the per-item rows of bucket buttons.
-2. **Item tray** (top): render each unplaced item as a draggable pill (`draggable`, `onDragStart` sets `dataTransfer` payload = item index; also pointer-event handlers for touch).
-3. **Bucket cards**: each becomes a drop target (`onDragOver` preventDefault, `onDrop` reads index → `setPlaced`). On drop:
-   - place the item into the bucket (visual pill inside the card as today)
-   - briefly flash the card border green/red based on `placed === item.bucket`
-4. **Touch fallback**: HTML5 DnD is desktop-only on mobile. Add a small `usePointerDrag` helper:
-   - `onPointerDown` on a pill captures the item, renders a floating clone following the pointer (`position: fixed`)
-   - on `pointerup`, `document.elementFromPoint` finds the bucket under the finger (buckets get `data-bucket="Happy"` etc.) and we call the same place handler.
-5. **Undo**: tapping a placed pill inside a bucket sends it back to the tray (so users can correct mistakes before pressing Continue).
-6. Keep the existing footer/progress logic (`allDone`, `correct`, `onComplete(xp)`) unchanged.
+2. **Hint banner** appears above the buckets:
+   > "Almost! 2 items are in the wrong jar. Tap a red pill to move it back, or use Hint."
+   - Count updates live as the user fixes items.
+   - Disappears once everything is correct.
 
-### Visual polish (match screenshot)
+3. **Hint button** (right side of the banner, ghost style):
+   - On click, picks the first wrong item and:
+     - Pulses its current (wrong) jar with a red glow
+     - Pulses the correct jar with a green glow + shows its label briefly
+     - Does NOT auto-move the item — the player still drags it.
+   - Limit: 2 hints per attempt; after that the button is disabled with text "No more hints".
 
-- Tray pills: white rounded-full, subtle shadow, `cursor-grab` / `active:cursor-grabbing`.
-- Bucket card while a drag is over it: thicker ring (`ring-4 ring-white/60`) and slight scale.
-- Placed pills: translucent white chip inside the colored card (already done).
-- Layout: 2-column grid of buckets (Happy / Sad / Scared / Angry), tray above.
+4. **Continue button (footer)**:
+   - When `allDone && correct < total`: label changes from `"X/Y correct · +XP"` to `"Fix wrong items to continue"` and stays **disabled**.
+   - When all are correct: enabled, label `"All correct · +XP XP"`.
+   - This makes "complete" mean "completed correctly", consistent with the other tasks.
 
-## Files to edit
+5. **All correct celebration**: when the last wrong item gets fixed, briefly flash a green ring around the whole bucket grid (reuse existing `flash` style) so the player knows they nailed it.
 
-- `src/game/LayerRenderer.tsx` — rewrite the `T03Sort` component only. No other components, no DB, no Studio changes. Existing `layer.config.items` / `layer.config.buckets` shape is preserved.
+## Technical changes (single file: `src/game/LayerRenderer.tsx`, `T03Sort` only)
+
+- Add state: `hintsUsed: number`, `hintTarget: { idx: number; wrongBucket: string; rightBucket: string } | null`.
+- Derive: `wrongCount = items.filter((it,i) => placed[i] && placed[i] !== it.bucket).length`.
+- New `useHint()` function: find first `i` where `placed[i] && placed[i] !== items[i].bucket`, set `hintTarget`, auto-clear after ~1.5s, increment `hintsUsed`.
+- In the bucket render loop, when `hintTarget?.wrongBucket === b.label` add a red pulse class; when `hintTarget?.rightBucket === b.label` add a green pulse class with an overlay caption "← move it here".
+- In the placed-pill render, when `placed[i] !== items[i].bucket` add red ring + ✗ + `animate-shake` (one-shot via key bump or CSS).
+- Insert the hint banner between the tray and the bucket grid, only when `allDone && wrongCount > 0`.
+- Update the footer `PrimaryBtn`:
+  - `disabled={!allDone || wrongCount > 0}`
+  - Label logic: `wrongCount > 0 ? "Fix wrong items to continue" : allDone ? \`All correct · +${xp} XP\` : "Drag all items into a jar"`.
+- Keep `onComplete(xp)` unchanged (it now only fires on a fully-correct sort, which matches scoring elsewhere).
+- Add a tiny keyframe (in the same file's existing inline style or via a Tailwind arbitrary class) for `animate-shake` if no equivalent exists; otherwise reuse `animate-pulse`.
 
 ## Out of scope
 
-- No drag-reorder within a bucket.
-- No animation library; just CSS transitions.
-- Studio editor for the sort task is unchanged.
+- No changes to the Studio editor for T03.
+- No changes to data shape (`layer.config.items` / `buckets`).
+- No changes to other task types or to scoring/XP rules elsewhere.
+- No new dependencies.
+
+## Files to edit
+
+- `src/game/LayerRenderer.tsx` — `T03Sort` component only.
