@@ -80,14 +80,27 @@ export function LibraryScreen() {
           {topic?.modules.length ? topic.modules.map(m => {
             const built = m.classes.filter(c => c.layers.length > 0).length;
             return (
-              <button key={m.id} onClick={() => setView({ kind: "module", pillarId: pillar.id, topicId: topic.id, moduleId: m.id })}
-                className="block w-full rounded-[8px] px-3 py-3 text-left transition-colors hover:bg-[#F8F8FC]">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-[#1A1A2E]">{m.name}</span>
+              <div key={m.id}
+                onClick={() => setView({ kind: "module", pillarId: pillar.id, topicId: topic.id, moduleId: m.id })}
+                className="group block w-full cursor-pointer rounded-[8px] px-3 py-3 text-left transition-colors hover:bg-[#F8F8FC]">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="flex-1 text-sm font-semibold text-[#1A1A2E]">{m.name}</span>
+                  <button
+                    onClick={async (e) => {
+                      e.stopPropagation();
+                      if (confirm(`Delete module "${m.name}"? All its classes will be removed.`)) {
+                        await removeModule(m.id);
+                      }
+                    }}
+                    className="rounded-[6px] px-1.5 py-0.5 text-[11px] text-[#C0392B] opacity-0 transition-opacity hover:bg-white group-hover:opacity-100"
+                    aria-label="Delete module"
+                  >
+                    🗑 Delete
+                  </button>
                   <StatusPill status={m.status} />
                 </div>
                 <div className="mt-1 text-[12px] text-[#666680]">{built}/10 classes built</div>
-              </button>
+              </div>
             );
           }) : <div className="px-3 py-8 text-center text-sm text-[#888]">No modules yet.</div>}
           <button onClick={openAddModule} className="mt-2 w-full rounded-[8px] border border-dashed border-[#D8D8E8] px-3 py-2.5 text-sm font-semibold text-[#7B2FBE] hover:bg-[#F8F8FC]">+ Add Module</button>
