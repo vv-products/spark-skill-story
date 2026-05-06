@@ -474,7 +474,7 @@ function T05Cards({ layer, xp, onComplete }: any) {
     }, 600);
   }
   return (
-    <Frame title={layer.title} subtitle={`Card ${i + 1} of ${cards.length}`}>
+    <Frame title={layer.title} subtitle={`Card ${i + 1} of ${cards.length}`} speakText={card.scenario}>
       <div className="aspect-[3/4] rounded-3xl bg-gradient-to-br from-white to-[#F8F8FC] p-6 shadow-xl border border-[#EBEBF5] flex items-center justify-center text-center">
         <p className="text-lg font-bold text-[#1A1A2E]">{card.scenario}</p>
       </div>
