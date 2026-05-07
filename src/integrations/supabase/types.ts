@@ -318,6 +318,45 @@ export type Database = {
         }
         Relationships: []
       }
+      welcome_cards: {
+        Row: {
+          active: boolean
+          created_at: string
+          cta_destination: string
+          cta_label: string
+          headline: string
+          hero_image_url: string | null
+          id: string
+          position: number
+          subtitle: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          cta_destination?: string
+          cta_label?: string
+          headline: string
+          hero_image_url?: string | null
+          id?: string
+          position?: number
+          subtitle?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          cta_destination?: string
+          cta_label?: string
+          headline?: string
+          hero_image_url?: string | null
+          id?: string
+          position?: number
+          subtitle?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       xp_events: {
         Row: {
           amount: number
