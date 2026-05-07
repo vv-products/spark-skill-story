@@ -51,7 +51,7 @@ export function HomeScreen() {
                 Alex <span>👋</span>
               </p>
               <h2 className="mt-3 text-2xl font-black leading-tight drop-shadow-md">
-                Leo needs your<br />help today...
+                {heroChar.name} needs your<br />help today...
               </h2>
               <button
                 onClick={() => setStep("intro")}
@@ -61,8 +61,8 @@ export function HomeScreen() {
               </button>
             </div>
             <img
-              src={leo}
-              alt="Leo holding a small bird"
+              src={heroChar.img}
+              alt={heroChar.alt}
               className="h-40 w-32 -mr-2 -mt-2 rounded-2xl object-cover shadow-pop animate-float-soft"
             />
           </div>
