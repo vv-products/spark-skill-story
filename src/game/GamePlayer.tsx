@@ -233,7 +233,6 @@ export function GameHome() {
                 image={image}
                 className={e.nextClass.title}
                 moduleName={e.module.name}
-                topicName={e.topic.name}
                 pillarName={e.pillar.name}
                 pillarEmoji={e.pillar.emoji}
                 pct={e.pct}
