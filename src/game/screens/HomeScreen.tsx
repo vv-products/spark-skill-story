@@ -20,8 +20,10 @@ export function HomeScreen() {
     { img: leo, name: "Leo", alt: "Leo holding a small bird" },
     { img: maya, name: "Maya", alt: "Maya looking thoughtful" },
   ];
-  const [idx, setIdx] = useState(0);
+  const MAYA_ONLY_TEST_MODE = true; // TEMP: force Maya to verify rendering
+  const [idx, setIdx] = useState(MAYA_ONLY_TEST_MODE ? 1 : 0);
   useEffect(() => {
+    if (MAYA_ONLY_TEST_MODE) return;
     const id = setInterval(() => setIdx((i) => (i + 1) % characters.length), 4000);
     return () => clearInterval(id);
   }, [characters.length]);
