@@ -20,7 +20,14 @@ export const Route = createFileRoute("/studio")({
 });
 
 function Router() {
-  const { view } = useStudio();
+  const { view, loadingCatalog, pillars } = useStudio();
+  if (loadingCatalog && pillars.length === 0) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-studio-bg font-studio text-text-secondary">
+        Loading…
+      </div>
+    );
+  }
   switch (view.kind) {
     case "dashboard": return <DashboardScreen />;
     case "library": return <LibraryScreen />;
