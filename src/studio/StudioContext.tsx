@@ -14,6 +14,7 @@ type View =
   | { kind: "class"; pillarId: string; topicId: string; moduleId: string; classId: string }
   | { kind: "task-types" }
   | { kind: "welcome-cards" }
+  | { kind: "avatars" }
   | { kind: "admin" };
 
 type Ctx = {
