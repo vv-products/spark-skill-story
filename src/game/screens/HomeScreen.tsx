@@ -16,13 +16,16 @@ import journeyFallback from "@/assets/journey-fallback.png";
 export function HomeScreen() {
   const { setStep, xp, totalXp, streak } = useGame();
   const ringPct = Math.min(100, (xp / totalXp) * 100);
-  const heroChar = useMemo(() => {
-    const characters = [
-      { img: leo, name: "Leo", alt: "Leo holding a small bird" },
-      { img: maya, name: "Maya", alt: "Maya looking thoughtful" },
-    ];
-    return characters[Math.floor(Date.now() / 60000) % characters.length];
-  }, []);
+  const characters = [
+    { img: leo, name: "Leo", alt: "Leo holding a small bird" },
+    { img: maya, name: "Maya", alt: "Maya looking thoughtful" },
+  ];
+  const [idx, setIdx] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setIdx((i) => (i + 1) % characters.length), 4000);
+    return () => clearInterval(id);
+  }, [characters.length]);
+  const heroChar = characters[idx];
 
   return (
     <div className="flex min-h-[100dvh] flex-col bg-background">
