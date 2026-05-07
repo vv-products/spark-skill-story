@@ -24,18 +24,42 @@ const FALLBACK_SLIDES: HeroSlide[] = [
 export function HomeScreen() {
   const { setStep, xp, totalXp, streak } = useGame();
   const ringPct = Math.min(100, (xp / totalXp) * 100);
-  const characters = [
-    { img: leo, name: "Leo", alt: "Leo holding a small bird" },
-    { img: maya, name: "Maya", alt: "Maya looking thoughtful" },
-  ];
-  const MAYA_ONLY_TEST_MODE = true; // TEMP: force Maya to verify rendering
-  const [idx, setIdx] = useState(MAYA_ONLY_TEST_MODE ? 1 : 0);
+
+  const [cmsCards, setCmsCards] = useState<WelcomeCard[] | null>(null);
   useEffect(() => {
-    if (MAYA_ONLY_TEST_MODE) return;
-    const id = setInterval(() => setIdx((i) => (i + 1) % characters.length), 4000);
+    let alive = true;
+    listActiveWelcomeCards()
+      .then((c) => { if (alive) setCmsCards(c); })
+      .catch(() => { if (alive) setCmsCards([]); });
+    return () => { alive = false; };
+  }, []);
+
+  const slides: HeroSlide[] =
+    cmsCards && cmsCards.length > 0
+      ? cmsCards.map((c) => ({
+          img: c.hero_image_url || journeyFallback,
+          alt: c.headline,
+          headline: c.headline,
+          ctaLabel: c.cta_label,
+          ctaHref: c.cta_destination,
+        }))
+      : FALLBACK_SLIDES;
+
+  const [idx, setIdx] = useState(0);
+  useEffect(() => {
+    if (slides.length <= 1) return;
+    const id = setInterval(() => setIdx((i) => (i + 1) % slides.length), 4000);
     return () => clearInterval(id);
-  }, [characters.length]);
-  const heroChar = characters[idx];
+  }, [slides.length]);
+  const hero = slides[idx % slides.length];
+
+  function handleHeroCta() {
+    if (hero.ctaHref && hero.ctaHref !== "/" && hero.ctaHref.length > 0) {
+      window.location.href = hero.ctaHref;
+    } else {
+      setStep("intro");
+    }
+  }
 
   return (
     <div className="flex min-h-[100dvh] flex-col bg-background">
