@@ -71,7 +71,7 @@ export function HomeScreen() {
         <SectionHeader title="Your Journey" />
         <div className="-mx-5 mt-2 flex gap-3 overflow-x-auto px-5 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <JourneyCard
-            image={zara}
+            image={journeyFallback}
             title="Zara Gets Angry 😤"
             subtitle="Emotional Control"
             tags={["Emotions", "Episode 5"]}
@@ -82,7 +82,7 @@ export function HomeScreen() {
             current
           />
           <JourneyCard
-            image={dash}
+            image={journeyFallback}
             title="The Big Choice"
             subtitle="Decision Making"
             tags={["Decisions", "Episode 3"]}
@@ -91,7 +91,7 @@ export function HomeScreen() {
             onClick={() => setStep("intro")}
           />
           <JourneyCard
-            image={pip}
+            image={journeyFallback}
             title="Pip's Curiosity"
             subtitle="Discovery"
             tags={["Curiosity", "Episode 2"]}
@@ -99,9 +99,6 @@ export function HomeScreen() {
             ctaVariant="dark"
             onClick={() => setStep("intro")}
           />
-        </div>
-
-        {/* Your Missions */}
         <SectionHeader title="Your Missions" />
         <div className="-mx-5 mt-2 flex gap-3 overflow-x-auto px-5 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <JourneyCard
