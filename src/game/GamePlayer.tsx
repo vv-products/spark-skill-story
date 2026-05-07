@@ -217,30 +217,28 @@ export function GameHome() {
         {/* Your Journey */}
         <SectionHeader title="Your Journey" viewAllSlug={classes?.[0]?.slug} />
         <div className="-mx-5 mt-2 flex gap-3 overflow-x-auto px-5 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {classes == null ? (
+          {classes == null || pillars == null ? (
             <div className="text-sm text-text-secondary">Loading…</div>
-          ) : journeyClasses.length === 0 ? (
+          ) : journeyEntries.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-border bg-card p-6 text-center text-sm text-text-secondary">
               No classes yet.
             </div>
-          ) : journeyClasses.map((c) => {
-            const done = progress.completedClassIds.has(c.id);
-            const earnedHere = progress.perClass.get(c.id)?.xp ?? 0;
-            const totalHere = xpTotals.get(c.id) ?? 0;
-            const inProgress = !done && earnedHere > 0;
-            const pct = totalHere > 0 ? Math.min(100, Math.round((earnedHere / totalHere) * 100)) : 0;
+          ) : journeyEntries.map((e, idx) => {
+            const image = e.nextClass.heroImageUrl || FALLBACK_IMAGES[idx % FALLBACK_IMAGES.length];
+            const ctaLabel = e.state === "done" ? "Replay" : e.state === "in_progress" ? "Continue" : "Start";
             return (
               <JourneyCard
-                key={c.id}
-                slug={c.slug}
-                image={classImage(c)}
-                title={c.title}
-                subtitle={c.subtitle ?? `Class ${String(c.position).padStart(2, "0")}`}
-                tags={[done ? "Completed" : inProgress ? "In progress" : "New", `Class ${c.position}`]}
-                cta={done ? "Replay →" : inProgress ? "Continue →" : "Start →"}
-                ctaVariant={inProgress || done ? "primary" : "dark"}
-                progress={inProgress ? pct : undefined}
-                current={continueClass?.id === c.id}
+                key={e.pillar.id}
+                slug={e.nextClass.slug}
+                image={image}
+                className={e.nextClass.title}
+                moduleName={e.module.name}
+                topicName={e.topic.name}
+                pillarName={e.pillar.name}
+                pillarEmoji={e.pillar.emoji}
+                pct={e.pct}
+                cta={ctaLabel}
+                ctaVariant={e.state === "new" ? "dark" : "primary"}
               />
             );
           })}
