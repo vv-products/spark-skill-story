@@ -6,6 +6,7 @@ import { Btn } from "./ui";
 const NAV = [
   { key: "dashboard", label: "Dashboard", icon: "▦" },
   { key: "library", label: "Content Library", icon: "▤" },
+  { key: "welcome-cards", label: "Welcome Cards", icon: "★" },
   { key: "task-types", label: "Task Types", icon: "◇" },
 ] as const;
 
@@ -15,6 +16,7 @@ export function StudioLayout({ children, title, actions }: { children: ReactNode
   const active =
     view.kind === "dashboard" ? "dashboard" :
     view.kind === "task-types" ? "task-types" :
+    view.kind === "welcome-cards" ? "welcome-cards" :
     "library";
 
   return (
@@ -35,6 +37,7 @@ export function StudioLayout({ children, title, actions }: { children: ReactNode
                   if (item.key === "dashboard") setView({ kind: "dashboard" });
                   else if (item.key === "library") setView({ kind: "library" });
                   else if (item.key === "task-types") setView({ kind: "task-types" });
+                  else if (item.key === "welcome-cards") setView({ kind: "welcome-cards" });
                 }}
                 className={`mb-1 flex w-full items-center gap-3 rounded-[8px] px-3 py-2.5 text-left text-sm font-medium transition-colors ${
                   isActive ? "bg-[#7B2FBE] text-white" : "text-[#AAAACC] hover:bg-white/5 hover:text-white"
