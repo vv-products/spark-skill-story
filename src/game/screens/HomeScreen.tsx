@@ -1,7 +1,8 @@
 import { useGame } from "../GameContext";
 import { BottomNav } from "../Chrome";
 import leo from "@/assets/leo.jpg";
-import zara from "@/assets/maya.jpg";
+import maya from "@/assets/maya.jpg";
+import { useMemo } from "react";
 import dash from "@/assets/dash.jpg";
 import pip from "@/assets/pip.jpg";
 import liveEvents from "@/assets/live-events.jpg";
