@@ -1,7 +1,8 @@
 import { useGame } from "../GameContext";
 import { BottomNav } from "../Chrome";
 import leo from "@/assets/leo.jpg";
-import zara from "@/assets/maya.jpg";
+import maya from "@/assets/maya.jpg";
+import { useMemo } from "react";
 import dash from "@/assets/dash.jpg";
 import pip from "@/assets/pip.jpg";
 import liveEvents from "@/assets/live-events.jpg";
@@ -15,6 +16,13 @@ import journeyFallback from "@/assets/journey-fallback.png";
 export function HomeScreen() {
   const { setStep, xp, totalXp, streak } = useGame();
   const ringPct = Math.min(100, (xp / totalXp) * 100);
+  const heroChar = useMemo(() => {
+    const characters = [
+      { img: leo, name: "Leo", alt: "Leo holding a small bird" },
+      { img: maya, name: "Maya", alt: "Maya looking thoughtful" },
+    ];
+    return characters[Math.floor(Date.now() / 60000) % characters.length];
+  }, []);
 
   return (
     <div className="flex min-h-[100dvh] flex-col bg-background">
@@ -43,7 +51,7 @@ export function HomeScreen() {
                 Alex <span>👋</span>
               </p>
               <h2 className="mt-3 text-2xl font-black leading-tight drop-shadow-md">
-                Leo needs your<br />help today...
+                {heroChar.name} needs your<br />help today...
               </h2>
               <button
                 onClick={() => setStep("intro")}
@@ -53,8 +61,8 @@ export function HomeScreen() {
               </button>
             </div>
             <img
-              src={leo}
-              alt="Leo holding a small bird"
+              src={heroChar.img}
+              alt={heroChar.alt}
               className="h-40 w-32 -mr-2 -mt-2 rounded-2xl object-cover shadow-pop animate-float-soft"
             />
           </div>
