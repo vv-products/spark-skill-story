@@ -399,11 +399,74 @@ function SectionHeader({ title, subtitle, hideAll, viewAllSlug }: { title: strin
   );
 }
 
+function CircularProgress({ pct, size = 48 }: { pct: number; size?: number }) {
+  const stroke = 5;
+  const r = (size - stroke) / 2;
+  const c = 2 * Math.PI * r;
+  const offset = c - (Math.max(0, Math.min(100, pct)) / 100) * c;
+  return (
+    <div className="relative inline-flex items-center justify-center" style={{ width: size, height: size }}>
+      <svg width={size} height={size} className="-rotate-90">
+        <circle cx={size / 2} cy={size / 2} r={r} stroke="rgba(255,255,255,0.35)" strokeWidth={stroke} fill="none" />
+        <circle
+          cx={size / 2} cy={size / 2} r={r}
+          stroke="white" strokeWidth={stroke} fill="none" strokeLinecap="round"
+          strokeDasharray={c} strokeDashoffset={offset}
+        />
+      </svg>
+      <span className="absolute text-[10px] font-extrabold text-white">{Math.round(pct)}%</span>
+    </div>
+  );
+}
+
 function JourneyCard({
-  slug, image, title, subtitle, tags, cta, ctaVariant, progress, current,
+  slug, image, className, moduleName, topicName, pillarName, pillarEmoji, pct, cta, ctaVariant,
+}: {
+  slug: string; image: string;
+  className: string; moduleName: string; topicName: string;
+  pillarName: string; pillarEmoji: string;
+  pct: number; cta: string; ctaVariant: "primary" | "dark";
+}) {
+  return (
+    <Link
+      to="/play/$slug"
+      params={{ slug }}
+      className="flex w-[260px] shrink-0 flex-col overflow-hidden rounded-2xl bg-card shadow-card"
+    >
+      <div className="relative h-32 w-full overflow-hidden">
+        <img src={image} alt="" className="h-full w-full object-cover" />
+        <div className="absolute right-2 top-2 rounded-full bg-black/45 p-1 backdrop-blur-sm">
+          <CircularProgress pct={pct} size={44} />
+        </div>
+      </div>
+      <div className="flex flex-1 flex-col p-3">
+        <p className="line-clamp-1 text-sm font-extrabold leading-tight text-foreground">{className}</p>
+        <p className="mt-0.5 line-clamp-1 text-[11px] font-bold text-text-secondary">{moduleName}</p>
+        <p className="line-clamp-1 text-[11px] font-bold text-text-secondary">{topicName}</p>
+        <div
+          className={`mt-3 w-full rounded-pill py-2 text-center text-xs font-extrabold ${
+            ctaVariant === "primary"
+              ? "bg-primary text-primary-foreground shadow-pop"
+              : "bg-foreground text-primary-foreground"
+          }`}
+        >
+          {cta}
+        </div>
+        <div className="mt-2 flex">
+          <span className="rounded-pill bg-tag px-2 py-0.5 text-[10px] font-extrabold text-tag-foreground">
+            {pillarEmoji} {pillarName}
+          </span>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+function MissionCard({
+  slug, image, title, subtitle, tags, cta, ctaVariant, progress,
 }: {
   slug: string; image: string; title: string; subtitle: string; tags: string[]; cta: string;
-  ctaVariant: "primary" | "dark"; progress?: number; current?: boolean;
+  ctaVariant: "primary" | "dark"; progress?: number;
 }) {
   return (
     <Link
@@ -431,14 +494,12 @@ function JourneyCard({
         >
           {cta}
         </div>
-        <div className="mt-2 flex items-center justify-between">
-          <div className="flex flex-wrap gap-1">
-            {tags.map((t) => (
-              <span key={t} className="rounded-pill bg-tag px-2 py-0.5 text-[10px] font-extrabold text-tag-foreground">
-                {t}
-              </span>
-            ))}
-          </div>
+        <div className="mt-2 flex flex-wrap gap-1">
+          {tags.map((t) => (
+            <span key={t} className="rounded-pill bg-tag px-2 py-0.5 text-[10px] font-extrabold text-tag-foreground">
+              {t}
+            </span>
+          ))}
         </div>
       </div>
     </Link>
