@@ -247,7 +247,7 @@ export function GameHome() {
         {/* Your Missions */}
         <SectionHeader title="Your Missions" viewAllSlug={classes?.[0]?.slug} />
         <div className="-mx-5 mt-2 flex gap-3 overflow-x-auto px-5 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <JourneyCard
+          <MissionCard
             slug={classes?.[0]?.slug ?? ""}
             image={missionStorytimeImg}
             title="Leo's Story Time"
@@ -256,7 +256,7 @@ export function GameHome() {
             cta="Start →"
             ctaVariant="dark"
           />
-          <JourneyCard
+          <MissionCard
             slug={classes?.[1]?.slug ?? ""}
             image={missionTreasureImg}
             title="Pip's Treasure"
