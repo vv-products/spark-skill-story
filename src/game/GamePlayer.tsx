@@ -662,8 +662,12 @@ function PodiumLeaderboard({
             >
               <div className="relative">
                 {isFirst && <div className="absolute -top-3 left-1/2 -translate-x-1/2 text-base">👑</div>}
-                <div className={`h-12 w-12 overflow-hidden rounded-full ring-4 ${isFirst ? "ring-primary" : "ring-card"} shadow-card`}>
-                  <Avatar config={cfg} size={48} />
+                <div className={`h-12 w-12 overflow-hidden rounded-full ring-4 ${isFirst ? "ring-primary" : "ring-card"} shadow-card bg-muted`}>
+                  {entry.avatar_image_url ? (
+                    <img src={entry.avatar_image_url} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    <Avatar config={cfg} size={48} />
+                  )}
                 </div>
               </div>
               <p className="mt-1.5 max-w-[6.5rem] truncate text-[11px] font-extrabold text-foreground">
@@ -696,8 +700,12 @@ function PodiumLeaderboard({
                 <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted text-[11px] font-black text-text-secondary">
                   {i + 4}
                 </span>
-                <div className="h-9 w-9 overflow-hidden rounded-full ring-2 ring-card">
-                  <Avatar config={cfg} size={36} />
+                <div className="h-9 w-9 overflow-hidden rounded-full ring-2 ring-card bg-muted">
+                  {entry.avatar_image_url ? (
+                    <img src={entry.avatar_image_url} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    <Avatar config={cfg} size={36} />
+                  )}
                 </div>
                 <div className="flex-1">
                   <p className="text-sm font-extrabold text-foreground">
