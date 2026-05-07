@@ -99,6 +99,9 @@ export function HomeScreen() {
             ctaVariant="dark"
             onClick={() => setStep("intro")}
           />
+        </div>
+
+        {/* Your Missions */}
         <SectionHeader title="Your Missions" />
         <div className="-mx-5 mt-2 flex gap-3 overflow-x-auto px-5 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <JourneyCard
