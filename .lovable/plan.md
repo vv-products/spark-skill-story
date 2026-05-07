@@ -1,66 +1,29 @@
-## Goal
-Replace the current "Your Journey" rail (5 class cards from a single ordering) with **exactly 4 cards — one per pillar**. Each card represents the most relevant module in that pillar for the user, with module-level progress and a clear Start/Continue CTA.
+## Issue
 
-## Card content (each of the 4 cards)
+The seed import created NEW duplicate modules ("Using My Words", "A or B?", "Being a Good Example") at position 6 in each topic and attached the 10 classes to those, instead of populating the existing position-1 modules already in the catalog.
 
-```text
-┌──────────────────────────┐
-│  [hero image]      ◐ 45% │  ← circular progress + % overlay
-│                          │
-├──────────────────────────┤
-│ Class: <next class name> │  line 1
-│ Module: <module name>    │  line 2
-│ Topic: <topic name>      │  line 3
-│                          │
-│   [ Start ] / [Continue] │  full-width pill button
-│                          │
-│   • <Pillar name> pill   │  pill tag below button
-└──────────────────────────┘
-```
+Duplicates (position 6, with 10 classes):
+- Communication Skills → `9a53986c…` "Using My Words"
+- Decision Making → `e31be56c…` "A or B?"
+- Leadership → `0cf3d01e…` "Being a Good Example"
 
-- **Module shown per pillar**:
-  1. If any module in the pillar is *in progress* (≥1 class started but not all classes completed) → show that one (most recently touched).
-  2. Else → show the next *not-started* module (lowest position whose classes are all unstarted).
-  3. Else (everything in the pillar is completed) → show the last completed module with 100%.
-- **Class shown on card**: within that module, the next class to play (first not-completed; if all completed, the last one).
-- **Hero image**: that class's `heroImageUrl` if set, else fallback (existing `FALLBACK_IMAGES` rotation).
-- **Progress %**: completed classes ÷ total classes in module × 100 (module-level, not class-level).
-- **Button label**: `Continue` if any class in the module has progress; otherwise `Start`. (If module 100% done → `Replay`.)
-- **Pillar pill**: pillar emoji + name, styled like existing tag pills.
-- Card click navigates to `/play/$slug` for the chosen class (same as today).
+Existing target modules (position 1, currently empty):
+- Communication Skills → `9b160bad…` "Using My Words"
+- Decision Making → `80b8e4b1…` "A or B?"
+- Leadership → `2a15e3c5…` "Being a Good Example"
 
-## Implementation
+## Fix
 
-**File: `src/game/GamePlayer.tsx`** (only file touched)
+Run a data migration (insert tool) that for each of the 3 pairs:
 
-1. **Load the full catalog** alongside the existing class list:
-   - Add `loadFullCatalog` (already exported from `src/studio/catalog.ts`) to the initial `Promise.all` in `GameHome`.
-   - Store as `pillars: HPillar[] | null` in state.
-2. **Filter to published classes only** when computing per-pillar selections (use the existing `loadPublishedClasses` result as a `Set<classId>` of valid IDs; ignore drafts inside modules).
-3. **Replace `journeyClasses` memo** with a new `journeyEntries` memo returning up to 4 items of shape:
-   ```ts
-   { pillar: HPillar; topic: HTopic; module: HModule; nextClass: HClass;
-     completedCount: number; totalCount: number; pct: number;
-     state: "new" | "in_progress" | "done" }
-   ```
-   One entry per pillar, in pillar `position` order. Skip a pillar if it has zero published classes.
-4. **Render the rail** using the new entries. Replace the current `JourneyCard` usage with an updated `JourneyCard` that accepts `className`, `moduleName`, `topicName`, `pillarName`, `pillarEmoji`, `pct`, `state`, `image`, `slug`.
-5. **Update `JourneyCard`**:
-   - Show three text lines (class / module / topic) with truncation (`line-clamp-1`).
-   - Replace the small bottom-right `45% ◐` badge with a proper circular progress ring (SVG, ~44px) overlaid top-right of the image, showing the % in the center.
-   - Keep the full-width pill button (`Start` / `Continue` / `Replay`).
-   - Add a single pill below the button: `<emoji> <Pillar name>`.
-   - Drop the old `tags` and `current` props (and the `current` border logic — already removed previously).
+1. `UPDATE classes SET module_id = <target_id> WHERE module_id = <duplicate_id>` — moves all 10 classes (and their layers cascade via class_id) onto the existing module.
+2. `DELETE FROM modules WHERE id = <duplicate_id>` — removes the duplicate position-6 module.
 
-## Edge cases
+No code or schema changes needed — `loadFullCatalog` already reads classes by `module_id`, so the UI will reflect the move immediately.
 
-- **Pillar has no published classes** → omit (fewer than 4 cards is acceptable).
-- **Guest / signed-out user** → `state` is always `new`, pct is `0`, button shows `Start`. Behaviour matches today's empty-progress path.
-- **Module has zero classes** → skip module, fall through to next candidate in same pillar.
-- **Loading** → keep existing "Loading…" placeholder until both `classes` and `pillars` resolve.
+## Verification
 
-## Out of scope
-
-- No DB schema changes.
-- "Your Missions", "Fun Activities", and Leaderboard sections are untouched.
-- Hero banner ("Leo needs your help today…") and its `continueClass` logic stay as-is.
+After the migration, re-run the inventory query and confirm:
+- Each of the 3 target modules at position 1 shows `class_count = 10`.
+- The 3 duplicate modules at position 6 are gone.
+- Library screen shows "10/10 classes built" on the correct first module and no extra module at the bottom.
