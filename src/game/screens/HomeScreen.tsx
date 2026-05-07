@@ -87,19 +87,19 @@ export function HomeScreen() {
               <p className="text-base font-extrabold text-text-accent drop-shadow-sm">
                 Alex <span>👋</span>
               </p>
-              <h2 className="mt-3 text-2xl font-black leading-tight drop-shadow-md">
-                {heroChar.name} needs your<br />help today...
+              <h2 className="mt-3 whitespace-pre-line text-2xl font-black leading-tight drop-shadow-md">
+                {hero.headline}
               </h2>
               <button
-                onClick={() => setStep("intro")}
+                onClick={handleHeroCta}
                 className="mt-4 inline-flex items-center gap-1 rounded-pill bg-white px-5 py-2.5 text-sm font-extrabold text-primary shadow-card transition-transform active:scale-[0.97]"
               >
-                Start →
+                {hero.ctaLabel}
               </button>
             </div>
             <img
-              src={heroChar.img}
-              alt={heroChar.alt}
+              src={hero.img}
+              alt={hero.alt}
               className="h-40 w-32 -mr-2 -mt-2 rounded-2xl object-cover shadow-pop animate-float-soft"
             />
           </div>
