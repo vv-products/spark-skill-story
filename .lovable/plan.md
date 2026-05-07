@@ -1,29 +1,27 @@
-## Issue
+Switch the Welcome Card hero image from a 4:5 portrait sidekick to a **4:3 landscape banner** across the home screen, the Studio uploader, and the live preview — so what editors upload matches what learners see.
 
-The seed import created NEW duplicate modules ("Using My Words", "A or B?", "Being a Good Example") at position 6 in each topic and attached the 10 classes to those, instead of populating the existing position-1 modules already in the catalog.
+## Changes
 
-Duplicates (position 6, with 10 classes):
-- Communication Skills → `9a53986c…` "Using My Words"
-- Decision Making → `e31be56c…` "A or B?"
-- Leadership → `0cf3d01e…` "Being a Good Example"
+### 1. `src/game/screens/HomeScreen.tsx` — Hero layout
+Restructure the Welcome card from a side-by-side (text + portrait image) to a **stacked** layout:
+- Top: 4:3 landscape image banner (full card width), `object-cover`, rounded corners
+- Below: "Welcome back, Alex 👋", headline, CTA button
 
-Existing target modules (position 1, currently empty):
-- Communication Skills → `9b160bad…` "Using My Words"
-- Decision Making → `80b8e4b1…` "A or B?"
-- Leadership → `2a15e3c5…` "Being a Good Example"
+This makes the 4:3 image the visual anchor and removes the cramped portrait crop.
 
-## Fix
+### 2. `src/studio/screens/WelcomeCards.tsx`
+- **Uploader thumbnail**: change `aspect-[4/5]` → `aspect-[4/3]`, widen the editor image column from 160px to ~240px.
+- **Hint text** under the upload button: *"Recommended: 4:3 landscape, ~1200×900px. JPG or PNG, max 5MB."*
+- **Preview rotator (`WelcomeCardPreview`)**: rebuild to mirror the new home-screen stacked layout (4:3 banner on top, text + CTA below) so preview === reality.
 
-Run a data migration (insert tool) that for each of the 3 pairs:
+### 3. No DB migration needed
+The image URL column is unchanged; only the rendered aspect ratio changes.
 
-1. `UPDATE classes SET module_id = <target_id> WHERE module_id = <duplicate_id>` — moves all 10 classes (and their layers cascade via class_id) onto the existing module.
-2. `DELETE FROM modules WHERE id = <duplicate_id>` — removes the duplicate position-6 module.
+## Out of scope (deferred)
+- Per-card image-fit toggle (cover vs contain)
+- Multi-line headline textarea (can address separately if still needed after the layout change)
+- Seeding a 2nd starter card to demo rotation — you can add one in the CMS once the ratio fix lands.
 
-No code or schema changes needed — `loadFullCatalog` already reads classes by `module_id`, so the UI will reflect the move immediately.
-
-## Verification
-
-After the migration, re-run the inventory query and confirm:
-- Each of the 3 target modules at position 1 shows `class_count = 10`.
-- The 3 duplicate modules at position 6 are gone.
-- Library screen shows "10/10 classes built" on the correct first module and no extra module at the bottom.
+## Files touched
+- `src/game/screens/HomeScreen.tsx`
+- `src/studio/screens/WelcomeCards.tsx`
