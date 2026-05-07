@@ -10,6 +10,7 @@ import leoAvatar from "@/assets/leo-avatar.png";
 import mayaAvatar from "@/assets/maya-avatar.png";
 import dashAvatar from "@/assets/dash-avatar.png";
 import pipAvatar from "@/assets/pip-avatar.png";
+import journeyFallback from "@/assets/journey-fallback.png";
 
 export function HomeScreen() {
   const { setStep, xp, totalXp, streak } = useGame();
