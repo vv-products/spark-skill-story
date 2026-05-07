@@ -78,44 +78,57 @@ export function GameHome() {
     return classes.find((c) => !progress.completedClassIds.has(c.id)) ?? null;
   }, [classes, progress]);
 
-  const journeyClasses = useMemo<DbClass[]>(() => {
-    const all = classes ?? [];
-    if (all.length === 0) return [];
-    const hasProgress = progress.perClass.size > 0 || progress.completedClassIds.size > 0;
-    if (!user || !hasProgress) return all.slice(0, 5);
+  type JourneyEntry = {
+    pillar: HPillar; topic: HTopic; module: HModule; nextClass: HClass;
+    pct: number; state: "new" | "in_progress" | "done";
+  };
 
-    const byId = new Map(all.map((c) => [c.id, c]));
-    const ordered: DbClass[] = [];
-    const seen = new Set<string>();
-    const push = (c?: DbClass | null) => {
-      if (!c || seen.has(c.id)) return;
-      seen.add(c.id);
-      ordered.push(c);
-    };
+  const journeyEntries = useMemo<JourneyEntry[]>(() => {
+    if (!pillars || !classes) return [];
+    const publishedIds = new Set(classes.map((c) => c.id));
+    const result: JourneyEntry[] = [];
 
-    push(continueClass);
+    for (const pillar of pillars) {
+      type Cand = { topic: HTopic; module: HModule; pubClasses: HClass[]; completed: number; started: number; lastAt: number };
+      const cands: Cand[] = [];
+      for (const topic of pillar.topics) {
+        for (const module of topic.modules) {
+          const pubClasses = module.classes.filter((c) => publishedIds.has(c.id));
+          if (pubClasses.length === 0) continue;
+          let completed = 0, started = 0, lastAt = 0;
+          for (const c of pubClasses) {
+            if (progress.completedClassIds.has(c.id)) completed += 1;
+            const info = progress.perClass.get(c.id);
+            if (info && info.xp > 0) started += 1;
+            if (info && info.lastAt > lastAt) lastAt = info.lastAt;
+          }
+          cands.push({ topic, module, pubClasses, completed, started, lastAt });
+        }
+      }
+      if (cands.length === 0) continue;
 
-    const inProgress = Array.from(progress.perClass.entries())
-      .filter(([id, info]) => info.xp > 0 && !progress.completedClassIds.has(id))
-      .sort((a, b) => b[1].lastAt - a[1].lastAt)
-      .map(([id]) => byId.get(id))
-      .filter((c): c is DbClass => !!c);
-    inProgress.forEach(push);
+      // 1) in progress (any started, not all completed) — most recent
+      let chosen = cands
+        .filter((c) => c.started > 0 && c.completed < c.pubClasses.length)
+        .sort((a, b) => b.lastAt - a.lastAt)[0];
+      // 2) next not-started module by position
+      if (!chosen) chosen = cands.filter((c) => c.started === 0 && c.completed === 0)[0];
+      // 3) all done — last completed
+      if (!chosen) chosen = cands.filter((c) => c.completed === c.pubClasses.length).sort((a, b) => b.lastAt - a.lastAt)[0];
+      if (!chosen) chosen = cands[0];
 
-    const completed = Array.from(progress.completedClassIds)
-      .map((id) => ({ c: byId.get(id), t: progress.perClass.get(id)?.lastAt ?? 0 }))
-      .filter((x): x is { c: DbClass; t: number } => !!x.c)
-      .sort((a, b) => b.t - a.t)
-      .map((x) => x.c);
-    completed.forEach(push);
+      const nextClass =
+        chosen.pubClasses.find((c) => !progress.completedClassIds.has(c.id)) ?? chosen.pubClasses[chosen.pubClasses.length - 1];
 
-    for (const c of all) {
-      if (ordered.length >= 5) break;
-      push(c);
+      const pct = Math.round((chosen.completed / chosen.pubClasses.length) * 100);
+      const state: JourneyEntry["state"] =
+        chosen.completed === chosen.pubClasses.length ? "done" : chosen.started > 0 ? "in_progress" : "new";
+
+      result.push({ pillar, topic: chosen.topic, module: chosen.module, nextClass, pct, state });
+      if (result.length >= 4) break;
     }
-
-    return ordered.slice(0, 5);
-  }, [classes, progress, continueClass, user]);
+    return result;
+  }, [pillars, classes, progress]);
 
   if (loading) return <div className="flex h-[100dvh] items-center justify-center bg-[#F8F8FC] text-[#666]">Loading…</div>;
 
