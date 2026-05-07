@@ -77,17 +77,24 @@ export function HomeScreen() {
 
       <main className="flex-1 px-5 pb-6">
         {/* Hero */}
-        <div className="relative overflow-hidden rounded-[24px] [background:var(--gradient-hero)] p-5 text-primary-foreground shadow-pop">
+        <div className="relative overflow-hidden rounded-[24px] [background:var(--gradient-hero)] p-4 text-primary-foreground shadow-pop">
           <div className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full bg-white/10" />
           <div className="pointer-events-none absolute -bottom-12 -left-8 h-36 w-36 rounded-full bg-white/10" />
 
-          <div className="relative flex items-start justify-between gap-3">
-            <div className="flex-1 pt-1">
+          <div className="relative">
+            <div className="aspect-[4/3] w-full overflow-hidden rounded-2xl bg-white/10 shadow-pop">
+              <img
+                src={hero.img}
+                alt={hero.alt}
+                className="h-full w-full object-cover"
+              />
+            </div>
+            <div className="mt-4 px-1">
               <p className="text-xs font-bold text-white/85">Welcome back,</p>
               <p className="text-base font-extrabold text-text-accent drop-shadow-sm">
                 Alex <span>👋</span>
               </p>
-              <h2 className="mt-3 whitespace-pre-line text-2xl font-black leading-tight drop-shadow-md">
+              <h2 className="mt-2 whitespace-pre-line text-2xl font-black leading-tight drop-shadow-md">
                 {hero.headline}
               </h2>
               <button
@@ -97,11 +104,6 @@ export function HomeScreen() {
                 {hero.ctaLabel}
               </button>
             </div>
-            <img
-              src={hero.img}
-              alt={hero.alt}
-              className="h-40 w-32 -mr-2 -mt-2 rounded-2xl object-cover shadow-pop animate-float-soft"
-            />
           </div>
         </div>
 

@@ -159,10 +159,10 @@ function CardEditor({ card, onChanged }: { card: WelcomeCard; onChanged: () => v
         </div>
       </div>
 
-      <div className="grid grid-cols-[160px_1fr] gap-4">
+      <div className="grid grid-cols-[240px_1fr] gap-4">
         {/* Image */}
         <div>
-          <div className="aspect-[4/5] w-full overflow-hidden rounded-[8px] border border-dashed border-[#EBEBF5] bg-[#F8F8FC]">
+          <div className="aspect-[4/3] w-full overflow-hidden rounded-[8px] border border-dashed border-[#EBEBF5] bg-[#F8F8FC]">
             {draft.hero_image_url ? (
               <img src={draft.hero_image_url} alt={draft.headline} className="h-full w-full object-cover" />
             ) : (
@@ -174,6 +174,9 @@ function CardEditor({ card, onChanged }: { card: WelcomeCard; onChanged: () => v
             <Btn size="sm" variant="outline" onClick={() => fileRef.current?.click()} loading={uploading} disabled={uploading}>
               {uploading ? "Uploading…" : draft.hero_image_url ? "Replace" : "Upload"}
             </Btn>
+            <p className="text-[10px] leading-snug text-[#888]">
+              Recommended: 4:3 landscape, ~1200×900px. JPG or PNG, max 5MB.
+            </p>
             {draft.hero_image_url && !uploading && (
               <Btn size="sm" variant="ghost" onClick={async () => {
                 await updateWelcomeCard(card.id, { hero_image_url: null });
@@ -241,15 +244,22 @@ function PreviewRotator({ cards }: { cards: WelcomeCard[] }) {
 export function WelcomeCardPreview({ card }: { card: WelcomeCard }) {
   return (
     <div
-      className="relative overflow-hidden rounded-[20px] p-4 text-white shadow-pop"
+      className="relative overflow-hidden rounded-[20px] p-3 text-white shadow-pop"
       style={{ background: "linear-gradient(135deg, #7B2FBE 0%, #B66BFF 100%)" }}
     >
       <div className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white/10" />
-      <div className="relative flex items-start justify-between gap-2">
-        <div className="flex-1 pt-0.5">
+      <div className="relative">
+        <div className="aspect-[4/3] w-full overflow-hidden rounded-xl bg-white/15">
+          {card.hero_image_url ? (
+            <img src={card.hero_image_url} alt="" className="h-full w-full object-cover" />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-[10px] text-white/70">No image</div>
+          )}
+        </div>
+        <div className="mt-3 px-1 pb-1">
           <p className="text-[10px] font-bold text-white/85">Welcome back,</p>
           <p className="text-xs font-extrabold text-yellow-200 drop-shadow-sm">Alex 👋</p>
-          <h2 className="mt-2 text-lg font-black leading-tight drop-shadow-md">
+          <h2 className="mt-1.5 whitespace-pre-line text-base font-black leading-tight drop-shadow-md">
             {card.headline}
           </h2>
           {card.subtitle && (
@@ -258,13 +268,6 @@ export function WelcomeCardPreview({ card }: { card: WelcomeCard }) {
           <button className="mt-3 inline-flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-[11px] font-extrabold text-[#7B2FBE]">
             {card.cta_label}
           </button>
-        </div>
-        <div className="h-28 w-20 overflow-hidden rounded-xl bg-white/15">
-          {card.hero_image_url ? (
-            <img src={card.hero_image_url} alt="" className="h-full w-full object-cover" />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center text-[10px] text-white/70">No image</div>
-          )}
         </div>
       </div>
     </div>
