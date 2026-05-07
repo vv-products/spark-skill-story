@@ -13,6 +13,7 @@ type View =
   | { kind: "module"; pillarId: string; topicId: string; moduleId: string }
   | { kind: "class"; pillarId: string; topicId: string; moduleId: string; classId: string }
   | { kind: "task-types" }
+  | { kind: "welcome-cards" }
   | { kind: "admin" };
 
 type Ctx = {
