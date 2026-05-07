@@ -1,27 +1,17 @@
-Switch the Welcome Card hero image from a 4:5 portrait sidekick to a **4:3 landscape banner** across the home screen, the Studio uploader, and the live preview — so what editors upload matches what learners see.
+The hero card looks 4:3-ish because only the **inner image slot** is 16:9, while the surrounding card adds padding + the text block below it, making the overall shape taller. Match the reference: make the **whole card 16:9**, with the image as the background and text overlaid on the left.
 
-## Changes
+## Change — `src/game/screens/HomeScreen.tsx` (Hero block only)
 
-### 1. `src/game/screens/HomeScreen.tsx` — Hero layout
-Restructure the Welcome card from a side-by-side (text + portrait image) to a **stacked** layout:
-- Top: 4:3 landscape image banner (full card width), `object-cover`, rounded corners
-- Below: "Welcome back, Alex 👋", headline, CTA button
+Replace the current stacked layout (image banner on top, text below) with:
 
-This makes the 4:3 image the visual anchor and removes the cramped portrait crop.
+- Outer card: `aspect-video` (true 16:9), no padding, `overflow-hidden`, gradient as fallback background.
+- `<img>` absolutely positioned, `inset-0 h-full w-full object-cover object-right` — anchors the character to the right side so faces aren't cropped.
+- A left-to-right gradient overlay (`rgba(123,47,190,0.92) → transparent at 70%`) so the headline stays legible over the image.
+- Foreground stack uses `flex h-full flex-col justify-between p-5`:
+  - Top: "Welcome back," / "Alex 👋" / headline (constrained to `max-w-[55%]` so it doesn't overlap the character).
+  - Bottom: "Start →" CTA button, self-aligned left.
 
-### 2. `src/studio/screens/WelcomeCards.tsx`
-- **Uploader thumbnail**: change `aspect-[4/5]` → `aspect-[4/3]`, widen the editor image column from 160px to ~240px.
-- **Hint text** under the upload button: *"Recommended: 4:3 landscape, ~1200×900px. JPG or PNG, max 5MB."*
-- **Preview rotator (`WelcomeCardPreview`)**: rebuild to mirror the new home-screen stacked layout (4:3 banner on top, text + CTA below) so preview === reality.
-
-### 3. No DB migration needed
-The image URL column is unchanged; only the rendered aspect ratio changes.
-
-## Out of scope (deferred)
-- Per-card image-fit toggle (cover vs contain)
-- Multi-line headline textarea (can address separately if still needed after the layout change)
-- Seeding a 2nd starter card to demo rotation — you can add one in the CMS once the ratio fix lands.
+No CMS / preview changes — they already use `aspect-video`. (Optionally I can mirror this same overlay style in the Studio preview so it matches; say the word.)
 
 ## Files touched
-- `src/game/screens/HomeScreen.tsx`
-- `src/studio/screens/WelcomeCards.tsx`
+- `src/game/screens/HomeScreen.tsx` (lines ~79–108)

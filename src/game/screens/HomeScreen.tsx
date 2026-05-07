@@ -76,34 +76,31 @@ export function HomeScreen() {
       </div>
 
       <main className="flex-1 px-5 pb-6">
-        {/* Hero */}
-        <div className="relative overflow-hidden rounded-[24px] [background:var(--gradient-hero)] p-4 text-primary-foreground shadow-pop">
-          <div className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full bg-white/10" />
-          <div className="pointer-events-none absolute -bottom-12 -left-8 h-36 w-36 rounded-full bg-white/10" />
+        {/* Hero — 16:9 card with image as background, text overlaid */}
+        <div className="relative aspect-video w-full overflow-hidden rounded-[24px] [background:var(--gradient-hero)] text-primary-foreground shadow-pop">
+          <img
+            src={hero.img}
+            alt={hero.alt}
+            className="pointer-events-none absolute inset-0 h-full w-full object-cover object-right"
+          />
+          <div className="pointer-events-none absolute inset-0 [background:linear-gradient(90deg,rgba(123,47,190,0.92)_0%,rgba(123,47,190,0.7)_40%,rgba(123,47,190,0)_70%)]" />
 
-          <div className="relative">
-            <div className="aspect-video w-full overflow-hidden rounded-2xl bg-white/10 shadow-pop">
-              <img
-                src={hero.img}
-                alt={hero.alt}
-                className="h-full w-full object-cover"
-              />
-            </div>
-            <div className="mt-4 px-1">
+          <div className="relative flex h-full flex-col justify-between p-5">
+            <div>
               <p className="text-xs font-bold text-white/85">Welcome back,</p>
               <p className="text-base font-extrabold text-text-accent drop-shadow-sm">
                 Alex <span>👋</span>
               </p>
-              <h2 className="mt-2 whitespace-pre-line text-2xl font-black leading-tight drop-shadow-md">
+              <h2 className="mt-2 max-w-[55%] whitespace-pre-line text-xl font-black leading-tight drop-shadow-md">
                 {hero.headline}
               </h2>
-              <button
-                onClick={handleHeroCta}
-                className="mt-4 inline-flex items-center gap-1 rounded-pill bg-white px-5 py-2.5 text-sm font-extrabold text-primary shadow-card transition-transform active:scale-[0.97]"
-              >
-                {hero.ctaLabel}
-              </button>
             </div>
+            <button
+              onClick={handleHeroCta}
+              className="self-start rounded-pill bg-white px-5 py-2.5 text-sm font-extrabold text-primary shadow-card transition-transform active:scale-[0.97]"
+            >
+              {hero.ctaLabel}
+            </button>
           </div>
         </div>
 
