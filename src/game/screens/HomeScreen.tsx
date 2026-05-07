@@ -82,7 +82,7 @@ export function HomeScreen() {
           <div className="pointer-events-none absolute -bottom-12 -left-8 h-36 w-36 rounded-full bg-white/10" />
 
           <div className="relative">
-            <div className="aspect-[4/3] w-full overflow-hidden rounded-2xl bg-white/10 shadow-pop">
+            <div className="aspect-video w-full overflow-hidden rounded-2xl bg-white/10 shadow-pop">
               <img
                 src={hero.img}
                 alt={hero.alt}

@@ -162,7 +162,7 @@ function CardEditor({ card, onChanged }: { card: WelcomeCard; onChanged: () => v
       <div className="grid grid-cols-[240px_1fr] gap-4">
         {/* Image */}
         <div>
-          <div className="aspect-[4/3] w-full overflow-hidden rounded-[8px] border border-dashed border-[#EBEBF5] bg-[#F8F8FC]">
+          <div className="aspect-video w-full overflow-hidden rounded-[8px] border border-dashed border-[#EBEBF5] bg-[#F8F8FC]">
             {draft.hero_image_url ? (
               <img src={draft.hero_image_url} alt={draft.headline} className="h-full w-full object-cover" />
             ) : (
@@ -175,7 +175,7 @@ function CardEditor({ card, onChanged }: { card: WelcomeCard; onChanged: () => v
               {uploading ? "Uploading…" : draft.hero_image_url ? "Replace" : "Upload"}
             </Btn>
             <p className="text-[10px] leading-snug text-[#888]">
-              Recommended: 4:3 landscape, ~1200×900px. JPG or PNG, max 5MB.
+              Recommended: 16:9 landscape, ~1600×900px. JPG or PNG, max 5MB.
             </p>
             {draft.hero_image_url && !uploading && (
               <Btn size="sm" variant="ghost" onClick={async () => {
@@ -249,7 +249,7 @@ export function WelcomeCardPreview({ card }: { card: WelcomeCard }) {
     >
       <div className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white/10" />
       <div className="relative">
-        <div className="aspect-[4/3] w-full overflow-hidden rounded-xl bg-white/15">
+        <div className="aspect-video w-full overflow-hidden rounded-xl bg-white/15">
           {card.hero_image_url ? (
             <img src={card.hero_image_url} alt="" className="h-full w-full object-cover" />
           ) : (
