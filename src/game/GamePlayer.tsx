@@ -152,6 +152,16 @@ export function GameHome() {
 
   if (!user && !isGuest) return <PlayerSignIn onContinueAsGuest={() => setGuest(true)} />;
 
+  if (user && profileLoaded && needsAvatar) {
+    return (
+      <AvatarPicker
+        userId={user.id}
+        fullscreen
+        onPicked={(a) => { setAvatarImageUrl(a.image_url); setNeedsAvatar(false); }}
+      />
+    );
+  }
+
   const continueXpEarned = continueClass ? (progress.perClass.get(continueClass.id)?.xp ?? 0) : 0;
   const continueXpTotal = continueClass ? (xpTotals.get(continueClass.id) ?? 0) : 0;
   const continuePct = continueXpTotal > 0 ? Math.min(100, Math.round((continueXpEarned / continueXpTotal) * 100)) : 0;
@@ -178,7 +188,11 @@ export function GameHome() {
             className="h-10 w-10 overflow-hidden rounded-full ring-2 ring-card shadow-card disabled:cursor-default"
             aria-label="Edit your profile"
           >
-            <Avatar config={avatarCfg} size={40} />
+            {avatarImageUrl ? (
+              <img src={avatarImageUrl} alt="" className="h-full w-full object-cover" />
+            ) : (
+              <Avatar config={avatarCfg} size={40} />
+            )}
           </button>
         </div>
       </div>
