@@ -233,7 +233,6 @@ export function GameHome() {
                 image={image}
                 className={e.nextClass.title}
                 moduleName={e.module.name}
-                topicName={e.topic.name}
                 pillarName={e.pillar.name}
                 pillarEmoji={e.pillar.emoji}
                 pct={e.pct}
@@ -420,10 +419,10 @@ function CircularProgress({ pct, size = 48 }: { pct: number; size?: number }) {
 }
 
 function JourneyCard({
-  slug, image, className, moduleName, topicName, pillarName, pillarEmoji, pct, cta, ctaVariant,
+  slug, image, className, moduleName, pillarName, pillarEmoji, pct, cta, ctaVariant,
 }: {
   slug: string; image: string;
-  className: string; moduleName: string; topicName: string;
+  className: string; moduleName: string;
   pillarName: string; pillarEmoji: string;
   pct: number; cta: string; ctaVariant: "primary" | "dark";
 }) {
@@ -442,7 +441,6 @@ function JourneyCard({
       <div className="flex flex-1 flex-col p-3">
         <p className="line-clamp-1 text-sm font-extrabold leading-tight text-foreground">{className}</p>
         <p className="mt-0.5 line-clamp-1 text-[11px] font-bold text-text-secondary">{moduleName}</p>
-        <p className="line-clamp-1 text-[11px] font-bold text-text-secondary">{topicName}</p>
         <div
           className={`mt-3 w-full rounded-pill py-2 text-center text-xs font-extrabold ${
             ctaVariant === "primary"
