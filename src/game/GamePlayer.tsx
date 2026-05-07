@@ -22,6 +22,7 @@ import missionTreasureImg from "@/assets/mission-treasure.jpg";
 import iconStar from "@/assets/icon-star.png";
 import iconTrophy from "@/assets/icon-trophy.png";
 import iconFire from "@/assets/icon-fire.png";
+import { listActiveWelcomeCards, type WelcomeCard } from "@/studio/welcomeCards";
 
 const FALLBACK_IMAGES = [leoImg, mayaImg, dashImg, pipImg];
 const classImage = (c: DbClass) => c.hero_image_url || FALLBACK_IMAGES[c.position % FALLBACK_IMAGES.length];
