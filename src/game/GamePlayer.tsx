@@ -3,7 +3,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { Search, Bell } from "lucide-react";
 import { usePlayerAuth } from "./PlayerAuth";
 import { PlayerSignIn } from "./PlayerSignIn";
-import { loadPublishedClasses, loadPublishedClassXpTotals, type DbClass } from "@/studio/catalog";
+import { loadPublishedClasses, loadPublishedClassXpTotals, loadFullCatalog, type DbClass, type HPillar, type HTopic, type HModule, type HClass } from "@/studio/catalog";
 import { loadUserProgress, type UserProgress } from "./progress";
 import { Avatar } from "./avatar/Avatar";
 import { avatarFromSeed, type AvatarConfig } from "./avatar/config";
@@ -34,6 +34,7 @@ export function GameHome() {
   const { user, loading, isGuest, setGuest, signOut } = usePlayerAuth();
   const navigate = useNavigate();
   const [classes, setClasses] = useState<DbClass[] | null>(null);
+  const [pillars, setPillars] = useState<HPillar[] | null>(null);
   const [xpTotals, setXpTotals] = useState<Map<string, number>>(new Map());
   const [progress, setProgress] = useState<UserProgress>(EMPTY_PROGRESS);
   const [avatarCfg, setAvatarCfg] = useState<AvatarConfig | null>(null);
@@ -41,9 +42,9 @@ export function GameHome() {
   const [previewEntry, setPreviewEntry] = useState<LeaderboardEntry | null>(null);
 
   useEffect(() => {
-    Promise.all([loadPublishedClasses(), loadPublishedClassXpTotals()])
-      .then(([cls, totals]) => { setClasses(cls); setXpTotals(totals); })
-      .catch(() => setClasses([]));
+    Promise.all([loadPublishedClasses(), loadPublishedClassXpTotals(), loadFullCatalog()])
+      .then(([cls, totals, pl]) => { setClasses(cls); setXpTotals(totals); setPillars(pl); })
+      .catch(() => { setClasses([]); setPillars([]); });
   }, []);
   useEffect(() => {
     if (!user) { setProgress(EMPTY_PROGRESS); setAvatarCfg(null); setDisplayName(null); return; }
@@ -77,44 +78,57 @@ export function GameHome() {
     return classes.find((c) => !progress.completedClassIds.has(c.id)) ?? null;
   }, [classes, progress]);
 
-  const journeyClasses = useMemo<DbClass[]>(() => {
-    const all = classes ?? [];
-    if (all.length === 0) return [];
-    const hasProgress = progress.perClass.size > 0 || progress.completedClassIds.size > 0;
-    if (!user || !hasProgress) return all.slice(0, 5);
+  type JourneyEntry = {
+    pillar: HPillar; topic: HTopic; module: HModule; nextClass: HClass;
+    pct: number; state: "new" | "in_progress" | "done";
+  };
 
-    const byId = new Map(all.map((c) => [c.id, c]));
-    const ordered: DbClass[] = [];
-    const seen = new Set<string>();
-    const push = (c?: DbClass | null) => {
-      if (!c || seen.has(c.id)) return;
-      seen.add(c.id);
-      ordered.push(c);
-    };
+  const journeyEntries = useMemo<JourneyEntry[]>(() => {
+    if (!pillars || !classes) return [];
+    const publishedIds = new Set(classes.map((c) => c.id));
+    const result: JourneyEntry[] = [];
 
-    push(continueClass);
+    for (const pillar of pillars) {
+      type Cand = { topic: HTopic; module: HModule; pubClasses: HClass[]; completed: number; started: number; lastAt: number };
+      const cands: Cand[] = [];
+      for (const topic of pillar.topics) {
+        for (const module of topic.modules) {
+          const pubClasses = module.classes.filter((c) => publishedIds.has(c.id));
+          if (pubClasses.length === 0) continue;
+          let completed = 0, started = 0, lastAt = 0;
+          for (const c of pubClasses) {
+            if (progress.completedClassIds.has(c.id)) completed += 1;
+            const info = progress.perClass.get(c.id);
+            if (info && info.xp > 0) started += 1;
+            if (info && info.lastAt > lastAt) lastAt = info.lastAt;
+          }
+          cands.push({ topic, module, pubClasses, completed, started, lastAt });
+        }
+      }
+      if (cands.length === 0) continue;
 
-    const inProgress = Array.from(progress.perClass.entries())
-      .filter(([id, info]) => info.xp > 0 && !progress.completedClassIds.has(id))
-      .sort((a, b) => b[1].lastAt - a[1].lastAt)
-      .map(([id]) => byId.get(id))
-      .filter((c): c is DbClass => !!c);
-    inProgress.forEach(push);
+      // 1) in progress (any started, not all completed) — most recent
+      let chosen = cands
+        .filter((c) => c.started > 0 && c.completed < c.pubClasses.length)
+        .sort((a, b) => b.lastAt - a.lastAt)[0];
+      // 2) next not-started module by position
+      if (!chosen) chosen = cands.filter((c) => c.started === 0 && c.completed === 0)[0];
+      // 3) all done — last completed
+      if (!chosen) chosen = cands.filter((c) => c.completed === c.pubClasses.length).sort((a, b) => b.lastAt - a.lastAt)[0];
+      if (!chosen) chosen = cands[0];
 
-    const completed = Array.from(progress.completedClassIds)
-      .map((id) => ({ c: byId.get(id), t: progress.perClass.get(id)?.lastAt ?? 0 }))
-      .filter((x): x is { c: DbClass; t: number } => !!x.c)
-      .sort((a, b) => b.t - a.t)
-      .map((x) => x.c);
-    completed.forEach(push);
+      const nextClass =
+        chosen.pubClasses.find((c) => !progress.completedClassIds.has(c.id)) ?? chosen.pubClasses[chosen.pubClasses.length - 1];
 
-    for (const c of all) {
-      if (ordered.length >= 5) break;
-      push(c);
+      const pct = Math.round((chosen.completed / chosen.pubClasses.length) * 100);
+      const state: JourneyEntry["state"] =
+        chosen.completed === chosen.pubClasses.length ? "done" : chosen.started > 0 ? "in_progress" : "new";
+
+      result.push({ pillar, topic: chosen.topic, module: chosen.module, nextClass, pct, state });
+      if (result.length >= 4) break;
     }
-
-    return ordered.slice(0, 5);
-  }, [classes, progress, continueClass, user]);
+    return result;
+  }, [pillars, classes, progress]);
 
   if (loading) return <div className="flex h-[100dvh] items-center justify-center bg-[#F8F8FC] text-[#666]">Loading…</div>;
 
@@ -203,30 +217,28 @@ export function GameHome() {
         {/* Your Journey */}
         <SectionHeader title="Your Journey" viewAllSlug={classes?.[0]?.slug} />
         <div className="-mx-5 mt-2 flex gap-3 overflow-x-auto px-5 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {classes == null ? (
+          {classes == null || pillars == null ? (
             <div className="text-sm text-text-secondary">Loading…</div>
-          ) : journeyClasses.length === 0 ? (
+          ) : journeyEntries.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-border bg-card p-6 text-center text-sm text-text-secondary">
               No classes yet.
             </div>
-          ) : journeyClasses.map((c) => {
-            const done = progress.completedClassIds.has(c.id);
-            const earnedHere = progress.perClass.get(c.id)?.xp ?? 0;
-            const totalHere = xpTotals.get(c.id) ?? 0;
-            const inProgress = !done && earnedHere > 0;
-            const pct = totalHere > 0 ? Math.min(100, Math.round((earnedHere / totalHere) * 100)) : 0;
+          ) : journeyEntries.map((e, idx) => {
+            const image = e.nextClass.heroImageUrl || FALLBACK_IMAGES[idx % FALLBACK_IMAGES.length];
+            const ctaLabel = e.state === "done" ? "Replay" : e.state === "in_progress" ? "Continue" : "Start";
             return (
               <JourneyCard
-                key={c.id}
-                slug={c.slug}
-                image={classImage(c)}
-                title={c.title}
-                subtitle={c.subtitle ?? `Class ${String(c.position).padStart(2, "0")}`}
-                tags={[done ? "Completed" : inProgress ? "In progress" : "New", `Class ${c.position}`]}
-                cta={done ? "Replay →" : inProgress ? "Continue →" : "Start →"}
-                ctaVariant={inProgress || done ? "primary" : "dark"}
-                progress={inProgress ? pct : undefined}
-                current={continueClass?.id === c.id}
+                key={e.pillar.id}
+                slug={e.nextClass.slug}
+                image={image}
+                className={e.nextClass.title}
+                moduleName={e.module.name}
+                topicName={e.topic.name}
+                pillarName={e.pillar.name}
+                pillarEmoji={e.pillar.emoji}
+                pct={e.pct}
+                cta={ctaLabel}
+                ctaVariant={e.state === "new" ? "dark" : "primary"}
               />
             );
           })}
@@ -235,7 +247,7 @@ export function GameHome() {
         {/* Your Missions */}
         <SectionHeader title="Your Missions" viewAllSlug={classes?.[0]?.slug} />
         <div className="-mx-5 mt-2 flex gap-3 overflow-x-auto px-5 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <JourneyCard
+          <MissionCard
             slug={classes?.[0]?.slug ?? ""}
             image={missionStorytimeImg}
             title="Leo's Story Time"
@@ -244,7 +256,7 @@ export function GameHome() {
             cta="Start →"
             ctaVariant="dark"
           />
-          <JourneyCard
+          <MissionCard
             slug={classes?.[1]?.slug ?? ""}
             image={missionTreasureImg}
             title="Pip's Treasure"
@@ -387,11 +399,74 @@ function SectionHeader({ title, subtitle, hideAll, viewAllSlug }: { title: strin
   );
 }
 
+function CircularProgress({ pct, size = 48 }: { pct: number; size?: number }) {
+  const stroke = 5;
+  const r = (size - stroke) / 2;
+  const c = 2 * Math.PI * r;
+  const offset = c - (Math.max(0, Math.min(100, pct)) / 100) * c;
+  return (
+    <div className="relative inline-flex items-center justify-center" style={{ width: size, height: size }}>
+      <svg width={size} height={size} className="-rotate-90">
+        <circle cx={size / 2} cy={size / 2} r={r} stroke="rgba(255,255,255,0.35)" strokeWidth={stroke} fill="none" />
+        <circle
+          cx={size / 2} cy={size / 2} r={r}
+          stroke="white" strokeWidth={stroke} fill="none" strokeLinecap="round"
+          strokeDasharray={c} strokeDashoffset={offset}
+        />
+      </svg>
+      <span className="absolute text-[10px] font-extrabold text-white">{Math.round(pct)}%</span>
+    </div>
+  );
+}
+
 function JourneyCard({
-  slug, image, title, subtitle, tags, cta, ctaVariant, progress, current,
+  slug, image, className, moduleName, topicName, pillarName, pillarEmoji, pct, cta, ctaVariant,
+}: {
+  slug: string; image: string;
+  className: string; moduleName: string; topicName: string;
+  pillarName: string; pillarEmoji: string;
+  pct: number; cta: string; ctaVariant: "primary" | "dark";
+}) {
+  return (
+    <Link
+      to="/play/$slug"
+      params={{ slug }}
+      className="flex w-[260px] shrink-0 flex-col overflow-hidden rounded-2xl bg-card shadow-card"
+    >
+      <div className="relative h-32 w-full overflow-hidden">
+        <img src={image} alt="" className="h-full w-full object-cover" />
+        <div className="absolute right-2 top-2 rounded-full bg-black/45 p-1 backdrop-blur-sm">
+          <CircularProgress pct={pct} size={44} />
+        </div>
+      </div>
+      <div className="flex flex-1 flex-col p-3">
+        <p className="line-clamp-1 text-sm font-extrabold leading-tight text-foreground">{className}</p>
+        <p className="mt-0.5 line-clamp-1 text-[11px] font-bold text-text-secondary">{moduleName}</p>
+        <p className="line-clamp-1 text-[11px] font-bold text-text-secondary">{topicName}</p>
+        <div
+          className={`mt-3 w-full rounded-pill py-2 text-center text-xs font-extrabold ${
+            ctaVariant === "primary"
+              ? "bg-primary text-primary-foreground shadow-pop"
+              : "bg-foreground text-primary-foreground"
+          }`}
+        >
+          {cta}
+        </div>
+        <div className="mt-2 flex">
+          <span className="rounded-pill bg-tag px-2 py-0.5 text-[10px] font-extrabold text-tag-foreground">
+            {pillarEmoji} {pillarName}
+          </span>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+function MissionCard({
+  slug, image, title, subtitle, tags, cta, ctaVariant, progress,
 }: {
   slug: string; image: string; title: string; subtitle: string; tags: string[]; cta: string;
-  ctaVariant: "primary" | "dark"; progress?: number; current?: boolean;
+  ctaVariant: "primary" | "dark"; progress?: number;
 }) {
   return (
     <Link
@@ -419,14 +494,12 @@ function JourneyCard({
         >
           {cta}
         </div>
-        <div className="mt-2 flex items-center justify-between">
-          <div className="flex flex-wrap gap-1">
-            {tags.map((t) => (
-              <span key={t} className="rounded-pill bg-tag px-2 py-0.5 text-[10px] font-extrabold text-tag-foreground">
-                {t}
-              </span>
-            ))}
-          </div>
+        <div className="mt-2 flex flex-wrap gap-1">
+          {tags.map((t) => (
+            <span key={t} className="rounded-pill bg-tag px-2 py-0.5 text-[10px] font-extrabold text-tag-foreground">
+              {t}
+            </span>
+          ))}
         </div>
       </div>
     </Link>
