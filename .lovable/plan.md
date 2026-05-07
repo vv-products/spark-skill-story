@@ -1,23 +1,25 @@
-# Fix Welcome Card studio preview to match live hero
-
 ## Problem
-The studio "Welcome Cards" preview (right column of `/studio` Welcome Cards screen) renders the image as a small inset rectangle with text stacked **below** it on a solid purple panel — the "Maya" mock. That doesn't match the live home hero, which is a single 16:9 card with the image as the **background** and text overlaid on the left ("Leo" mock).
 
-The live hero (`src/game/GamePlayer.tsx`, recently fixed) is the source of truth.
+The home page at `/` renders `GameHome` from `src/game/GamePlayer.tsx`, whose hero card is **hardcoded** to Leo's image and "Leo needs your help today…" headline. It never queries `welcome_cards`, so newly-created/edited cards in Studio never appear.
 
-## Change — `src/studio/screens/WelcomeCards.tsx`
+(There's a second `HomeScreen.tsx` that *does* read CMS welcome cards via `listActiveWelcomeCards()` — but that component is not mounted on `/`. It's dead/legacy.)
 
-Rewrite `WelcomeCardPreview` (lines 230–261) to mirror the live hero exactly:
+## Fix — wire `GameHome` hero to CMS welcome cards
 
-- Outer: `relative aspect-video w-full overflow-hidden rounded-[20px] shadow-pop` with the existing purple gradient as fallback background.
-- `<img>` absolutely positioned `inset-0 h-full w-full object-cover object-right` (only when `hero_image_url` exists).
-- Left-to-right gradient overlay: `linear-gradient(90deg, rgba(123,47,190,0.92) 0%, rgba(123,47,190,0.7) 40%, rgba(123,47,190,0) 70%)`.
-- Foreground: `relative flex h-full flex-col justify-between p-4`.
-  - Top group (`max-w-[58%]`): "Welcome back," / `Alex 👋` (yellow) / headline (`text-[16px] font-black`) / optional subtitle.
-  - Bottom: white pill CTA, `self-start`.
-- Drop the decorative top-right white circle and the inner image-card pattern.
+In `src/game/GamePlayer.tsx`:
 
-Sizes are slightly smaller than the live hero because the studio preview frame is narrower (~320px), but the proportions and layering match.
+1. Import `listActiveWelcomeCards` and `WelcomeCard` from `@/studio/welcomeCards`, plus `useEffect`/`useState` (already in scope).
+2. Inside `GameHome`, fetch active cards once on mount into `cmsCards` state.
+3. Build a `slides` array from CMS cards; if none load, fall back to the current hardcoded Leo slide (`leoHeroImg` + "Leo needs your help today..." + Start → linking to `continueClass`).
+4. Add a 4-second rotation `setInterval` (skip when ≤1 slide), tracking `idx` in state.
+5. Render the active slide's `hero_image_url`, `headline` (with `whitespace-pre-line` so `\n` works), `cta_label`, and route the CTA:
+   - if `cta_destination` starts with `/play/` → use TanStack `<Link to="/play/$slug" params={{ slug }}>`,
+   - else if it's a non-`/` path → `window.location.href = destination`,
+   - else (default `/`) → keep current behavior (link to `continueClass`).
+6. Keep all existing layout/styling (16:9, gradient overlay, max-w-[58%], self-start CTA) — only the data source and CTA wiring change.
+
+## Optional cleanup
+- Delete unused `src/game/screens/HomeScreen.tsx` (and its sibling fallback imports if no other consumer) since `/` uses `GameHome` exclusively. Confirm with `rg "HomeScreen"` first; if anything still imports it, leave it alone.
 
 ## Files touched
-- `src/studio/screens/WelcomeCards.tsx` (lines 230–261)
+- `src/game/GamePlayer.tsx` (hero block, lines ~168–196, plus a small fetch effect above the JSX)
