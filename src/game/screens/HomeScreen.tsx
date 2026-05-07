@@ -12,6 +12,14 @@ import mayaAvatar from "@/assets/maya-avatar.png";
 import dashAvatar from "@/assets/dash-avatar.png";
 import pipAvatar from "@/assets/pip-avatar.png";
 import journeyFallback from "@/assets/journey-fallback.png";
+import { listActiveWelcomeCards, type WelcomeCard } from "@/studio/welcomeCards";
+
+type HeroSlide = { img: string; alt: string; headline: string; ctaLabel: string; ctaHref?: string };
+
+const FALLBACK_SLIDES: HeroSlide[] = [
+  { img: leo, alt: "Leo holding a small bird", headline: "Leo needs your\nhelp today...", ctaLabel: "Start →" },
+  { img: maya, alt: "Maya looking thoughtful", headline: "Maya needs your\nhelp today...", ctaLabel: "Start →" },
+];
 
 export function HomeScreen() {
   const { setStep, xp, totalXp, streak } = useGame();
