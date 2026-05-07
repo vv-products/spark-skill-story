@@ -37,6 +37,7 @@ export type LeaderboardEntry = {
   user_id: string;
   display_name: string | null;
   avatar_config: AvatarConfig | null;
+  avatar_image_url: string | null;
   age: number | null;
   bio: string | null;
   total_xp: number;
@@ -45,17 +46,11 @@ export type LeaderboardEntry = {
 export async function loadLeaderboard(limit = 20): Promise<LeaderboardEntry[]> {
   const { data, error } = await supabase.rpc("get_leaderboard", { _limit: limit });
   if (error) throw error;
-  return (data ?? []).map((r: {
-    user_id: string;
-    display_name: string | null;
-    avatar_config: unknown;
-    age: number | null;
-    bio: string | null;
-    total_xp: number | string;
-  }) => ({
+  return (data ?? []).map((r: any) => ({
     user_id: r.user_id,
     display_name: r.display_name,
     avatar_config: (r.avatar_config as AvatarConfig | null) ?? null,
+    avatar_image_url: r.avatar_image_url ?? null,
     age: r.age,
     bio: r.bio,
     total_xp: Number(r.total_xp ?? 0),

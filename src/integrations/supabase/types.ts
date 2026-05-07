@@ -450,6 +450,7 @@ export type Database = {
         Returns: {
           age: number
           avatar_config: Json
+          avatar_image_url: string
           bio: string
           display_name: string
           total_xp: number
