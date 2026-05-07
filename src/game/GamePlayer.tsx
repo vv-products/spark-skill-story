@@ -3,7 +3,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { Search, Bell } from "lucide-react";
 import { usePlayerAuth } from "./PlayerAuth";
 import { PlayerSignIn } from "./PlayerSignIn";
-import { loadPublishedClasses, loadPublishedClassXpTotals, type DbClass } from "@/studio/catalog";
+import { loadPublishedClasses, loadPublishedClassXpTotals, loadFullCatalog, type DbClass, type HPillar, type HTopic, type HModule, type HClass } from "@/studio/catalog";
 import { loadUserProgress, type UserProgress } from "./progress";
 import { Avatar } from "./avatar/Avatar";
 import { avatarFromSeed, type AvatarConfig } from "./avatar/config";
