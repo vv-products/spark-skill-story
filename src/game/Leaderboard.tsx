@@ -47,8 +47,12 @@ export function Leaderboard({ currentUserId, onSelect }: Props) {
                 }`}>
                   {rank}
                 </span>
-                <span className="block h-10 w-10 shrink-0 overflow-hidden rounded-full ring-2 ring-white shadow">
-                  <Avatar config={cfg} size={40} />
+                <span className="block h-10 w-10 shrink-0 overflow-hidden rounded-full ring-2 ring-white shadow bg-[#F0F0FA]">
+                  {r.avatar_image_url ? (
+                    <img src={r.avatar_image_url} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    <Avatar config={cfg} size={40} />
+                  )}
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-sm font-extrabold text-[#1A1A2E]">
