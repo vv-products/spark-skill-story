@@ -8,16 +8,19 @@ export type PlayerProfile = {
   avatar_config: AvatarConfig | null;
   bio: string | null;
   age: number | null;
+  avatar_id: string | null;
+  avatar_image_url: string | null;
 };
 
 export async function loadProfile(userId: string): Promise<PlayerProfile | null> {
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, display_name, avatar_url, avatar_config, bio, age")
+    .select("id, display_name, avatar_url, avatar_config, bio, age, avatar_id, avatars:avatar_id ( image_url )")
     .eq("id", userId)
     .maybeSingle();
   if (error) throw error;
   if (!data) return null;
+  const av = (data as any).avatars;
   return {
     id: data.id,
     display_name: data.display_name,
@@ -25,6 +28,8 @@ export async function loadProfile(userId: string): Promise<PlayerProfile | null>
     avatar_config: (data.avatar_config as unknown as AvatarConfig | null) ?? null,
     bio: data.bio,
     age: data.age,
+    avatar_id: (data as any).avatar_id ?? null,
+    avatar_image_url: av?.image_url ?? null,
   };
 }
 

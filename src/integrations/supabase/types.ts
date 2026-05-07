@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      avatars: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          image_url: string
+          position: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          image_url: string
+          position?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          image_url?: string
+          position?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       class_progress: {
         Row: {
           class_id: string
@@ -224,6 +251,7 @@ export type Database = {
         Row: {
           age: number | null
           avatar_config: Json | null
+          avatar_id: string | null
           avatar_url: string | null
           bio: string | null
           created_at: string
@@ -234,6 +262,7 @@ export type Database = {
         Insert: {
           age?: number | null
           avatar_config?: Json | null
+          avatar_id?: string | null
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
@@ -244,6 +273,7 @@ export type Database = {
         Update: {
           age?: number | null
           avatar_config?: Json | null
+          avatar_id?: string | null
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
@@ -251,7 +281,15 @@ export type Database = {
           id?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_avatar_id_fkey"
+            columns: ["avatar_id"]
+            isOneToOne: false
+            referencedRelation: "avatars"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       topics: {
         Row: {
