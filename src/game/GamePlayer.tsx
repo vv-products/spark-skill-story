@@ -41,12 +41,20 @@ export function GameHome() {
   const [avatarCfg, setAvatarCfg] = useState<AvatarConfig | null>(null);
   const [displayName, setDisplayName] = useState<string | null>(null);
   const [previewEntry, setPreviewEntry] = useState<LeaderboardEntry | null>(null);
+  const [welcomeCards, setWelcomeCards] = useState<WelcomeCard[]>([]);
+  const [heroIdx, setHeroIdx] = useState(0);
 
   useEffect(() => {
     Promise.all([loadPublishedClasses(), loadPublishedClassXpTotals(), loadFullCatalog()])
       .then(([cls, totals, pl]) => { setClasses(cls); setXpTotals(totals); setPillars(pl); })
       .catch(() => { setClasses([]); setPillars([]); });
+    listActiveWelcomeCards().then(setWelcomeCards).catch(() => setWelcomeCards([]));
   }, []);
+  useEffect(() => {
+    if (welcomeCards.length <= 1) return;
+    const id = setInterval(() => setHeroIdx((i) => (i + 1) % welcomeCards.length), 4000);
+    return () => clearInterval(id);
+  }, [welcomeCards.length]);
   useEffect(() => {
     if (!user) { setProgress(EMPTY_PROGRESS); setAvatarCfg(null); setDisplayName(null); return; }
     loadUserProgress(user.id).then(setProgress).catch(() => setProgress(EMPTY_PROGRESS));
