@@ -291,7 +291,6 @@ function JourneyCard({
       </div>
       <div className="flex flex-1 flex-col p-3">
         <p className="text-sm font-extrabold leading-tight text-foreground">{title}</p>
-        <p className="mt-0.5 text-[11px] font-bold text-text-secondary">{subtitle}</p>
         <button
           onClick={onClick}
           className={`mt-3 w-full rounded-pill py-2 text-xs font-extrabold transition-transform active:scale-[0.97] ${
