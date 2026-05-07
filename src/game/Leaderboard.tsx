@@ -85,8 +85,12 @@ export function ProfilePreviewCard({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex flex-col items-center text-center">
-          <div className="h-28 w-28 overflow-hidden rounded-full ring-4 ring-[#F4ECFB] shadow">
-            <Avatar config={cfg} size={112} />
+          <div className="h-28 w-28 overflow-hidden rounded-full ring-4 ring-[#F4ECFB] shadow bg-[#F0F0FA]">
+            {entry.avatar_image_url ? (
+              <img src={entry.avatar_image_url} alt="" className="h-full w-full object-cover" />
+            ) : (
+              <Avatar config={cfg} size={112} />
+            )}
           </div>
           <h3 className="mt-3 text-xl font-black text-[#1A1A2E]">{name}</h3>
           {entry.age != null && (
