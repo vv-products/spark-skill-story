@@ -244,31 +244,34 @@ function PreviewRotator({ cards }: { cards: WelcomeCard[] }) {
 export function WelcomeCardPreview({ card }: { card: WelcomeCard }) {
   return (
     <div
-      className="relative overflow-hidden rounded-[20px] p-3 text-white shadow-pop"
+      className="relative aspect-video w-full overflow-hidden rounded-[20px] text-white shadow-pop"
       style={{ background: "linear-gradient(135deg, #7B2FBE 0%, #B66BFF 100%)" }}
     >
-      <div className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white/10" />
-      <div className="relative">
-        <div className="aspect-video w-full overflow-hidden rounded-xl bg-white/15">
-          {card.hero_image_url ? (
-            <img src={card.hero_image_url} alt="" className="h-full w-full object-cover" />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center text-[10px] text-white/70">No image</div>
-          )}
-        </div>
-        <div className="mt-3 px-1 pb-1">
-          <p className="text-[10px] font-bold text-white/85">Welcome back,</p>
-          <p className="text-xs font-extrabold text-yellow-200 drop-shadow-sm">Alex 👋</p>
-          <h2 className="mt-1.5 whitespace-pre-line text-base font-black leading-tight drop-shadow-md">
+      {card.hero_image_url && (
+        <img
+          src={card.hero_image_url}
+          alt=""
+          className="pointer-events-none absolute inset-0 h-full w-full select-none object-cover object-right"
+        />
+      )}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{ background: "linear-gradient(90deg, rgba(123,47,190,0.92) 0%, rgba(123,47,190,0.7) 40%, rgba(123,47,190,0) 70%)" }}
+      />
+      <div className="relative flex h-full flex-col justify-between p-4">
+        <div className="max-w-[58%]">
+          <p className="text-[11px] font-semibold text-white/90">Welcome back,</p>
+          <p className="text-[13px] font-extrabold text-yellow-200 drop-shadow-sm">Alex 👋</p>
+          <h2 className="mt-1 whitespace-pre-line text-[16px] font-black leading-[1.15] drop-shadow-md">
             {card.headline}
           </h2>
           {card.subtitle && (
-            <p className="mt-1 text-[11px] font-semibold text-white/85">{card.subtitle}</p>
+            <p className="mt-1 text-[10px] font-semibold text-white/85">{card.subtitle}</p>
           )}
-          <button className="mt-3 inline-flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-[11px] font-extrabold text-[#7B2FBE]">
-            {card.cta_label}
-          </button>
         </div>
+        <button className="self-start inline-flex items-center gap-1 rounded-full bg-white px-4 py-2 text-[11px] font-extrabold text-[#7B2FBE] shadow-card">
+          {card.cta_label}
+        </button>
       </div>
     </div>
   );
