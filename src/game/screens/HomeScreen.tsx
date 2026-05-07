@@ -12,22 +12,54 @@ import mayaAvatar from "@/assets/maya-avatar.png";
 import dashAvatar from "@/assets/dash-avatar.png";
 import pipAvatar from "@/assets/pip-avatar.png";
 import journeyFallback from "@/assets/journey-fallback.png";
+import { listActiveWelcomeCards, type WelcomeCard } from "@/studio/welcomeCards";
+
+type HeroSlide = { img: string; alt: string; headline: string; ctaLabel: string; ctaHref?: string };
+
+const FALLBACK_SLIDES: HeroSlide[] = [
+  { img: leo, alt: "Leo holding a small bird", headline: "Leo needs your\nhelp today...", ctaLabel: "Start →" },
+  { img: maya, alt: "Maya looking thoughtful", headline: "Maya needs your\nhelp today...", ctaLabel: "Start →" },
+];
 
 export function HomeScreen() {
   const { setStep, xp, totalXp, streak } = useGame();
   const ringPct = Math.min(100, (xp / totalXp) * 100);
-  const characters = [
-    { img: leo, name: "Leo", alt: "Leo holding a small bird" },
-    { img: maya, name: "Maya", alt: "Maya looking thoughtful" },
-  ];
-  const MAYA_ONLY_TEST_MODE = true; // TEMP: force Maya to verify rendering
-  const [idx, setIdx] = useState(MAYA_ONLY_TEST_MODE ? 1 : 0);
+
+  const [cmsCards, setCmsCards] = useState<WelcomeCard[] | null>(null);
   useEffect(() => {
-    if (MAYA_ONLY_TEST_MODE) return;
-    const id = setInterval(() => setIdx((i) => (i + 1) % characters.length), 4000);
+    let alive = true;
+    listActiveWelcomeCards()
+      .then((c) => { if (alive) setCmsCards(c); })
+      .catch(() => { if (alive) setCmsCards([]); });
+    return () => { alive = false; };
+  }, []);
+
+  const slides: HeroSlide[] =
+    cmsCards && cmsCards.length > 0
+      ? cmsCards.map((c) => ({
+          img: c.hero_image_url || journeyFallback,
+          alt: c.headline,
+          headline: c.headline,
+          ctaLabel: c.cta_label,
+          ctaHref: c.cta_destination,
+        }))
+      : FALLBACK_SLIDES;
+
+  const [idx, setIdx] = useState(0);
+  useEffect(() => {
+    if (slides.length <= 1) return;
+    const id = setInterval(() => setIdx((i) => (i + 1) % slides.length), 4000);
     return () => clearInterval(id);
-  }, [characters.length]);
-  const heroChar = characters[idx];
+  }, [slides.length]);
+  const hero = slides[idx % slides.length];
+
+  function handleHeroCta() {
+    if (hero.ctaHref && hero.ctaHref !== "/" && hero.ctaHref.length > 0) {
+      window.location.href = hero.ctaHref;
+    } else {
+      setStep("intro");
+    }
+  }
 
   return (
     <div className="flex min-h-[100dvh] flex-col bg-background">
@@ -55,19 +87,19 @@ export function HomeScreen() {
               <p className="text-base font-extrabold text-text-accent drop-shadow-sm">
                 Alex <span>👋</span>
               </p>
-              <h2 className="mt-3 text-2xl font-black leading-tight drop-shadow-md">
-                {heroChar.name} needs your<br />help today...
+              <h2 className="mt-3 whitespace-pre-line text-2xl font-black leading-tight drop-shadow-md">
+                {hero.headline}
               </h2>
               <button
-                onClick={() => setStep("intro")}
+                onClick={handleHeroCta}
                 className="mt-4 inline-flex items-center gap-1 rounded-pill bg-white px-5 py-2.5 text-sm font-extrabold text-primary shadow-card transition-transform active:scale-[0.97]"
               >
-                Start →
+                {hero.ctaLabel}
               </button>
             </div>
             <img
-              src={heroChar.img}
-              alt={heroChar.alt}
+              src={hero.img}
+              alt={hero.alt}
               className="h-40 w-32 -mr-2 -mt-2 rounded-2xl object-cover shadow-pop animate-float-soft"
             />
           </div>

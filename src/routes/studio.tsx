@@ -8,6 +8,7 @@ import { LibraryScreen } from "@/studio/screens/Library";
 import { ModuleScreen } from "@/studio/screens/Module";
 import { ClassEditorScreen } from "@/studio/screens/ClassEditor";
 import { TaskTypesScreen } from "@/studio/screens/TaskTypesRef";
+import { WelcomeCardsScreen } from "@/studio/screens/WelcomeCards";
 
 export const Route = createFileRoute("/studio")({
   head: () => ({
@@ -34,6 +35,7 @@ function Router() {
     case "module": return <ModuleScreen />;
     case "class": return <ClassEditorScreen />;
     case "task-types": return <TaskTypesScreen />;
+    case "welcome-cards": return <WelcomeCardsScreen />;
   }
 }
 
