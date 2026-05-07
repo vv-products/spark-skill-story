@@ -185,8 +185,28 @@ export function GameHome() {
           const playMatch = dest.match(/^\/play\/([^/?#]+)/);
           const isExternal = !playMatch && dest !== "/" && dest.length > 0;
           const ctaClass = "inline-flex self-start items-center gap-1 rounded-pill bg-white px-5 py-2.5 text-[14px] font-extrabold text-primary shadow-card transition-transform active:scale-[0.97]";
+          const total = welcomeCards.length;
+          const goTo = (delta: number) => {
+            if (total <= 1) return;
+            setHeroIdx((i) => (i + delta + total) % total);
+          };
+          let touchStartX = 0;
+          let touchStartY = 0;
           return (
-            <div className="relative aspect-video w-full overflow-hidden rounded-[24px] [background:var(--gradient-hero)] text-primary-foreground shadow-pop">
+            <div
+              className="relative aspect-video w-full overflow-hidden rounded-[24px] [background:var(--gradient-hero)] text-primary-foreground shadow-pop touch-pan-y"
+              onTouchStart={(e) => {
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+              }}
+              onTouchEnd={(e) => {
+                const dx = e.changedTouches[0].clientX - touchStartX;
+                const dy = e.changedTouches[0].clientY - touchStartY;
+                if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+                  goTo(dx < 0 ? 1 : -1);
+                }
+              }}
+            >
               <img
                 src={heroImg}
                 alt=""
