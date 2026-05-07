@@ -8,6 +8,7 @@ import { loadUserProgress, type UserProgress } from "./progress";
 import { Avatar } from "./avatar/Avatar";
 import { avatarFromSeed, type AvatarConfig } from "./avatar/config";
 import { loadProfile } from "./profileApi";
+import { AvatarPicker } from "./AvatarPicker";
 import { ProfilePreviewCard } from "./Leaderboard";
 import { loadLeaderboard, type LeaderboardEntry } from "./profileApi";
 import leoImg from "@/assets/leo.jpg";
@@ -43,6 +44,9 @@ export function GameHome() {
   const [previewEntry, setPreviewEntry] = useState<LeaderboardEntry | null>(null);
   const [welcomeCards, setWelcomeCards] = useState<WelcomeCard[]>([]);
   const [heroIdx, setHeroIdx] = useState(0);
+  const [avatarImageUrl, setAvatarImageUrl] = useState<string | null>(null);
+  const [needsAvatar, setNeedsAvatar] = useState(false);
+  const [profileLoaded, setProfileLoaded] = useState(false);
 
   useEffect(() => {
     Promise.all([loadPublishedClasses(), loadPublishedClassXpTotals(), loadFullCatalog()])
@@ -56,20 +60,25 @@ export function GameHome() {
     return () => clearInterval(id);
   }, [welcomeCards.length]);
   useEffect(() => {
-    if (!user) { setProgress(EMPTY_PROGRESS); setAvatarCfg(null); setDisplayName(null); return; }
+    if (!user) {
+      setProgress(EMPTY_PROGRESS); setAvatarCfg(null); setDisplayName(null);
+      setAvatarImageUrl(null); setNeedsAvatar(false); setProfileLoaded(false);
+      return;
+    }
     loadUserProgress(user.id).then(setProgress).catch(() => setProgress(EMPTY_PROGRESS));
     loadProfile(user.id)
       .then((p) => {
-        // First-time onboarding: brand-new account → send to avatar setup before showing Home.
-        if (!p?.avatar_config && !p?.display_name) {
-          navigate({ to: "/profile" });
-          return;
-        }
         setAvatarCfg(p?.avatar_config ?? avatarFromSeed(user.id));
         setDisplayName(p?.display_name ?? null);
+        setAvatarImageUrl(p?.avatar_image_url ?? null);
+        setNeedsAvatar(!p?.avatar_id);
+        setProfileLoaded(true);
       })
-      .catch(() => setAvatarCfg(avatarFromSeed(user.id)));
-  }, [user, navigate]);
+      .catch(() => {
+        setAvatarCfg(avatarFromSeed(user.id));
+        setProfileLoaded(true);
+      });
+  }, [user]);
 
   // "Continue" = the most-recently-touched class that isn't completed yet.
   // Fallback for a brand-new signed-in user: first non-completed published class.
