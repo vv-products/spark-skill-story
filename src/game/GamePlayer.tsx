@@ -22,6 +22,7 @@ import missionTreasureImg from "@/assets/mission-treasure.jpg";
 import iconStar from "@/assets/icon-star.png";
 import iconTrophy from "@/assets/icon-trophy.png";
 import iconFire from "@/assets/icon-fire.png";
+import { listActiveWelcomeCards, type WelcomeCard } from "@/studio/welcomeCards";
 
 const FALLBACK_IMAGES = [leoImg, mayaImg, dashImg, pipImg];
 const classImage = (c: DbClass) => c.hero_image_url || FALLBACK_IMAGES[c.position % FALLBACK_IMAGES.length];
@@ -40,12 +41,20 @@ export function GameHome() {
   const [avatarCfg, setAvatarCfg] = useState<AvatarConfig | null>(null);
   const [displayName, setDisplayName] = useState<string | null>(null);
   const [previewEntry, setPreviewEntry] = useState<LeaderboardEntry | null>(null);
+  const [welcomeCards, setWelcomeCards] = useState<WelcomeCard[]>([]);
+  const [heroIdx, setHeroIdx] = useState(0);
 
   useEffect(() => {
     Promise.all([loadPublishedClasses(), loadPublishedClassXpTotals(), loadFullCatalog()])
       .then(([cls, totals, pl]) => { setClasses(cls); setXpTotals(totals); setPillars(pl); })
       .catch(() => { setClasses([]); setPillars([]); });
+    listActiveWelcomeCards().then(setWelcomeCards).catch(() => setWelcomeCards([]));
   }, []);
+  useEffect(() => {
+    if (welcomeCards.length <= 1) return;
+    const id = setInterval(() => setHeroIdx((i) => (i + 1) % welcomeCards.length), 4000);
+    return () => clearInterval(id);
+  }, [welcomeCards.length]);
   useEffect(() => {
     if (!user) { setProgress(EMPTY_PROGRESS); setAvatarCfg(null); setDisplayName(null); return; }
     loadUserProgress(user.id).then(setProgress).catch(() => setProgress(EMPTY_PROGRESS));
@@ -167,33 +176,65 @@ export function GameHome() {
 
       <main className="flex-1 px-5 pb-24">
         {/* Hero */}
-        <div className="relative aspect-video w-full overflow-hidden rounded-[24px] [background:var(--gradient-hero)] text-primary-foreground shadow-pop">
-          <img
-            src={leoHeroImg}
-            alt=""
-            className="pointer-events-none absolute inset-0 h-full w-full select-none object-cover object-right"
-          />
-          <div className="pointer-events-none absolute inset-0 [background:linear-gradient(90deg,rgba(123,47,190,0.92)_0%,rgba(123,47,190,0.7)_40%,rgba(123,47,190,0)_70%)]" />
+        {(() => {
+          const activeCard = welcomeCards.length > 0 ? welcomeCards[heroIdx % welcomeCards.length] : null;
+          const heroImg = activeCard?.hero_image_url || leoHeroImg;
+          const headline = activeCard?.headline || "Leo needs your help today...";
+          const ctaLabel = activeCard?.cta_label || "Start →";
+          const dest = activeCard?.cta_destination || "/";
+          const playMatch = dest.match(/^\/play\/([^/?#]+)/);
+          const isExternal = !playMatch && dest !== "/" && dest.length > 0;
+          const ctaClass = "inline-flex self-start items-center gap-1 rounded-pill bg-white px-5 py-2.5 text-[14px] font-extrabold text-primary shadow-card transition-transform active:scale-[0.97]";
+          return (
+            <div className="relative aspect-video w-full overflow-hidden rounded-[24px] [background:var(--gradient-hero)] text-primary-foreground shadow-pop">
+              <img
+                src={heroImg}
+                alt=""
+                className="pointer-events-none absolute inset-0 h-full w-full select-none object-cover object-right"
+              />
+              <div className="pointer-events-none absolute inset-0 [background:linear-gradient(90deg,rgba(123,47,190,0.92)_0%,rgba(123,47,190,0.7)_40%,rgba(123,47,190,0)_70%)]" />
 
-          <div className="relative flex h-full flex-col justify-between p-5">
-            <div>
-              <p className="text-[13px] font-semibold text-white/90">Welcome back,</p>
-              <p className="text-[16px] font-extrabold text-text-accent drop-shadow-sm">
-                {greetName} <span>👋</span>
-              </p>
-              <h2 className="mt-1.5 max-w-[58%] text-[20px] font-black leading-[1.15] drop-shadow-md">
-                Leo needs your help today...
-              </h2>
+              <div className="relative flex h-full flex-col justify-between p-5">
+                <div>
+                  <p className="text-[13px] font-semibold text-white/90">Welcome back,</p>
+                  <p className="text-[16px] font-extrabold text-text-accent drop-shadow-sm">
+                    {greetName} <span>👋</span>
+                  </p>
+                  <h2 className="mt-1.5 max-w-[58%] whitespace-pre-line text-[20px] font-black leading-[1.15] drop-shadow-md">
+                    {headline}
+                  </h2>
+                  {activeCard?.subtitle && (
+                    <p className="mt-1 max-w-[58%] text-[12px] font-semibold text-white/85 drop-shadow-sm">
+                      {activeCard.subtitle}
+                    </p>
+                  )}
+                </div>
+                {playMatch ? (
+                  <Link to="/play/$slug" params={{ slug: playMatch[1] }} className={ctaClass}>
+                    {ctaLabel}
+                  </Link>
+                ) : isExternal ? (
+                  <a href={dest} className={ctaClass}>{ctaLabel}</a>
+                ) : (
+                  <Link
+                    to={continueClass ? "/play/$slug" : "/"}
+                    params={continueClass ? { slug: continueClass.slug } : undefined}
+                    className={ctaClass}
+                  >
+                    {ctaLabel}
+                  </Link>
+                )}
+              </div>
+              {welcomeCards.length > 1 && (
+                <div className="absolute bottom-2 left-1/2 flex -translate-x-1/2 gap-1">
+                  {welcomeCards.map((_, i) => (
+                    <span key={i} className={`h-1.5 w-1.5 rounded-full ${i === heroIdx ? "bg-white" : "bg-white/40"}`} />
+                  ))}
+                </div>
+              )}
             </div>
-            <Link
-              to={continueClass ? "/play/$slug" : "/"}
-              params={continueClass ? { slug: continueClass.slug } : undefined}
-              className="inline-flex self-start items-center gap-1 rounded-pill bg-white px-5 py-2.5 text-[14px] font-extrabold text-primary shadow-card transition-transform active:scale-[0.97]"
-            >
-              Start →
-            </Link>
-          </div>
-        </div>
+          );
+        })()}
 
         {/* Stat cards */}
         <div className="mt-4 grid grid-cols-3 gap-3">
