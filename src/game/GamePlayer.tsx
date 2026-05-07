@@ -34,6 +34,7 @@ export function GameHome() {
   const { user, loading, isGuest, setGuest, signOut } = usePlayerAuth();
   const navigate = useNavigate();
   const [classes, setClasses] = useState<DbClass[] | null>(null);
+  const [pillars, setPillars] = useState<HPillar[] | null>(null);
   const [xpTotals, setXpTotals] = useState<Map<string, number>>(new Map());
   const [progress, setProgress] = useState<UserProgress>(EMPTY_PROGRESS);
   const [avatarCfg, setAvatarCfg] = useState<AvatarConfig | null>(null);
@@ -41,9 +42,9 @@ export function GameHome() {
   const [previewEntry, setPreviewEntry] = useState<LeaderboardEntry | null>(null);
 
   useEffect(() => {
-    Promise.all([loadPublishedClasses(), loadPublishedClassXpTotals()])
-      .then(([cls, totals]) => { setClasses(cls); setXpTotals(totals); })
-      .catch(() => setClasses([]));
+    Promise.all([loadPublishedClasses(), loadPublishedClassXpTotals(), loadFullCatalog()])
+      .then(([cls, totals, pl]) => { setClasses(cls); setXpTotals(totals); setPillars(pl); })
+      .catch(() => { setClasses([]); setPillars([]); });
   }, []);
   useEffect(() => {
     if (!user) { setProgress(EMPTY_PROGRESS); setAvatarCfg(null); setDisplayName(null); return; }
