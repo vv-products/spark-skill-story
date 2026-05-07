@@ -167,32 +167,31 @@ export function GameHome() {
 
       <main className="flex-1 px-5 pb-24">
         {/* Hero */}
-        <div className="relative overflow-hidden rounded-[24px] p-5 text-primary-foreground shadow-pop">
+        <div className="relative aspect-video w-full overflow-hidden rounded-[24px] [background:var(--gradient-hero)] text-primary-foreground shadow-pop">
           <img
             src={leoHeroImg}
             alt=""
             className="pointer-events-none absolute inset-0 h-full w-full select-none object-cover object-right"
           />
+          <div className="pointer-events-none absolute inset-0 [background:linear-gradient(90deg,rgba(123,47,190,0.92)_0%,rgba(123,47,190,0.7)_40%,rgba(123,47,190,0)_70%)]" />
 
-          <div className="relative flex items-stretch min-h-[240px]">
-            <div className="relative z-10 flex w-[58%] flex-col pt-1">
-              <p className="text-[14px] font-semibold text-white/90">Welcome back,</p>
-              <p className="text-[18px] font-extrabold text-text-accent drop-shadow-sm">
+          <div className="relative flex h-full flex-col justify-between p-5">
+            <div>
+              <p className="text-[13px] font-semibold text-white/90">Welcome back,</p>
+              <p className="text-[16px] font-extrabold text-text-accent drop-shadow-sm">
                 {greetName} <span>👋</span>
               </p>
-              <h2 className="mt-4 text-[26px] font-black leading-[1.1] drop-shadow-md">
+              <h2 className="mt-1.5 max-w-[58%] text-[20px] font-black leading-[1.15] drop-shadow-md">
                 Leo needs your help today...
               </h2>
-              <div className="mt-auto pt-5">
-                <Link
-                  to={continueClass ? "/play/$slug" : "/"}
-                  params={continueClass ? { slug: continueClass.slug } : undefined}
-                  className="inline-flex items-center gap-1 rounded-pill bg-white px-7 py-3 text-[15px] font-extrabold text-primary shadow-card transition-transform active:scale-[0.97]"
-                >
-                  Start →
-                </Link>
-              </div>
             </div>
+            <Link
+              to={continueClass ? "/play/$slug" : "/"}
+              params={continueClass ? { slug: continueClass.slug } : undefined}
+              className="inline-flex self-start items-center gap-1 rounded-pill bg-white px-5 py-2.5 text-[14px] font-extrabold text-primary shadow-card transition-transform active:scale-[0.97]"
+            >
+              Start →
+            </Link>
           </div>
         </div>
 
