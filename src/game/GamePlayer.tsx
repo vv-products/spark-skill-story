@@ -462,21 +462,27 @@ function StatCard({ bg, icon, label, value }: { bg: string; icon: string; label:
 }
 
 function SectionHeader({ title, subtitle, hideAll, viewAllSlug }: { title: string; subtitle?: string; hideAll?: boolean; viewAllSlug?: string }) {
+  const isJourney = title === "Your Journey";
+  const pillClass = "rounded-pill border border-border bg-card px-3 py-1 text-[11px] font-extrabold text-foreground shadow-card";
   return (
     <div className="mt-6 flex items-end justify-between">
       <div>
         <h3 className="text-base font-extrabold text-foreground">{title}</h3>
         {subtitle && <p className="text-[11px] font-bold text-text-secondary">{subtitle}</p>}
       </div>
-      {!hideAll && viewAllSlug && (
+      {!hideAll && isJourney ? (
+        <Link to="/journey" className={pillClass}>
+          View All ›
+        </Link>
+      ) : !hideAll && viewAllSlug ? (
         <Link
           to="/play/$slug"
           params={{ slug: viewAllSlug }}
-          className="rounded-pill border border-border bg-card px-3 py-1 text-[11px] font-extrabold text-foreground shadow-card"
+          className={pillClass}
         >
           View All ›
         </Link>
-      )}
+      ) : null}
     </div>
   );
 }
