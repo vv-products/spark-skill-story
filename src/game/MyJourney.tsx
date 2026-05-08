@@ -81,12 +81,12 @@ const SCENE: Array<{
   width: string;
   bottom: string;
   zIndex: number;
-  footOffset: string; // px — pushes name pill up to actual feet level
+  footOffset: string;
 }> = [
-  { id: "pip",  left: "2%",  width: "18%", bottom: "42%", zIndex: 10, footOffset: "0px"  },
-  { id: "leo",  left: "8%",  width: "46%", bottom: "20%", zIndex: 11, footOffset: "0px"  },
-  { id: "maya", left: "44%", width: "46%", bottom: "20%", zIndex: 11, footOffset: "0px"  },
-  { id: "dash", left: "25%", width: "50%", bottom: "0%",  zIndex: 14, footOffset: "0px"  },
+  { id: "pip",  left: "0%",  width: "20%", bottom: "52%", zIndex: 10, footOffset: "0px" },
+  { id: "leo",  left: "2%",  width: "58%", bottom: "8%",  zIndex: 11, footOffset: "12px" },
+  { id: "maya", left: "40%", width: "58%", bottom: "8%",  zIndex: 11, footOffset: "12px" },
+  { id: "dash", left: "22%", width: "56%", bottom: "0%",  zIndex: 14, footOffset: "0px"  },
 ];
 // Note: tune footOffset per-character (e.g. "24px") if name pills
 // appear mid-body due to transparent padding at bottom of PNG.
