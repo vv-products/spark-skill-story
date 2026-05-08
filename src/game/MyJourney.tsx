@@ -66,26 +66,30 @@ const CHARACTERS: Character[] = [
   },
 ];
 
-// ─── SCENE LAYOUT ────────────────────────────────────────────────────────────
-// Mimics the reference photo composition:
-//   Pip (cat)  — back left, on the bench, small
-//   Leo (boy)  — back center-left, standing
-//   Maya (girl)— back center-right, standing
-//   Dash (dog) — front center, sitting on ground, largest
+// ─── TUNED SCENE LAYOUT ──────────────────────────────────────────────────────
+// Based on screenshot feedback:
+//   • Pip: smaller (cat on bench, back-left)
+//   • Leo: larger, more visible behind Dash
+//   • Maya: larger, right side
+//   • Dash: centered front
 //
-// All values are % of the scene container (100% wide, 70vh tall)
+// footOffset: how much empty transparent space is at the bottom of each PNG.
+// This shifts the name pill to sit at the actual character's feet.
 const SCENE: Array<{
   id: CharId;
   left: string;
   width: string;
   bottom: string;
   zIndex: number;
+  footOffset: string; // px — pushes name pill up to actual feet level
 }> = [
-  { id: "pip",  left: "2%",  width: "26%", bottom: "38%", zIndex: 10 }, // on bench, back left
-  { id: "leo",  left: "10%", width: "42%", bottom: "18%", zIndex: 11 }, // standing, center-left
-  { id: "maya", left: "46%", width: "42%", bottom: "18%", zIndex: 11 }, // standing, center-right
-  { id: "dash", left: "28%", width: "44%", bottom: "0%",  zIndex: 14 }, // front center, largest
+  { id: "pip",  left: "2%",  width: "18%", bottom: "42%", zIndex: 10, footOffset: "0px"  },
+  { id: "leo",  left: "8%",  width: "46%", bottom: "20%", zIndex: 11, footOffset: "0px"  },
+  { id: "maya", left: "44%", width: "46%", bottom: "20%", zIndex: 11, footOffset: "0px"  },
+  { id: "dash", left: "25%", width: "50%", bottom: "0%",  zIndex: 14, footOffset: "0px"  },
 ];
+// Note: tune footOffset per-character (e.g. "24px") if name pills
+// appear mid-body due to transparent padding at bottom of PNG.
 
 export function MyJourney() {
   const [active, setActive] = useState<CharId | null>(null);
@@ -118,25 +122,21 @@ export function MyJourney() {
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap');
         * { font-family: 'Nunito', sans-serif; box-sizing: border-box; }
 
-        /* Idle gentle float */
         @keyframes float {
           0%, 100% { transform: translateY(0px); }
           50%       { transform: translateY(-7px); }
         }
-        /* Active float — slightly higher */
         @keyframes floatActive {
           0%, 100% { transform: translateY(-3px) scale(1.06); }
           50%       { transform: translateY(-11px) scale(1.06); }
         }
-        /* Tap — single clean bounce, no rotation */
         @keyframes bounce {
           0%   { transform: translateY(0px)   scale(1);    }
-          28%  { transform: translateY(-20px) scale(1.06); }
-          52%  { transform: translateY(-6px)  scale(1.03); }
-          72%  { transform: translateY(-14px) scale(1.05); }
+          28%  { transform: translateY(-22px) scale(1.07); }
+          52%  { transform: translateY(-7px)  scale(1.03); }
+          72%  { transform: translateY(-15px) scale(1.05); }
           100% { transform: translateY(0px)   scale(1);    }
         }
-
         @keyframes fadeDown {
           from { opacity: 0; transform: translateY(-14px); }
           to   { opacity: 1; transform: translateY(0); }
@@ -164,19 +164,18 @@ export function MyJourney() {
 
         .name-pill {
           position: absolute;
-          bottom: -2px;
           left: 50%;
           transform: translateX(-50%);
           white-space: nowrap;
           border-radius: 999px;
-          padding: 2px 10px;
-          font-size: 10px;
+          padding: 3px 11px;
+          font-size: 11px;
           font-weight: 900;
           color: white;
           pointer-events: none;
           letter-spacing: 0.03em;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.25);
-          transition: background 0.4s ease, opacity 0.4s ease, transform 0.4s ease;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+          transition: background 0.4s ease, opacity 0.4s ease, transform 0.3s ease;
         }
 
         .cta-btn {
@@ -188,35 +187,35 @@ export function MyJourney() {
         .cta-btn:active { transform: scale(0.95) !important; }
       `}</style>
 
-      {/* ── Background scene ── */}
+      {/* ── Background ── */}
       <div
         className="absolute inset-0 z-0"
         style={{
-          // Real image once available:
-          // backgroundImage: `url(${BG_IMG})`,
-          // backgroundSize: "cover",
-          // backgroundPosition: "center bottom",
-          //
-          // Placeholder gradient that approximates the warm garden lighting:
-          background: BG_IMG
-            ? `url(${BG_IMG}) center bottom / cover no-repeat`
-            : "linear-gradient(180deg, #87ceeb 0%, #b8e4b8 45%, #8fbc6e 70%, #6b8f4e 100%)",
+          backgroundImage: `url(${BG_IMG})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center bottom",
           transition: "filter 0.55s ease",
-          // Darken + blur the scene when a character is active
           filter: active
-            ? "brightness(0.55) blur(2px)"
+            ? "brightness(0.45) blur(3px)"
             : "brightness(1) blur(0px)",
         }}
       />
 
-      {/* Warm overlay that tints to character colour when active */}
+      {/* Dark gradient at top for header legibility */}
+      <div
+        className="absolute inset-x-0 top-0 z-10 pointer-events-none"
+        style={{
+          height: "22%",
+          background: "linear-gradient(to bottom, rgba(0,0,0,0.52) 0%, transparent 100%)",
+        }}
+      />
+
+      {/* Colour tint overlay */}
       <div
         className="absolute inset-0 z-0 pointer-events-none"
         style={{
-          background: activeChar
-            ? `${activeChar.glowColor}`
-            : "transparent",
-          opacity: active ? 0.25 : 0,
+          background: activeChar ? activeChar.glowColor : "transparent",
+          opacity: active ? 0.22 : 0,
           transition: "opacity 0.55s ease, background 0.55s ease",
           mixBlendMode: "soft-light",
         }}
@@ -227,14 +226,14 @@ export function MyJourney() {
         {activeChar ? (
           <div key={activeChar.id + "-hdr"} className="fade-down">
             <h1
-              className="text-[2rem] font-black leading-tight drop-shadow-lg"
-              style={{ color: "white", textShadow: "0 2px 12px rgba(0,0,0,0.4)" }}
+              className="text-[2rem] font-black leading-tight"
+              style={{ color: "white", textShadow: "0 2px 16px rgba(0,0,0,0.6)" }}
             >
               {activeChar.world}
             </h1>
             <p
               className="mt-1 text-[0.82rem] font-semibold"
-              style={{ color: "rgba(255,255,255,0.9)", textShadow: "0 1px 6px rgba(0,0,0,0.3)" }}
+              style={{ color: "rgba(255,255,255,0.92)", textShadow: "0 1px 8px rgba(0,0,0,0.5)" }}
             >
               {activeChar.tagline}
             </p>
@@ -243,13 +242,13 @@ export function MyJourney() {
           <div key="neutral-hdr" className="fade-down">
             <h1
               className="text-[2rem] font-black"
-              style={{ color: "white", textShadow: "0 2px 10px rgba(0,0,0,0.35)" }}
+              style={{ color: "white", textShadow: "0 2px 16px rgba(0,0,0,0.6)" }}
             >
               My Journey
             </h1>
             <p
               className="mt-1 text-[0.82rem] font-semibold"
-              style={{ color: "rgba(255,255,255,0.85)", textShadow: "0 1px 6px rgba(0,0,0,0.3)" }}
+              style={{ color: "rgba(255,255,255,0.88)", textShadow: "0 1px 8px rgba(0,0,0,0.5)" }}
             >
               Tap a character to explore their world
             </p>
@@ -257,8 +256,8 @@ export function MyJourney() {
         )}
       </div>
 
-      {/* ── Character scene ── */}
-      <div className="relative z-10 flex flex-1 items-end justify-center pb-28">
+      {/* ── Characters ── */}
+      <div className="relative z-20 flex flex-1 items-end justify-center pb-28">
         <div
           className="relative w-full"
           style={{ maxWidth: 440, height: "68vh" }}
@@ -288,7 +287,6 @@ export function MyJourney() {
                   bottom: s.bottom,
                   width: s.width,
                   zIndex: isActive ? 22 : s.zIndex,
-                  transition: "z-index 0s",
                 }}
               >
                 <img
@@ -298,27 +296,26 @@ export function MyJourney() {
                   draggable={false}
                   style={{
                     filter: isDimmed
-                      ? "grayscale(0.8) brightness(0.4)"
+                      ? "grayscale(0.9) brightness(0.35)"
                       : isActive
-                        ? `drop-shadow(0 0 28px ${char.glowColor}) drop-shadow(0 8px 16px rgba(0,0,0,0.3)) brightness(1.08)`
-                        : "drop-shadow(0 4px 8px rgba(0,0,0,0.2))",
-                    opacity: isDimmed ? 0.45 : 1,
+                        ? `drop-shadow(0 0 30px ${char.glowColor}) drop-shadow(0 8px 16px rgba(0,0,0,0.3)) brightness(1.08)`
+                        : "drop-shadow(0 4px 10px rgba(0,0,0,0.25))",
+                    opacity: isDimmed ? 0.4 : 1,
                     animation: anim,
                   }}
                   onClick={(e) => handleTap(s.id, e)}
                 />
 
-                {/* Name pill */}
+                {/* Name pill — positioned at feet using footOffset */}
                 <div
                   className="name-pill"
                   style={{
-                    background: isDimmed
-                      ? "rgba(80,80,80,0.6)"
-                      : char.accentColor,
-                    opacity: isDimmed ? 0.4 : 1,
+                    bottom: s.footOffset,
+                    background: isDimmed ? "rgba(60,60,60,0.55)" : char.accentColor,
+                    opacity: isDimmed ? 0.35 : 1,
                     transform: isActive
-                      ? "translateX(-50%) translateY(-4px) scale(1.1)"
-                      : "translateX(-50%)",
+                      ? "translateX(-50%) scale(1.12)"
+                      : "translateX(-50%) scale(1)",
                   }}
                 >
                   {char.name}
@@ -329,13 +326,13 @@ export function MyJourney() {
         </div>
       </div>
 
-      {/* ── CTA button ── */}
+      {/* ── CTA ── */}
       {activeChar && visible && (
         <div className="absolute inset-x-0 bottom-8 z-30 flex justify-center rise-up">
           <button
             type="button"
             className="cta-btn rounded-full px-8 py-4 text-[0.95rem] font-black text-white shadow-2xl"
-            style={{ background: `${activeChar.accentColor}cc` }}
+            style={{ background: `${activeChar.accentColor}dd` }}
             onClick={(e) => e.stopPropagation()}
           >
             Explore {activeChar.name}'s {activeChar.world} →
@@ -349,7 +346,7 @@ export function MyJourney() {
           <div
             className="rounded-full px-5 py-2 text-xs font-bold text-white shadow-md"
             style={{
-              background: "rgba(0,0,0,0.25)",
+              background: "rgba(0,0,0,0.3)",
               backdropFilter: "blur(8px)",
               WebkitBackdropFilter: "blur(8px)",
             }}
