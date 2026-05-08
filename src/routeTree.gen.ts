@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as StudioRouteImport } from './routes/studio'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as JourneyRouteImport } from './routes/journey'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PlaySlugRouteImport } from './routes/play.$slug'
 
@@ -22,6 +23,11 @@ const StudioRoute = StudioRouteImport.update({
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JourneyRoute = JourneyRouteImport.update({
+  id: '/journey',
+  path: '/journey',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -37,12 +43,14 @@ const PlaySlugRoute = PlaySlugRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/journey': typeof JourneyRoute
   '/profile': typeof ProfileRoute
   '/studio': typeof StudioRoute
   '/play/$slug': typeof PlaySlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/journey': typeof JourneyRoute
   '/profile': typeof ProfileRoute
   '/studio': typeof StudioRoute
   '/play/$slug': typeof PlaySlugRoute
@@ -50,20 +58,22 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/journey': typeof JourneyRoute
   '/profile': typeof ProfileRoute
   '/studio': typeof StudioRoute
   '/play/$slug': typeof PlaySlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/profile' | '/studio' | '/play/$slug'
+  fullPaths: '/' | '/journey' | '/profile' | '/studio' | '/play/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/profile' | '/studio' | '/play/$slug'
-  id: '__root__' | '/' | '/profile' | '/studio' | '/play/$slug'
+  to: '/' | '/journey' | '/profile' | '/studio' | '/play/$slug'
+  id: '__root__' | '/' | '/journey' | '/profile' | '/studio' | '/play/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  JourneyRoute: typeof JourneyRoute
   ProfileRoute: typeof ProfileRoute
   StudioRoute: typeof StudioRoute
   PlaySlugRoute: typeof PlaySlugRoute
@@ -85,6 +95,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/journey': {
+      id: '/journey'
+      path: '/journey'
+      fullPath: '/journey'
+      preLoaderRoute: typeof JourneyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -104,6 +121,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  JourneyRoute: JourneyRoute,
   ProfileRoute: ProfileRoute,
   StudioRoute: StudioRoute,
   PlaySlugRoute: PlaySlugRoute,
