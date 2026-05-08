@@ -2,21 +2,20 @@ import { useState, useEffect } from "react";
 
 type CharId = "maya" | "leo" | "dash" | "pip";
 
-// Individual character PNGs (transparent background)
 import mayaImg from "@/assets/images/maya-world.png";
 import leoImg  from "@/assets/images/leo-world.png";
 import dashImg from "@/assets/images/dash-world.png";
 import pipImg  from "@/assets/images/pip-world.png";
-import bgImg from "@/assets/images/scene-bg.png";
+import bgImg   from "@/assets/images/scene-bg.png";
+
+const BG_IMG: string = bgImg;
 
 const IMGS: Record<CharId, string> = {
   maya: mayaImg,
   leo:  leoImg,
   dash: dashImg,
   pip:  pipImg,
-  BG_IMG: bgImg,
 };
-// ────────────────────────────────────────────────────────────────────────────
 
 type Character = {
   id: CharId;
