@@ -68,13 +68,14 @@ const CHARACTERS: Character[] = [
   },
 ];
 
-// Back row: Maya (left) + Leo (right) — taller
-// Front row: Dash (front-left) + Pip (front-right) — smaller, higher zIndex
+// Back row: Maya (left) + Leo (right) — taller, pushed up
+// Front row: Dash (front-left) + Pip (front-right) — smaller, sit lower
+// All positions relative to a fixed-height scene container
 const SCENE: Array<{ id: CharId; left: string; width: string; bottom: string; zIndex: number }> = [
-  { id: "maya", left: "1%",  width: "46%", bottom: "14%", zIndex: 11 },
-  { id: "leo",  left: "50%", width: "47%", bottom: "14%", zIndex: 11 },
-  { id: "dash", left: "2%",  width: "40%", bottom: "0%",  zIndex: 13 },
-  { id: "pip",  left: "57%", width: "36%", bottom: "0%",  zIndex: 13 },
+  { id: "maya", left: "0%",   width: "50%", bottom: "18%", zIndex: 11 },
+  { id: "leo",  left: "48%",  width: "52%", bottom: "18%", zIndex: 11 },
+  { id: "dash", left: "0%",   width: "44%", bottom: "0%",  zIndex: 13 },
+  { id: "pip",  left: "54%",  width: "40%", bottom: "0%",  zIndex: 13 },
 ];
 
 const NEUTRAL_BG = "linear-gradient(160deg, #bae6fd 0%, #dbeafe 50%, #fef9c3 100%)";
@@ -145,7 +146,12 @@ export function MyJourney() {
         }
         .char-wrap:active { filter: brightness(1.15) !important; }
 
-        .char-img { width: 100%; display: block; }
+        .char-img {
+          width: 100%;
+          display: block;
+          background: transparent;
+          mix-blend-mode: multiply;
+        }
 
         .char-placeholder {
           width: 100%;
@@ -187,7 +193,7 @@ export function MyJourney() {
       <div className="relative z-10 flex flex-1 items-end justify-center pb-24">
         <div
           className="relative w-full"
-          style={{ maxWidth: 420, height: "75vw", maxHeight: 400 }}
+          style={{ maxWidth: 420, height: "60vh", position: "relative" }}
           onClick={(e) => e.stopPropagation()}
         >
           {SCENE.map((s) => {
