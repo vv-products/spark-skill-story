@@ -189,10 +189,7 @@ export function MyJourney() {
       `}</style>
 
       {/* Backdrop fill behind the scene box */}
-      <div
-        className="absolute inset-0 z-0"
-        style={{ backgroundColor: "#cfe7d4" }}
-      />
+      <div className="absolute inset-0 z-0 bg-background" />
 
       {/* Dark gradient at top for header legibility */}
       <div
