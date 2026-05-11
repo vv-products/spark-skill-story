@@ -10,6 +10,7 @@ import { ClassEditorScreen } from "@/studio/screens/ClassEditor";
 import { TaskTypesScreen } from "@/studio/screens/TaskTypesRef";
 import { WelcomeCardsScreen } from "@/studio/screens/WelcomeCards";
 import { AvatarsScreen } from "@/studio/screens/Avatars";
+import { MissionsScreen } from "@/studio/screens/Missions";
 
 export const Route = createFileRoute("/studio")({
   head: () => ({
