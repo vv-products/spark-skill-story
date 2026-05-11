@@ -348,6 +348,16 @@ export function GameHome() {
             ctaVariant="primary"
             progress={45}
           />
+          <MissionCard
+            slug=""
+            customTo="/mission/emotions-crossword"
+            image={missionStorytimeImg}
+            title="Emotions Crossword"
+            subtitle="Solo or with a friend"
+            tags={["Feelings", "Co-op"]}
+            cta="Play →"
+            ctaVariant="primary"
+          />
         </div>
 
         {/* Fun Activities */}
@@ -550,15 +560,17 @@ function JourneyCard({
 }
 
 function MissionCard({
-  slug, image, title, subtitle, tags, cta, ctaVariant, progress,
+  slug, image, title, subtitle, tags, cta, ctaVariant, progress, customTo,
 }: {
   slug: string; image: string; title: string; subtitle: string; tags: string[]; cta: string;
-  ctaVariant: "primary" | "dark"; progress?: number;
+  ctaVariant: "primary" | "dark"; progress?: number; customTo?: string;
 }) {
+  const linkProps: any = customTo
+    ? { to: customTo }
+    : { to: "/play/$slug", params: { slug } };
   return (
     <Link
-      to="/play/$slug"
-      params={{ slug }}
+      {...linkProps}
       className="flex w-[260px] shrink-0 flex-col overflow-hidden rounded-2xl bg-card shadow-card"
     >
       <div className="relative h-32 w-full overflow-hidden">
