@@ -62,7 +62,7 @@ function emptyGrid(): string[][] {
 // ---------- component ----------
 export function EmotionsCrossword({ initialCode }: { initialCode?: string }) {
   const navigate = useNavigate();
-  const { user, displayName } = usePlayerAuth();
+  const { user } = usePlayerAuth();
   const [mode, setMode] = useState<"choose" | "solo" | "coop">(initialCode ? "coop" : "choose");
   const [code, setCode] = useState<string>(initialCode ?? "");
   const [grid, setGrid] = useState<string[][]>(emptyGrid);
@@ -71,7 +71,7 @@ export function EmotionsCrossword({ initialCode }: { initialCode?: string }) {
   const [done, setDone] = useState(false);
   const [copied, setCopied] = useState(false);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
-  const myName = displayName || (user ? "Friend" : "Guest");
+  const myName = (user?.user_metadata as any)?.display_name || user?.email?.split("@")[0] || "Guest";
 
   // ---------- Realtime channel ----------
   useEffect(() => {
