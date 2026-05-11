@@ -87,7 +87,7 @@ export function BottomNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-white/5 bg-white/5 backdrop-blur-2xl backdrop-saturate-150 lg:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-white/40 bg-gradient-to-b from-white/50 to-white/30 backdrop-blur-2xl backdrop-saturate-150 lg:hidden"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       <div className="grid grid-cols-5 px-2 pt-2 pb-2">
