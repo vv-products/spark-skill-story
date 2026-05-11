@@ -1,81 +1,56 @@
-## Goal
+## Problem
 
-Today the player app is hard-locked to a 430px-wide phone column centered on a grey backdrop. Studio is desktop-only and partially breaks on tablet. This plan makes the whole product look intentional on phone, iPad, and desktop — same React code, three layout modes driven by Tailwind breakpoints.
+The journey scene currently scales the background and the characters as two separate systems:
 
-Breakpoints used:
-- `< md` (≤767px): phone — current mobile UX, unchanged in spirit
-- `md` … `lg` (768–1023px): iPad — content fills width, multi-column grids, larger media, no sidebar yet
-- `≥ lg` (1024px+): desktop — persistent left sidebar nav + wide content area, max content width ~1200px
+- Background: CSS `background-image` with `backgroundSize: auto 100%`, centered. On tablet/desktop this leaves big empty bands on either side.
+- Characters: absolutely positioned in `%` of a container that grows from `440px → 680px → 880px`. As the container widens, character `%` anchors slide off the bench/path drawn in the BG.
 
----
+Result: only mobile is close to the reference. On tablet the scene doesn't fill, on desktop the kids become huge and Pip floats off the bench.
 
-## Part 1 — Player app shell (biggest change)
+## Fix: one scene, one coordinate system
 
-### New `PlayerShell` component
+Treat the background as the canvas and put characters on top of it as overlays inside the **same** box. The whole scene scales as a unit, so character positions calibrated once match at every viewport.
 
-Replace the four near-identical wrappers in `src/routes/index.tsx`, `play.$slug.tsx`, `journey.tsx`, `profile.tsx` with one shared `<PlayerShell>` that picks the layout based on viewport:
+### Changes to `src/game/MyJourney.tsx`
 
-- **Phone**: same as today — centered 430px column with shadow on grey background.
-- **iPad**: full-bleed content, max-w ~840px, the existing sticky bottom nav stays.
-- **Desktop**: persistent left sidebar (built with shadcn `Sidebar`), content area max-w ~1200px centered, hide bottom nav.
+1. **Replace the CSS-background div with an `<img>`-based scene box.**
+   - A relative wrapper with `aspect-ratio` matching `scene-bg.png` (likely ~3:4 portrait — confirm from the asset).
+   - Inside it: `<img src={BG_IMG} className="absolute inset-0 h-full w-full object-cover" />`.
+   - All character `<img>`s become absolute children of this same wrapper, positioned in `%` of the wrapper (which now equals `%` of the BG image).
 
-Sidebar items mirror the current `BottomNav` plus link targets that exist:
-- Home → `/`
-- My Journey → `/journey`
-- Profile → `/profile`
-- Leaderboard (rendered inside profile today; add a quick anchor)
-- Sign out at the bottom (uses existing `usePlayerAuth`)
+2. **Size the scene wrapper responsively, preserving aspect-ratio.**
+   - Phone: `w-full max-h-[68dvh]`.
+   - Tablet (`md`): `max-w-[560px] max-h-[72dvh]`.
+   - Desktop (`lg`): `max-w-[640px] max-h-[78dvh]`.
+   - Centered. The aspect-ratio rule keeps width and height in lockstep so the BG never letterboxes and characters never drift.
 
-Active route uses `useRouterState` so the current page is highlighted. Sidebar collapses to icon-strip on tablet-desktop boundary so users can reclaim space.
+3. **Re-anchor characters to BG landmarks (one calibration, applies everywhere).**
+   Tuned against the reference image:
+   - **Pip**: sitting on the left bench arm — `left ~14%`, `bottom ~46%`, `width ~12%`.
+   - **Leo**: standing in front of the bench, center-left — `left ~30%`, `bottom ~6%`, `width ~26%`.
+   - **Maya**: standing right of Leo — `left ~52%`, `bottom ~6%`, `width ~26%`.
+   - **Dash**: small dog front-center, slightly right of Leo — `left ~42%`, `bottom ~2%`, `width ~16%`.
+   Exact numbers will be nudged after a screenshot pass on all three viewports.
 
-### `Chrome.tsx` updates
+4. **Drop `mix-blend-mode: multiply` on character imgs** (it was hiding the cutout edges against the green band; with the new layout we don't need it and it dulls the kids on desktop).
 
-- `BottomNav`: hide on `lg+` (`className="lg:hidden"`). On phone/tablet keep current behavior but make it actually navigate (currently the buttons do nothing) — wire them to `/`, `/journey`, `/profile`, plus a placeholder `/rewards` route.
-- `TopBar`: keep, but on desktop it sits inside the content column not full-width.
+5. **Header & CTA stay as overlays** on top of the scene wrapper, unchanged.
 
-### Per-screen responsive passes
+6. **Sidebar dim/blur logic** stays as-is, just applied to the new scene wrapper instead of the CSS-bg div.
 
-For each screen, replace fixed pixel paddings with responsive ones (`px-5 md:px-8 lg:px-10`) and turn single-column lists into grids on wider viewports:
+### What stays the same
 
-- **`HomeScreen.tsx`**: hero card grows to ~720px tall on desktop with text and image side-by-side; "Your Journey" / "Live events" card rails become 2-up on iPad, 3-up on desktop using `grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3`.
-- **`GamePlayer.tsx`** (`GameHome`): same grid treatment for class cards. Section headers get larger type on desktop.
-- **`MyJourney.tsx`**: characters currently use `w-20`/`w-28`; bump to `lg:w-40` and increase portal sizes; badge & CTA grow proportionally. Composition stays a single row.
-- **`AvatarPicker.tsx`** & **`AvatarProfilePage.tsx`**: avatar grid `grid-cols-3 md:grid-cols-5 lg:grid-cols-6`. Sticky bottom CTA on phone becomes inline on desktop.
-- **`PlayerSignIn.tsx`**: card centered and capped at 480px (already mostly fine, just remove the 430px frame assumption).
-- **Lesson screens** (`IntroScreen`, `VideoScreen`, `QuizScreen`, `ReflectionScreen`, `BranchingScreen`, `CompleteScreen`): cap reading column at ~720px on desktop (`max-w-[720px] mx-auto`), enlarge media and primary CTAs, keep generous bottom padding so content clears the (now-hidden on desktop) bottom nav.
+- Tap / bounce / float animations.
+- Name pills, footOffset values.
+- Character data, colors, world taglines.
+- `PlayerShell` bleed mode — no shell changes needed.
 
----
+### Out of scope
 
-## Part 2 — Studio CMS responsiveness
+- No changes to other player screens.
+- No new assets.
+- No copy or color changes.
 
-Studio's `Layout.tsx` already uses a 240px sidebar. Issues are the sidebar isn't collapsible and several screens overflow on iPad.
+## Verification
 
-- **`src/studio/Layout.tsx`**: convert sidebar to collapsible. On `< md` it becomes an off-canvas drawer triggered by a hamburger in the header; on `md+` it stays pinned but can collapse to a 64px icon rail. Use the same shadcn `Sidebar` primitive as the player shell for consistency.
-- **`Dashboard`, `Library`, `Module`, `ClassEditor`**: replace fixed grid widths with `grid-cols-1 md:grid-cols-2 xl:grid-cols-3`. The 1100px editor column stays capped on desktop but becomes `max-w-full` on tablet. Long button rows in headers wrap with `flex-wrap gap-2`.
-- **`TaskTypesRef`, `WelcomeCards`, `Avatars`**: card grids made responsive; modal widths already use `max-w-[90vw]` and are fine.
-- Confirm/Prompt dialogs: already responsive — no change.
-
----
-
-## Part 3 — Small global cleanups
-
-- Remove `overflow-hidden` from page-level wrappers where it clipped sticky elements at narrow widths.
-- Add a single `useIsDesktop()` hook in `src/hooks/` (matchMedia ≥1024px) for the few places that need to swap markup (e.g. show/hide BottomNav) rather than just toggling Tailwind classes.
-- Keep all design tokens — no color or font changes.
-
----
-
-## Out of scope
-
-- No new routes (Rewards stays as a placeholder destination if added).
-- No backend or data changes.
-- No redesign of individual components beyond layout/spacing/grid changes — visual identity stays the same.
-
----
-
-## Technical notes
-
-- shadcn `Sidebar` is already in `src/components/ui/sidebar.tsx`. Use `collapsible="icon"` for desktop and `collapsible="offcanvas"` for the studio mobile drawer.
-- Use `var(--sidebar-width)` syntax (Tailwind 4 quirk) when referencing sidebar width in custom classes.
-- File-based routing means `/rewards` (if added) needs `src/routes/rewards.tsx`; flag for confirmation before creating.
-- Keep `<PlayerAuthProvider>` and `<Toaster>` mounted once at the shell level instead of in every route file (small dedupe win that drops from this refactor).
+After implementing, screenshot `/journey` at 390×844, 820×1180, and 1536×864 and compare each to the reference. Iterate the 4 character `%` values only (no structural changes) until all three match.

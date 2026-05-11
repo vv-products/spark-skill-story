@@ -75,6 +75,8 @@ const CHARACTERS: Character[] = [
 //
 // footOffset: how much empty transparent space is at the bottom of each PNG.
 // This shifts the name pill to sit at the actual character's feet.
+// Positions are in % of the scene wrapper, which has the SAME aspect ratio
+// as scene-bg.png (848×1264). One calibration → matches at every viewport.
 const SCENE: Array<{
   id: CharId;
   left: string;
@@ -83,10 +85,10 @@ const SCENE: Array<{
   zIndex: number;
   footOffset: string;
 }> = [
-  { id: "pip",  left: "4%",  width: "20%", bottom: "50%", zIndex: 10, footOffset: "0px" },
-  { id: "leo",  left: "16%", width: "44%", bottom: "6%",  zIndex: 11, footOffset: "12px" },
-  { id: "maya", left: "44%", width: "44%", bottom: "6%",  zIndex: 11, footOffset: "12px" },
-  { id: "dash", left: "38%", width: "24%", bottom: "0%",  zIndex: 14, footOffset: "0px"  },
+  { id: "pip",  left: "14%", width: "12%", bottom: "46%", zIndex: 10, footOffset: "0px"  },
+  { id: "leo",  left: "30%", width: "26%", bottom: "6%",  zIndex: 11, footOffset: "12px" },
+  { id: "maya", left: "52%", width: "26%", bottom: "6%",  zIndex: 11, footOffset: "12px" },
+  { id: "dash", left: "42%", width: "16%", bottom: "2%",  zIndex: 14, footOffset: "0px"  },
 ];
 // Note: tune footOffset per-character (e.g. "24px") if name pills
 // appear mid-body due to transparent padding at bottom of PNG.
@@ -153,7 +155,6 @@ export function MyJourney() {
           width: 100%;
           display: block;
           background: transparent;
-          mix-blend-mode: multiply;
           transform-origin: bottom center;
           cursor: pointer;
           -webkit-tap-highlight-color: transparent;
@@ -187,25 +188,15 @@ export function MyJourney() {
         .cta-btn:active { transform: scale(0.95) !important; }
       `}</style>
 
-      {/* ── Background ── */}
+      {/* Backdrop fill behind the scene box */}
       <div
         className="absolute inset-0 z-0"
-        style={{
-          backgroundImage: `url(${BG_IMG})`,
-          backgroundSize: "auto 100%",
-          backgroundPosition: "center bottom",
-          backgroundRepeat: "no-repeat",
-          backgroundColor: "#cfe7d4",
-          transition: "filter 0.55s ease",
-          filter: active
-            ? "brightness(0.45) blur(3px)"
-            : "brightness(1) blur(0px)",
-        }}
+        style={{ backgroundColor: "#cfe7d4" }}
       />
 
       {/* Dark gradient at top for header legibility */}
       <div
-        className="absolute inset-x-0 top-0 z-10 pointer-events-none"
+        className="absolute inset-x-0 top-0 z-30 pointer-events-none"
         style={{
           height: "22%",
           background: "linear-gradient(to bottom, rgba(0,0,0,0.52) 0%, transparent 100%)",
@@ -214,7 +205,7 @@ export function MyJourney() {
 
       {/* Colour tint overlay */}
       <div
-        className="absolute inset-0 z-0 pointer-events-none"
+        className="absolute inset-0 z-10 pointer-events-none"
         style={{
           background: activeChar ? activeChar.glowColor : "transparent",
           opacity: active ? 0.22 : 0,
@@ -258,13 +249,26 @@ export function MyJourney() {
         )}
       </div>
 
-      {/* ── Characters ── */}
-      <div className="relative z-20 flex flex-1 items-end justify-center pb-28">
+      {/* ── Scene (BG + characters share one coordinate system) ── */}
+      <div className="relative z-20 flex flex-1 items-end justify-center pb-24">
         <div
-          className="relative w-full max-w-[440px] md:max-w-[680px] lg:max-w-[880px]"
-          style={{ height: "68vh" }}
+          className="relative mx-auto h-full w-auto max-h-[78dvh]"
+          style={{ aspectRatio: "848 / 1264" }}
           onClick={(e) => e.stopPropagation()}
         >
+          {/* Background image — same box as characters */}
+          <img
+            src={BG_IMG}
+            alt=""
+            aria-hidden
+            draggable={false}
+            className="absolute inset-0 h-full w-full object-cover rounded-2xl"
+            style={{
+              transition: "filter 0.55s ease",
+              filter: active ? "brightness(0.45) blur(3px)" : "brightness(1) blur(0px)",
+            }}
+          />
+
           {SCENE.map((s) => {
             const char = CHARACTERS.find((c) => c.id === s.id)!;
             const isActive   = active === s.id;
