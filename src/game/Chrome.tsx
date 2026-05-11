@@ -77,43 +77,64 @@ export function TopBar({ layer, totalLayers }: { layer?: number; totalLayers?: n
 }
 
 type NavTo = "/" | "/journey" | "/profile" | "/studio";
-const NAV_ITEMS: Array<{ icon: string; label: string; to: NavTo }> = [
-  { icon: "🏠", label: "Home", to: "/" },
-  { icon: "🗺️", label: "Journey", to: "/journey" },
-  { icon: "👤", label: "Profile", to: "/profile" },
-  { icon: "⚙️", label: "Studio", to: "/studio" },
+const NAV_ITEMS: Array<{
+  icon: typeof Home;
+  label: string;
+  to: NavTo;
+}> = [
+  { icon: Home,      label: "My World",     to: "/" },
+  { icon: Map,       label: "My Journey",   to: "/journey" },
+  { icon: BarChart3, label: "My Growth",    to: "/profile" },
+  { icon: Users,     label: "Sementa Club", to: "/profile" },
+  { icon: Settings,  label: "Settings",     to: "/studio" },
 ];
 
 export function BottomNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   return (
-    <div
-      className="sticky bottom-0 z-20 mt-auto border-t border-border bg-card lg:hidden"
-      style={{ height: "calc(72px + env(safe-area-inset-bottom))" }}
+    <nav
+      className="sticky bottom-0 z-30 mt-auto border-t border-border bg-card/95 backdrop-blur-md lg:hidden"
+      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
-      <div className="grid h-[72px] grid-cols-4 px-2">
-        {NAV_ITEMS.map((it) => {
-          const active = it.to === "/" ? pathname === "/" : pathname === it.to || pathname.startsWith(it.to + "/");
+      <div className="grid grid-cols-5 px-2 pt-2 pb-2">
+        {NAV_ITEMS.map((it, idx) => {
+          // Active when pathname matches; for duplicate targets (My Growth + Sementa
+          // Club both → /profile) only the first one lights up.
+          const matches =
+            it.to === "/"
+              ? pathname === "/"
+              : pathname === it.to || pathname.startsWith(it.to + "/");
+          const firstMatchIdx = NAV_ITEMS.findIndex((n) =>
+            n.to === "/" ? pathname === "/" : pathname === n.to || pathname.startsWith(n.to + "/"),
+          );
+          const active = matches && idx === firstMatchIdx;
+          const Icon = it.icon;
           return (
             <Link
               key={it.label}
               to={it.to}
-              className="flex flex-col items-center justify-center gap-1 rounded-2xl py-1 transition-all active:scale-95"
+              className="flex flex-col items-center justify-center gap-1.5 py-1 transition-transform active:scale-95"
             >
-              {active ? (
-                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-xl text-primary-foreground shadow-pop">
-                  {it.icon}
-                </span>
-              ) : (
-                <span className="text-2xl opacity-60 grayscale">{it.icon}</span>
-              )}
-              <span className={`text-[10px] font-extrabold ${active ? "text-primary" : "text-[#999999]"}`}>
+              <span
+                className={`flex h-11 w-11 items-center justify-center rounded-full transition-colors ${
+                  active
+                    ? "bg-primary text-primary-foreground shadow-pop"
+                    : "bg-muted text-foreground/70"
+                }`}
+              >
+                <Icon size={20} strokeWidth={2.25} />
+              </span>
+              <span
+                className={`text-[10.5px] font-extrabold leading-none ${
+                  active ? "text-primary" : "text-text-secondary"
+                }`}
+              >
                 {it.label}
               </span>
             </Link>
           );
         })}
       </div>
-    </div>
+    </nav>
   );
 }
