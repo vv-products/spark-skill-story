@@ -234,8 +234,6 @@ export function HomeScreen() {
           <span className="font-display text-base text-text-secondary">Sementa</span>
         </p>
       </main>
-
-      <BottomNav />
     </div>
   );
 }
