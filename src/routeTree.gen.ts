@@ -12,8 +12,10 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as StudioRouteImport } from './routes/studio'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as JourneyRouteImport } from './routes/journey'
+import { Route as ClubRouteImport } from './routes/club'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PlaySlugRouteImport } from './routes/play.$slug'
+import { Route as ClubJoinCodeRouteImport } from './routes/club.join.$code'
 
 const StudioRoute = StudioRouteImport.update({
   id: '/studio',
@@ -30,6 +32,11 @@ const JourneyRoute = JourneyRouteImport.update({
   path: '/journey',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ClubRoute = ClubRouteImport.update({
+  id: '/club',
+  path: '/club',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -40,39 +47,73 @@ const PlaySlugRoute = PlaySlugRouteImport.update({
   path: '/play/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ClubJoinCodeRoute = ClubJoinCodeRouteImport.update({
+  id: '/join/$code',
+  path: '/join/$code',
+  getParentRoute: () => ClubRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/club': typeof ClubRouteWithChildren
   '/journey': typeof JourneyRoute
   '/profile': typeof ProfileRoute
   '/studio': typeof StudioRoute
   '/play/$slug': typeof PlaySlugRoute
+  '/club/join/$code': typeof ClubJoinCodeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/club': typeof ClubRouteWithChildren
   '/journey': typeof JourneyRoute
   '/profile': typeof ProfileRoute
   '/studio': typeof StudioRoute
   '/play/$slug': typeof PlaySlugRoute
+  '/club/join/$code': typeof ClubJoinCodeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/club': typeof ClubRouteWithChildren
   '/journey': typeof JourneyRoute
   '/profile': typeof ProfileRoute
   '/studio': typeof StudioRoute
   '/play/$slug': typeof PlaySlugRoute
+  '/club/join/$code': typeof ClubJoinCodeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/journey' | '/profile' | '/studio' | '/play/$slug'
+  fullPaths:
+    | '/'
+    | '/club'
+    | '/journey'
+    | '/profile'
+    | '/studio'
+    | '/play/$slug'
+    | '/club/join/$code'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/journey' | '/profile' | '/studio' | '/play/$slug'
-  id: '__root__' | '/' | '/journey' | '/profile' | '/studio' | '/play/$slug'
+  to:
+    | '/'
+    | '/club'
+    | '/journey'
+    | '/profile'
+    | '/studio'
+    | '/play/$slug'
+    | '/club/join/$code'
+  id:
+    | '__root__'
+    | '/'
+    | '/club'
+    | '/journey'
+    | '/profile'
+    | '/studio'
+    | '/play/$slug'
+    | '/club/join/$code'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ClubRoute: typeof ClubRouteWithChildren
   JourneyRoute: typeof JourneyRoute
   ProfileRoute: typeof ProfileRoute
   StudioRoute: typeof StudioRoute
@@ -102,6 +143,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof JourneyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/club': {
+      id: '/club'
+      path: '/club'
+      fullPath: '/club'
+      preLoaderRoute: typeof ClubRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -116,11 +164,29 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlaySlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/club/join/$code': {
+      id: '/club/join/$code'
+      path: '/join/$code'
+      fullPath: '/club/join/$code'
+      preLoaderRoute: typeof ClubJoinCodeRouteImport
+      parentRoute: typeof ClubRoute
+    }
   }
 }
 
+interface ClubRouteChildren {
+  ClubJoinCodeRoute: typeof ClubJoinCodeRoute
+}
+
+const ClubRouteChildren: ClubRouteChildren = {
+  ClubJoinCodeRoute: ClubJoinCodeRoute,
+}
+
+const ClubRouteWithChildren = ClubRoute._addFileChildren(ClubRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ClubRoute: ClubRouteWithChildren,
   JourneyRoute: JourneyRoute,
   ProfileRoute: ProfileRoute,
   StudioRoute: StudioRoute,
