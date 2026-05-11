@@ -16,6 +16,8 @@ import { Route as ClubRouteImport } from './routes/club'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProfileEditRouteImport } from './routes/profile.edit'
 import { Route as PlaySlugRouteImport } from './routes/play.$slug'
+import { Route as MissionEmotionsQuizRouteImport } from './routes/mission.emotions-quiz'
+import { Route as MissionEmotionsQuickfireRouteImport } from './routes/mission.emotions-quickfire'
 import { Route as MissionEmotionsCrosswordRouteImport } from './routes/mission.emotions-crossword'
 import { Route as ClubJoinCodeRouteImport } from './routes/club.join.$code'
 
@@ -54,6 +56,17 @@ const PlaySlugRoute = PlaySlugRouteImport.update({
   path: '/play/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MissionEmotionsQuizRoute = MissionEmotionsQuizRouteImport.update({
+  id: '/mission/emotions-quiz',
+  path: '/mission/emotions-quiz',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MissionEmotionsQuickfireRoute =
+  MissionEmotionsQuickfireRouteImport.update({
+    id: '/mission/emotions-quickfire',
+    path: '/mission/emotions-quickfire',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const MissionEmotionsCrosswordRoute =
   MissionEmotionsCrosswordRouteImport.update({
     id: '/mission/emotions-crossword',
@@ -73,6 +86,8 @@ export interface FileRoutesByFullPath {
   '/profile': typeof ProfileRouteWithChildren
   '/studio': typeof StudioRoute
   '/mission/emotions-crossword': typeof MissionEmotionsCrosswordRoute
+  '/mission/emotions-quickfire': typeof MissionEmotionsQuickfireRoute
+  '/mission/emotions-quiz': typeof MissionEmotionsQuizRoute
   '/play/$slug': typeof PlaySlugRoute
   '/profile/edit': typeof ProfileEditRoute
   '/club/join/$code': typeof ClubJoinCodeRoute
@@ -84,6 +99,8 @@ export interface FileRoutesByTo {
   '/profile': typeof ProfileRouteWithChildren
   '/studio': typeof StudioRoute
   '/mission/emotions-crossword': typeof MissionEmotionsCrosswordRoute
+  '/mission/emotions-quickfire': typeof MissionEmotionsQuickfireRoute
+  '/mission/emotions-quiz': typeof MissionEmotionsQuizRoute
   '/play/$slug': typeof PlaySlugRoute
   '/profile/edit': typeof ProfileEditRoute
   '/club/join/$code': typeof ClubJoinCodeRoute
@@ -96,6 +113,8 @@ export interface FileRoutesById {
   '/profile': typeof ProfileRouteWithChildren
   '/studio': typeof StudioRoute
   '/mission/emotions-crossword': typeof MissionEmotionsCrosswordRoute
+  '/mission/emotions-quickfire': typeof MissionEmotionsQuickfireRoute
+  '/mission/emotions-quiz': typeof MissionEmotionsQuizRoute
   '/play/$slug': typeof PlaySlugRoute
   '/profile/edit': typeof ProfileEditRoute
   '/club/join/$code': typeof ClubJoinCodeRoute
@@ -109,6 +128,8 @@ export interface FileRouteTypes {
     | '/profile'
     | '/studio'
     | '/mission/emotions-crossword'
+    | '/mission/emotions-quickfire'
+    | '/mission/emotions-quiz'
     | '/play/$slug'
     | '/profile/edit'
     | '/club/join/$code'
@@ -120,6 +141,8 @@ export interface FileRouteTypes {
     | '/profile'
     | '/studio'
     | '/mission/emotions-crossword'
+    | '/mission/emotions-quickfire'
+    | '/mission/emotions-quiz'
     | '/play/$slug'
     | '/profile/edit'
     | '/club/join/$code'
@@ -131,6 +154,8 @@ export interface FileRouteTypes {
     | '/profile'
     | '/studio'
     | '/mission/emotions-crossword'
+    | '/mission/emotions-quickfire'
+    | '/mission/emotions-quiz'
     | '/play/$slug'
     | '/profile/edit'
     | '/club/join/$code'
@@ -143,6 +168,8 @@ export interface RootRouteChildren {
   ProfileRoute: typeof ProfileRouteWithChildren
   StudioRoute: typeof StudioRoute
   MissionEmotionsCrosswordRoute: typeof MissionEmotionsCrosswordRoute
+  MissionEmotionsQuickfireRoute: typeof MissionEmotionsQuickfireRoute
+  MissionEmotionsQuizRoute: typeof MissionEmotionsQuizRoute
   PlaySlugRoute: typeof PlaySlugRoute
 }
 
@@ -197,6 +224,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlaySlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/mission/emotions-quiz': {
+      id: '/mission/emotions-quiz'
+      path: '/mission/emotions-quiz'
+      fullPath: '/mission/emotions-quiz'
+      preLoaderRoute: typeof MissionEmotionsQuizRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mission/emotions-quickfire': {
+      id: '/mission/emotions-quickfire'
+      path: '/mission/emotions-quickfire'
+      fullPath: '/mission/emotions-quickfire'
+      preLoaderRoute: typeof MissionEmotionsQuickfireRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/mission/emotions-crossword': {
       id: '/mission/emotions-crossword'
       path: '/mission/emotions-crossword'
@@ -242,6 +283,8 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileRoute: ProfileRouteWithChildren,
   StudioRoute: StudioRoute,
   MissionEmotionsCrosswordRoute: MissionEmotionsCrosswordRoute,
+  MissionEmotionsQuickfireRoute: MissionEmotionsQuickfireRoute,
+  MissionEmotionsQuizRoute: MissionEmotionsQuizRoute,
   PlaySlugRoute: PlaySlugRoute,
 }
 export const routeTree = rootRouteImport
