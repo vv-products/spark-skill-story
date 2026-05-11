@@ -83,10 +83,10 @@ const SCENE: Array<{
   zIndex: number;
   footOffset: string;
 }> = [
-  { id: "pip",  left: "0%",  width: "20%", bottom: "52%", zIndex: 10, footOffset: "0px" },
-  { id: "leo",  left: "2%",  width: "58%", bottom: "8%",  zIndex: 11, footOffset: "12px" },
-  { id: "maya", left: "40%", width: "58%", bottom: "8%",  zIndex: 11, footOffset: "12px" },
-  { id: "dash", left: "22%", width: "56%", bottom: "0%",  zIndex: 14, footOffset: "0px"  },
+  { id: "pip",  left: "0%",  width: "25%",   bottom: "52%", zIndex: 10, footOffset: "0px" },
+  { id: "leo",  left: "-8%", width: "72.5%", bottom: "8%",  zIndex: 11, footOffset: "12px" },
+  { id: "maya", left: "35%", width: "72.5%", bottom: "8%",  zIndex: 11, footOffset: "12px" },
+  { id: "dash", left: "36%", width: "28%",   bottom: "0%",  zIndex: 14, footOffset: "0px"  },
 ];
 // Note: tune footOffset per-character (e.g. "24px") if name pills
 // appear mid-body due to transparent padding at bottom of PNG.
