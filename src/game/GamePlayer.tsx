@@ -551,6 +551,45 @@ function JourneyCard({
   );
 }
 
+function EmotionsCrosswordCard() {
+  const [completion, setCompletion] = useState<{ difficulty: string; xp: number } | null>(null);
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem("sementa.mission.emotions-crossword.completion");
+      if (raw) setCompletion(JSON.parse(raw));
+    } catch { /* ignore */ }
+  }, []);
+  return (
+    <Link
+      to="/mission/emotions-crossword"
+      className="flex w-[260px] shrink-0 flex-col overflow-hidden rounded-2xl bg-card shadow-card"
+    >
+      <div className="relative h-32 w-full overflow-hidden">
+        <img src={missionStorytimeImg} alt="" className="h-full w-full object-cover" />
+        {completion && (
+          <div className="absolute right-2 top-2 flex items-center gap-1 rounded-pill bg-green-500 px-2 py-1 text-[10px] font-extrabold text-white shadow">
+            ✓ +{completion.xp} XP
+          </div>
+        )}
+      </div>
+      <div className="flex flex-1 flex-col p-3">
+        <p className="text-sm font-extrabold leading-tight text-foreground">Emotions Crossword</p>
+        <p className="mt-0.5 text-[11px] font-bold text-text-secondary">
+          {completion ? `Last: ${completion.difficulty} · +${completion.xp} XP` : "Solo or with a friend"}
+        </p>
+        <div className="mt-3 w-full rounded-pill bg-primary py-2 text-center text-xs font-extrabold text-primary-foreground shadow-pop">
+          {completion ? "Play again →" : "Play →"}
+        </div>
+        <div className="mt-2 flex flex-wrap gap-1">
+          <span className="rounded-pill bg-tag px-2 py-0.5 text-[10px] font-extrabold text-tag-foreground">Feelings</span>
+          <span className="rounded-pill bg-tag px-2 py-0.5 text-[10px] font-extrabold text-tag-foreground">Co-op</span>
+          <span className="rounded-pill bg-tag px-2 py-0.5 text-[10px] font-extrabold text-tag-foreground">Easy/Med/Hard</span>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
 function MissionCard({
   slug, image, title, subtitle, tags, cta, ctaVariant, progress, customTo,
 }: {
