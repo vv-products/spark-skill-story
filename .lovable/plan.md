@@ -1,56 +1,57 @@
-## Problem
 
-The journey scene currently scales the background and the characters as two separate systems:
+# Sementa Club — MVP (Friends only)
 
-- Background: CSS `background-image` with `backgroundSize: auto 100%`, centered. On tablet/desktop this leaves big empty bands on either side.
-- Characters: absolutely positioned in `%` of a container that grows from `440px → 680px → 880px`. As the container widens, character `%` anchors slide off the bench/path drawn in the BG.
+A new in-app space where kids connect with their real friends through a personal join code, QR, or share link. Once two kids are friends (mutual accept), the leaderboard can be filtered to show just them and their friends. Location/school clubs and mission co-op are intentionally deferred to a later iteration.
 
-Result: only mobile is close to the reference. On tablet the scene doesn't fill, on desktop the kids become huge and Pip floats off the bench.
+## What we're building
 
-## Fix: one scene, one coordinate system
+1. **New route `/club`** — the "Sementa Club" tab (already in the bottom nav, currently pointing to `/profile`; we'll repoint it).
+2. **Your join card** — shows the kid's avatar + display name, a friendly 6-character join code (e.g. `MAYA-7K2`), a QR code of the share link, and a "Copy link / Share" button (uses native share sheet on mobile).
+3. **Add a friend** — input field to type/paste a code, or scan QR via the device camera. Sends a friend request.
+4. **Requests inbox** — incoming requests with Accept / Decline; outgoing pending requests (cancel).
+5. **Friends list** — avatars + names of accepted friends, with a remove option.
+6. **Friend-filtered leaderboard** — on the existing leaderboard (currently in `Leaderboard.tsx` / shown on profile), add a toggle: **All players ⇄ Friends only**. "Friends only" includes the kid + their accepted friends, ranked by XP.
+7. **Deep link `/club/join/:code`** — opening a shared link auto-fills the code and prompts "Send friend request to {name}?".
 
-Treat the background as the canvas and put characters on top of it as overlays inside the **same** box. The whole scene scales as a unit, so character positions calibrated once match at every viewport.
+## What's deferred (stated, not built)
 
-### Changes to `src/game/MyJourney.tsx`
+- Location-based clubs and school clubs (browse + kid-created).
+- Co-op mission sessions and mission invites with shared progress.
+- Notifications/badges beyond a simple count on the inbox tab.
 
-1. **Replace the CSS-background div with an `<img>`-based scene box.**
-   - A relative wrapper with `aspect-ratio` matching `scene-bg.png` (likely ~3:4 portrait — confirm from the asset).
-   - Inside it: `<img src={BG_IMG} className="absolute inset-0 h-full w-full object-cover" />`.
-   - All character `<img>`s become absolute children of this same wrapper, positioned in `%` of the wrapper (which now equals `%` of the BG image).
+These will be follow-up plans once the friends MVP is in users' hands.
 
-2. **Size the scene wrapper responsively, preserving aspect-ratio.**
-   - Phone: `w-full max-h-[68dvh]`.
-   - Tablet (`md`): `max-w-[560px] max-h-[72dvh]`.
-   - Desktop (`lg`): `max-w-[640px] max-h-[78dvh]`.
-   - Centered. The aspect-ratio rule keeps width and height in lockstep so the BG never letterboxes and characters never drift.
+## Backend changes (Lovable Cloud)
 
-3. **Re-anchor characters to BG landmarks (one calibration, applies everywhere).**
-   Tuned against the reference image:
-   - **Pip**: sitting on the left bench arm — `left ~14%`, `bottom ~46%`, `width ~12%`.
-   - **Leo**: standing in front of the bench, center-left — `left ~30%`, `bottom ~6%`, `width ~26%`.
-   - **Maya**: standing right of Leo — `left ~52%`, `bottom ~6%`, `width ~26%`.
-   - **Dash**: small dog front-center, slightly right of Leo — `left ~42%`, `bottom ~2%`, `width ~16%`.
-   Exact numbers will be nudged after a screenshot pass on all three viewports.
+Two new tables + one helper function. All RLS-protected.
 
-4. **Drop `mix-blend-mode: multiply` on character imgs** (it was hiding the cutout edges against the green band; with the new layout we don't need it and it dulls the kids on desktop).
+- **`friend_codes`** — one row per user. Fields: `user_id` (PK, FK to profiles), `code` (unique, short, human-readable). Auto-created on first visit to `/club` if missing. Anyone signed in can read (so codes can be looked up); only the owner can rotate.
+- **`friendships`** — Fields: `requester_id`, `addressee_id`, `status` (`pending` | `accepted` | `declined`), unique on the unordered pair. RLS: a user can read/write rows where they are requester or addressee.
+- **`get_friend_leaderboard(_limit)`** — security-definer SQL function returning the same shape as the existing `get_leaderboard`, restricted to the caller + accepted friends.
 
-5. **Header & CTA stay as overlays** on top of the scene wrapper, unchanged.
+No changes to existing tables.
 
-6. **Sidebar dim/blur logic** stays as-is, just applied to the new scene wrapper instead of the CSS-bg div.
+## Frontend changes
 
-### What stays the same
+- New file `src/routes/club.tsx` (route shell, wraps in `PlayerAuthProvider` + `PlayerShell` like `/profile`).
+- New file `src/routes/club.join.$code.tsx` for the deep-link accept flow.
+- New folder `src/game/club/` with: `ClubPage.tsx` (tabs: My Code · Friends · Requests), `JoinCard.tsx` (QR + code + share), `AddFriend.tsx` (input + scan), `FriendsList.tsx`, `RequestsInbox.tsx`, `clubApi.ts` (typed Supabase calls).
+- Add a `scope: "all" | "friends"` toggle to `Leaderboard.tsx`; when "friends", call the new RPC.
+- Update `src/game/Chrome.tsx` `NAV_ITEMS`: change "Sementa Club" `to: "/profile"` → `to: "/club"` (and adjust the active-state dedupe so My Growth stays on `/profile`).
 
-- Tap / bounce / float animations.
-- Name pills, footOffset values.
-- Character data, colors, world taglines.
-- `PlayerShell` bleed mode — no shell changes needed.
+## Libraries
 
-### Out of scope
+- `qrcode.react` for the QR image (tiny, no native deps).
+- Camera scanning: use the browser's built-in `BarcodeDetector` where supported; otherwise show "paste the code" fallback (avoids a heavy scanner dependency for v1).
 
-- No changes to other player screens.
-- No new assets.
-- No copy or color changes.
+## Visual style
 
-## Verification
+Matches existing app: soft purple/pink gradient backdrop, white rounded cards (`rounded-3xl`, `shadow-card`), `bg-primary` purple for primary actions, friendly emoji accents (👋 add friend, ⭐ XP, 🤝 friends). Bottom-nav glass bar stays as-is.
 
-After implementing, screenshot `/journey` at 390×844, 820×1180, and 1536×864 and compare each to the reference. Iterate the 4 character `%` values only (no structural changes) until all three match.
+## Done when
+
+- A kid can open `/club`, see their code + QR, share a link.
+- A second kid can paste the code (or open the link) and send a request.
+- The first kid sees the request, accepts, and both appear in each other's Friends list.
+- On the leaderboard, toggling "Friends" filters to just them + accepted friends.
+

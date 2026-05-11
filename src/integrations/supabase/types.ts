@@ -129,6 +129,54 @@ export type Database = {
           },
         ]
       }
+      friend_codes: {
+        Row: {
+          code: string
+          created_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      friendships: {
+        Row: {
+          addressee_id: string
+          created_at: string
+          id: string
+          requester_id: string
+          status: Database["public"]["Enums"]["friendship_status"]
+          updated_at: string
+        }
+        Insert: {
+          addressee_id: string
+          created_at?: string
+          id?: string
+          requester_id: string
+          status?: Database["public"]["Enums"]["friendship_status"]
+          updated_at?: string
+        }
+        Update: {
+          addressee_id?: string
+          created_at?: string
+          id?: string
+          requester_id?: string
+          status?: Database["public"]["Enums"]["friendship_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       layers: {
         Row: {
           class_id: string
@@ -445,6 +493,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_friend_leaderboard: {
+        Args: { _limit?: number }
+        Returns: {
+          age: number
+          avatar_config: Json
+          avatar_image_url: string
+          bio: string
+          display_name: string
+          total_xp: number
+          user_id: string
+        }[]
+      }
       get_leaderboard: {
         Args: { _limit?: number }
         Returns: {
@@ -464,9 +524,18 @@ export type Database = {
         }
         Returns: boolean
       }
+      lookup_friend_code: {
+        Args: { _code: string }
+        Returns: {
+          avatar_image_url: string
+          display_name: string
+          user_id: string
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "editor"
+      friendship_status: "pending" | "accepted" | "declined"
       layer_type: "foundation" | "quiz" | "simulation" | "reflection"
       publish_status: "draft" | "published" | "in_review"
     }
@@ -597,6 +666,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "editor"],
+      friendship_status: ["pending", "accepted", "declined"],
       layer_type: ["foundation", "quiz", "simulation", "reflection"],
       publish_status: ["draft", "published", "in_review"],
     },

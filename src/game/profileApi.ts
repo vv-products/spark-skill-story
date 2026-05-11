@@ -43,8 +43,9 @@ export type LeaderboardEntry = {
   total_xp: number;
 };
 
-export async function loadLeaderboard(limit = 20): Promise<LeaderboardEntry[]> {
-  const { data, error } = await supabase.rpc("get_leaderboard", { _limit: limit });
+export async function loadLeaderboard(limit = 20, scope: "all" | "friends" = "all"): Promise<LeaderboardEntry[]> {
+  const fn = scope === "friends" ? "get_friend_leaderboard" : "get_leaderboard";
+  const { data, error } = await supabase.rpc(fn, { _limit: limit });
   if (error) throw error;
   return (data ?? []).map((r: any) => ({
     user_id: r.user_id,

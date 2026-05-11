@@ -70,7 +70,7 @@ export function TopBar({ layer, totalLayers }: { layer?: number; totalLayers?: n
   );
 }
 
-type NavTo = "/" | "/journey" | "/profile" | "/studio";
+type NavTo = "/" | "/journey" | "/profile" | "/studio" | "/club";
 const NAV_ITEMS: Array<{
   icon: typeof Home;
   label: string;
@@ -79,7 +79,7 @@ const NAV_ITEMS: Array<{
   { icon: Home, label: "My World", to: "/" },
   { icon: Map, label: "My Journey", to: "/journey" },
   { icon: BarChart3, label: "My Growth", to: "/profile" },
-  { icon: Users, label: "Sementa Club", to: "/profile" },
+  { icon: Users, label: "Sementa Club", to: "/club" },
   { icon: Settings, label: "Settings", to: "/studio" },
 ];
 
