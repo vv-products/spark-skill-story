@@ -93,7 +93,7 @@ export function BottomNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   return (
     <nav
-      className="sticky bottom-0 z-30 mt-auto border-t border-border bg-card/95 backdrop-blur-md lg:hidden"
+      className="absolute inset-x-0 bottom-0 z-30 border-t border-border bg-card/95 backdrop-blur-md lg:hidden"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       <div className="grid grid-cols-5 px-2 pt-2 pb-2">
