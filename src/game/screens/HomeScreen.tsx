@@ -1,5 +1,5 @@
 import { useGame } from "../GameContext";
-import { BottomNav } from "../Chrome";
+
 import leo from "@/assets/leo.jpg";
 import maya from "@/assets/maya.jpg";
 import { useEffect, useState } from "react";
