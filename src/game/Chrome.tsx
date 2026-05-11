@@ -108,7 +108,7 @@ export function BottomNav() {
             >
               <span
                 className={`flex h-11 w-11 items-center justify-center rounded-full transition-colors ${
-                  active ? "bg-primary text-primary-foreground shadow-pop" : "bg-muted text-foreground/70"
+                  active ? "bg-primary text-primary-foreground shadow-pop" : "bg-white/80 text-foreground/70 shadow-sm"
                 }`}
               >
                 <Icon size={20} strokeWidth={2.25} />
