@@ -15,6 +15,7 @@ type View =
   | { kind: "task-types" }
   | { kind: "welcome-cards" }
   | { kind: "avatars" }
+  | { kind: "missions" }
   | { kind: "admin" };
 
 type Ctx = {
