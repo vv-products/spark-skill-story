@@ -192,8 +192,10 @@ export function MyJourney() {
         className="absolute inset-0 z-0"
         style={{
           backgroundImage: `url(${BG_IMG})`,
-          backgroundSize: "cover",
+          backgroundSize: "auto 100%",
           backgroundPosition: "center bottom",
+          backgroundRepeat: "no-repeat",
+          backgroundColor: "#cfe7d4",
           transition: "filter 0.55s ease",
           filter: active
             ? "brightness(0.45) blur(3px)"
