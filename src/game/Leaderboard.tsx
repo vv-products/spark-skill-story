@@ -101,6 +101,7 @@ export function Leaderboard({ currentUserId, onSelect }: Props) {
           );
         })}
       </ol>
+      </div>
     </div>
   );
 }
