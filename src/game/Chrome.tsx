@@ -1,3 +1,4 @@
+import { Link, useRouterState } from "@tanstack/react-router";
 import { useGame } from "./GameContext";
 
 export function TopBar({ layer, totalLayers }: { layer?: number; totalLayers?: number }) {
@@ -74,36 +75,43 @@ export function TopBar({ layer, totalLayers }: { layer?: number; totalLayers?: n
   );
 }
 
+type NavTo = "/" | "/journey" | "/profile" | "/studio";
+const NAV_ITEMS: Array<{ icon: string; label: string; to: NavTo }> = [
+  { icon: "🏠", label: "Home", to: "/" },
+  { icon: "🗺️", label: "Journey", to: "/journey" },
+  { icon: "👤", label: "Profile", to: "/profile" },
+  { icon: "⚙️", label: "Studio", to: "/studio" },
+];
+
 export function BottomNav() {
-  const items = [
-    { icon: "🏠", label: "Home", active: true },
-    { icon: "🌱", label: "My Growth" },
-    { icon: "🎯", label: "Challenges" },
-    { icon: "🎁", label: "Rewards" },
-  ];
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
   return (
     <div
-      className="sticky bottom-0 z-20 mt-auto border-t border-border bg-card"
+      className="sticky bottom-0 z-20 mt-auto border-t border-border bg-card lg:hidden"
       style={{ height: "calc(72px + env(safe-area-inset-bottom))" }}
     >
       <div className="grid h-[72px] grid-cols-4 px-2">
-        {items.map((it) => (
-          <button
-            key={it.label}
-            className="flex flex-col items-center justify-center gap-1 rounded-2xl py-1 transition-all active:scale-95"
-          >
-            {it.active ? (
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-xl text-primary-foreground shadow-pop">
-                {it.icon}
+        {NAV_ITEMS.map((it) => {
+          const active = it.to === "/" ? pathname === "/" : pathname === it.to || pathname.startsWith(it.to + "/");
+          return (
+            <Link
+              key={it.label}
+              to={it.to}
+              className="flex flex-col items-center justify-center gap-1 rounded-2xl py-1 transition-all active:scale-95"
+            >
+              {active ? (
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-xl text-primary-foreground shadow-pop">
+                  {it.icon}
+                </span>
+              ) : (
+                <span className="text-2xl opacity-60 grayscale">{it.icon}</span>
+              )}
+              <span className={`text-[10px] font-extrabold ${active ? "text-primary" : "text-[#999999]"}`}>
+                {it.label}
               </span>
-            ) : (
-              <span className="text-2xl opacity-60 grayscale">{it.icon}</span>
-            )}
-            <span className={`text-[10px] font-extrabold ${it.active ? "text-primary" : "text-[#999999]"}`}>
-              {it.label}
-            </span>
-          </button>
-        ))}
+            </Link>
+          );
+        })}
       </div>
     </div>
   );

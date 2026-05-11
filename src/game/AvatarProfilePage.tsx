@@ -145,7 +145,7 @@ export function AvatarProfilePage() {
         </div>
       </div>
 
-      <div className="fixed bottom-0 left-1/2 z-10 w-full max-w-[430px] -translate-x-1/2 border-t border-[#EBEBF5] bg-white/95 px-5 py-3 backdrop-blur">
+      <div className="sticky bottom-0 z-10 w-full border-t border-[#EBEBF5] bg-white/95 px-5 py-3 backdrop-blur">
         <motion.button
           whileTap={{ scale: 0.97 }}
           onClick={save}
