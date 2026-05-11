@@ -33,20 +33,40 @@ export async function getOrCreateMyCode(userId: string): Promise<string> {
     .select("code")
     .eq("user_id", userId)
     .maybeSingle();
-  if (error) throw error;
+  if (error) {
+    console.error("[club] read friend_code failed", error);
+    throw new Error(error.message || "Couldn't load your code");
+  }
   if (data?.code) return data.code;
 
-  // Try a few times in case of collision
-  for (let i = 0; i < 5; i++) {
+  // Try a few times in case of `code` collision (user_id PK is also unique)
+  let lastErr: unknown = null;
+  for (let i = 0; i < 6; i++) {
     const code = randomCode();
     const { error: insErr } = await supabase
       .from("friend_codes")
       .insert({ user_id: userId, code });
     if (!insErr) return code;
-    // unique violation -> retry
-    if (!String(insErr.message).toLowerCase().includes("duplicate")) throw insErr;
+    lastErr = insErr;
+    const msg = String(insErr.message || "").toLowerCase();
+    console.error("[club] insert friend_code failed", insErr);
+    // If user already has a code (PK conflict on user_id), re-read it
+    if (msg.includes("friend_codes_pkey") || msg.includes("user_id")) {
+      const { data: again } = await supabase
+        .from("friend_codes")
+        .select("code")
+        .eq("user_id", userId)
+        .maybeSingle();
+      if (again?.code) return again.code;
+    }
+    // Only retry on `code` unique-collision; otherwise surface the real error
+    if (!msg.includes("friend_codes_code_key") && !msg.includes("duplicate")) {
+      throw new Error(insErr.message || "Couldn't create your code");
+    }
   }
-  throw new Error("Couldn't generate a code, please try again");
+  throw new Error(
+    lastErr instanceof Error ? lastErr.message : "Couldn't generate a code, please try again",
+  );
 }
 
 export async function rotateMyCode(userId: string): Promise<string> {
