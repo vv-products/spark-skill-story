@@ -349,6 +349,9 @@ export function GameHome() {
             progress={45}
           />
           <EmotionsCrosswordCard />
+          <EmotionsQuizCard />
+          <EmotionsQuickFireCard />
+
 
         </div>
 
