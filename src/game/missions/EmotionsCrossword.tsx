@@ -451,8 +451,8 @@ export function EmotionsCrossword({ initialCode }: { initialCode?: string }) {
       : "";
 
   // Ensure scoreboard always shows the current player even before they've scored
-  const scoreList = Object.values({ ...scores, [myName]: scores[myName] ?? { name: myName, correctLetters: 0, correctWords: 0 } })
-    .sort((a, b) => (b.correctWords - a.correctWords) || (b.correctLetters - a.correctLetters));
+  const scoreList: Score[] = Object.values({ ...scores, [myName]: scores[myName] ?? { name: myName, correctLetters: 0, correctWords: 0 } })
+    .sort((a: Score, b: Score) => (b.correctWords - a.correctWords) || (b.correctLetters - a.correctLetters));
 
   // Won → show rewards screen
   if (done && xpAwarded != null) {
