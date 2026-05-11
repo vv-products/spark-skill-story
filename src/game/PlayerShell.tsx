@@ -39,8 +39,12 @@ export function PlayerShell({
     <div className="min-h-[100dvh] w-full bg-[#E5E5F2] lg:bg-gradient-to-br lg:from-[#EFEAFB] lg:via-[#E5E5F2] lg:to-[#FCE9F0]">
       <div className="mx-auto flex min-h-[100dvh] w-full max-w-[1440px] lg:gap-8 lg:px-8 lg:py-6">
         <DesktopSidebar />
-        <div className="relative mx-auto flex min-h-[100dvh] w-full max-w-[430px] flex-1 flex-col bg-background shadow-2xl md:max-w-[720px] lg:min-h-[calc(100dvh-3rem)] lg:max-w-[960px] lg:overflow-hidden lg:rounded-[28px] lg:shadow-[0_30px_80px_-30px_rgba(60,40,120,0.35)]">
-          {bleed ? children : children}
+        <div
+          className={`relative mx-auto flex min-h-[100dvh] w-full max-w-[430px] flex-1 flex-col bg-background shadow-2xl md:max-w-[720px] lg:min-h-[calc(100dvh-3rem)] lg:max-w-[960px] lg:rounded-[28px] lg:shadow-[0_30px_80px_-30px_rgba(60,40,120,0.35)] ${
+            bleed ? "overflow-hidden" : ""
+          }`}
+        >
+          {children}
         </div>
       </div>
     </div>
