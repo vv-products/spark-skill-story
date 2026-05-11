@@ -75,6 +75,8 @@ const CHARACTERS: Character[] = [
 //
 // footOffset: how much empty transparent space is at the bottom of each PNG.
 // This shifts the name pill to sit at the actual character's feet.
+// Positions are in % of the scene wrapper, which has the SAME aspect ratio
+// as scene-bg.png (848×1264). One calibration → matches at every viewport.
 const SCENE: Array<{
   id: CharId;
   left: string;
@@ -83,10 +85,10 @@ const SCENE: Array<{
   zIndex: number;
   footOffset: string;
 }> = [
-  { id: "pip",  left: "4%",  width: "20%", bottom: "50%", zIndex: 10, footOffset: "0px" },
-  { id: "leo",  left: "16%", width: "44%", bottom: "6%",  zIndex: 11, footOffset: "12px" },
-  { id: "maya", left: "44%", width: "44%", bottom: "6%",  zIndex: 11, footOffset: "12px" },
-  { id: "dash", left: "38%", width: "24%", bottom: "0%",  zIndex: 14, footOffset: "0px"  },
+  { id: "pip",  left: "14%", width: "12%", bottom: "46%", zIndex: 10, footOffset: "0px"  },
+  { id: "leo",  left: "30%", width: "26%", bottom: "6%",  zIndex: 11, footOffset: "12px" },
+  { id: "maya", left: "52%", width: "26%", bottom: "6%",  zIndex: 11, footOffset: "12px" },
+  { id: "dash", left: "42%", width: "16%", bottom: "2%",  zIndex: 14, footOffset: "0px"  },
 ];
 // Note: tune footOffset per-character (e.g. "24px") if name pills
 // appear mid-body due to transparent padding at bottom of PNG.
