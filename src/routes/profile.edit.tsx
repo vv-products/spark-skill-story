@@ -2,23 +2,23 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Toaster } from "@/components/ui/sonner";
 import { PlayerAuthProvider } from "@/game/PlayerAuth";
 import { PlayerShell } from "@/game/PlayerShell";
-import { GrowthPage } from "@/game/GrowthPage";
+import { AvatarProfilePage } from "@/game/AvatarProfilePage";
 
-export const Route = createFileRoute("/profile")({
+export const Route = createFileRoute("/profile/edit")({
   head: () => ({
     meta: [
-      { title: "My Growth — Sementa" },
-      { name: "description", content: "Your XP, leaderboard ranking, and friends." },
+      { title: "Edit profile — Sementa" },
+      { name: "description", content: "Customize your avatar and profile." },
     ],
   }),
-  component: ProfileRoute,
+  component: ProfileEditRoute,
 });
 
-function ProfileRoute() {
+function ProfileEditRoute() {
   return (
     <PlayerAuthProvider>
       <PlayerShell>
-        <GrowthPage />
+        <AvatarProfilePage />
         <Toaster position="bottom-center" richColors />
       </PlayerShell>
     </PlayerAuthProvider>

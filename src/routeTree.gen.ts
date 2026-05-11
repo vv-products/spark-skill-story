@@ -14,6 +14,7 @@ import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as JourneyRouteImport } from './routes/journey'
 import { Route as ClubRouteImport } from './routes/club'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ProfileEditRouteImport } from './routes/profile.edit'
 import { Route as PlaySlugRouteImport } from './routes/play.$slug'
 import { Route as ClubJoinCodeRouteImport } from './routes/club.join.$code'
 
@@ -42,6 +43,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfileEditRoute = ProfileEditRouteImport.update({
+  id: '/edit',
+  path: '/edit',
+  getParentRoute: () => ProfileRoute,
+} as any)
 const PlaySlugRoute = PlaySlugRouteImport.update({
   id: '/play/$slug',
   path: '/play/$slug',
@@ -57,18 +63,20 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/club': typeof ClubRouteWithChildren
   '/journey': typeof JourneyRoute
-  '/profile': typeof ProfileRoute
+  '/profile': typeof ProfileRouteWithChildren
   '/studio': typeof StudioRoute
   '/play/$slug': typeof PlaySlugRoute
+  '/profile/edit': typeof ProfileEditRoute
   '/club/join/$code': typeof ClubJoinCodeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/club': typeof ClubRouteWithChildren
   '/journey': typeof JourneyRoute
-  '/profile': typeof ProfileRoute
+  '/profile': typeof ProfileRouteWithChildren
   '/studio': typeof StudioRoute
   '/play/$slug': typeof PlaySlugRoute
+  '/profile/edit': typeof ProfileEditRoute
   '/club/join/$code': typeof ClubJoinCodeRoute
 }
 export interface FileRoutesById {
@@ -76,9 +84,10 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/club': typeof ClubRouteWithChildren
   '/journey': typeof JourneyRoute
-  '/profile': typeof ProfileRoute
+  '/profile': typeof ProfileRouteWithChildren
   '/studio': typeof StudioRoute
   '/play/$slug': typeof PlaySlugRoute
+  '/profile/edit': typeof ProfileEditRoute
   '/club/join/$code': typeof ClubJoinCodeRoute
 }
 export interface FileRouteTypes {
@@ -90,6 +99,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/studio'
     | '/play/$slug'
+    | '/profile/edit'
     | '/club/join/$code'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -99,6 +109,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/studio'
     | '/play/$slug'
+    | '/profile/edit'
     | '/club/join/$code'
   id:
     | '__root__'
@@ -108,6 +119,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/studio'
     | '/play/$slug'
+    | '/profile/edit'
     | '/club/join/$code'
   fileRoutesById: FileRoutesById
 }
@@ -115,7 +127,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ClubRoute: typeof ClubRouteWithChildren
   JourneyRoute: typeof JourneyRoute
-  ProfileRoute: typeof ProfileRoute
+  ProfileRoute: typeof ProfileRouteWithChildren
   StudioRoute: typeof StudioRoute
   PlaySlugRoute: typeof PlaySlugRoute
 }
@@ -157,6 +169,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/profile/edit': {
+      id: '/profile/edit'
+      path: '/edit'
+      fullPath: '/profile/edit'
+      preLoaderRoute: typeof ProfileEditRouteImport
+      parentRoute: typeof ProfileRoute
+    }
     '/play/$slug': {
       id: '/play/$slug'
       path: '/play/$slug'
@@ -184,11 +203,22 @@ const ClubRouteChildren: ClubRouteChildren = {
 
 const ClubRouteWithChildren = ClubRoute._addFileChildren(ClubRouteChildren)
 
+interface ProfileRouteChildren {
+  ProfileEditRoute: typeof ProfileEditRoute
+}
+
+const ProfileRouteChildren: ProfileRouteChildren = {
+  ProfileEditRoute: ProfileEditRoute,
+}
+
+const ProfileRouteWithChildren =
+  ProfileRoute._addFileChildren(ProfileRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ClubRoute: ClubRouteWithChildren,
   JourneyRoute: JourneyRoute,
-  ProfileRoute: ProfileRoute,
+  ProfileRoute: ProfileRouteWithChildren,
   StudioRoute: StudioRoute,
   PlaySlugRoute: PlaySlugRoute,
 }
