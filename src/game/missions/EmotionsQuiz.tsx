@@ -1,11 +1,12 @@
 // Blooket-style multiple-choice mission for Emotions.
-// - "self-paced": no timer, soothing background music, +50 XP base
-// - "quick": 8s timer per question, fast music, streaks, +100 XP base + speed bonus
+// - "self-paced": no timer, soothing background music, +25 XP base
+// - "quick": 8s timer per question, fast music, streaks, +50 XP base + speed bonus
+// Solo or Co-op (Supabase Realtime broadcast — live scoreboard).
 // Background music starts on first user interaction (autoplay-safe).
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, Clock, Flame, Sparkles, Music, VolumeX } from "lucide-react";
+import { ArrowLeft, Clock, Flame, Sparkles, Music, VolumeX, Users, Copy, Check, Trophy } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { usePlayerAuth } from "@/game/PlayerAuth";
@@ -15,7 +16,8 @@ import { startMusic, type MusicHandle, type MusicKind } from "./missionMusic";
 import { SELF_PACED_QUIZ, QUICK_FIRE_QUIZ, type MCQ } from "./emotionsQuiz";
 
 type Pace = "self-paced" | "quick";
-const QUICK_TIME = 8; // seconds per question
+type Mode = "choose" | "solo" | "coop";
+const QUICK_TIME = 8;
 const COMPLETION_KEY_BASE = "sementa.mission.emotions-quiz";
 
 type CompletionRecord = { pace: Pace; score: number; xp: number; at: number };
@@ -30,17 +32,30 @@ function writeCompletion(rec: CompletionRecord) {
   try { window.localStorage.setItem(`${COMPLETION_KEY_BASE}.${rec.pace}`, JSON.stringify(rec)); } catch { /* ignore */ }
 }
 
+function makeCode(len = 5): string {
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let out = "";
+  for (let i = 0; i < len; i++) out += alphabet[Math.floor(Math.random() * alphabet.length)];
+  return out;
+}
+
 const PACE_CONFIG: Record<Pace, { music: MusicKind; baseXp: number; perRightXp: number; title: string; tagline: string; emoji: string }> = {
   "self-paced": { music: "soothing", baseXp: 25, perRightXp: 5, title: "Emotions Quiz", tagline: "Take your time. Soothing vibes.", emoji: "🌿" },
   "quick":      { music: "fast",     baseXp: 50, perRightXp: 8, title: "Emotions Quick-Fire", tagline: "8 seconds per question. Don't blink.", emoji: "⚡" },
 };
 
-export function EmotionsQuiz({ pace }: { pace: Pace }) {
+type PeerScore = { name: string; score: number; answered: number; done: boolean };
+
+export function EmotionsQuiz({ pace, initialCode }: { pace: Pace; initialCode?: string }) {
   const navigate = useNavigate();
   const { user } = usePlayerAuth();
   const { settings } = useMissionSettings();
   const cfg = PACE_CONFIG[pace];
   const questions = useMemo<MCQ[]>(() => (pace === "quick" ? QUICK_FIRE_QUIZ : SELF_PACED_QUIZ), [pace]);
+
+  const [mode, setMode] = useState<Mode>(initialCode ? "coop" : "choose");
+  const [code, setCode] = useState<string>(initialCode ?? "");
+  const [copied, setCopied] = useState(false);
 
   const [started, setStarted] = useState(false);
   const [musicOn, setMusicOn] = useState(true);
@@ -52,8 +67,45 @@ export function EmotionsQuiz({ pace }: { pace: Pace }) {
   const [timeLeft, setTimeLeft] = useState(QUICK_TIME);
   const [done, setDone] = useState(false);
   const [xpAwarded, setXpAwarded] = useState<number | null>(null);
+  const [peers, setPeers] = useState<Record<string, PeerScore>>({});
   const musicRef = useRef<MusicHandle | null>(null);
-  const startedAtRef = useRef<number>(0);
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+
+  const myName = (user?.user_metadata as any)?.display_name || user?.email?.split("@")[0] || "Guest";
+  const myKey = user?.id ?? `guest-${myName}-${Math.random().toString(36).slice(2, 6)}`;
+
+  // Realtime channel for co-op
+  useEffect(() => {
+    if (mode !== "coop" || !code) return;
+    const ch = supabase.channel(`mission:emotions-quiz:${pace}:${code}`, {
+      config: { broadcast: { self: false }, presence: { key: myKey } },
+    });
+    channelRef.current = ch;
+
+    ch.on("broadcast", { event: "score" }, (payload) => {
+      const p = payload.payload as PeerScore & { key: string };
+      setPeers((prev) => ({ ...prev, [p.key]: { name: p.name, score: p.score, answered: p.answered, done: p.done } }));
+    });
+
+    ch.subscribe((status) => {
+      if (status === "SUBSCRIBED") {
+        // Announce self
+        ch.send({ type: "broadcast", event: "score", payload: { key: myKey, name: myName, score: 0, answered: 0, done: false } });
+      }
+    });
+    return () => { ch.unsubscribe(); channelRef.current = null; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode, code, pace]);
+
+  // Broadcast my own running state in co-op
+  useEffect(() => {
+    if (mode !== "coop" || !channelRef.current) return;
+    channelRef.current.send({
+      type: "broadcast",
+      event: "score",
+      payload: { key: myKey, name: myName, score, answered: idx + (picked != null ? 1 : 0), done },
+    });
+  }, [score, idx, picked, done, mode, myKey, myName]);
 
   // Music lifecycle
   useEffect(() => {
@@ -73,7 +125,6 @@ export function EmotionsQuiz({ pace }: { pace: Pace }) {
       setTimeLeft(left);
       if (left <= 0) {
         clearInterval(interval);
-        // Time up = wrong
         setPicked(-1);
         setStreak(0);
         playFeedback("incorrect", settings);
@@ -84,17 +135,13 @@ export function EmotionsQuiz({ pace }: { pace: Pace }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [started, idx, pace, done, picked]);
 
-  function start() {
-    setStarted(true);
-    startedAtRef.current = Date.now();
-  }
+  function start() { setStarted(true); }
 
   function pick(i: number) {
     if (picked != null || done) return;
     const correct = i === questions[idx].answer;
     setPicked(i);
     if (correct) {
-      // Speed bonus for quick mode
       const speedBonus = pace === "quick" ? Math.round(timeLeft * 2) : 0;
       const streakBonus = (streak + 1) >= 3 ? 5 : 0;
       const gain = cfg.perRightXp + speedBonus + streakBonus;
@@ -114,11 +161,8 @@ export function EmotionsQuiz({ pace }: { pace: Pace }) {
 
   function nextQuestion() {
     setPicked(null);
-    if (idx + 1 >= questions.length) {
-      void finish();
-    } else {
-      setIdx((n) => n + 1);
-    }
+    if (idx + 1 >= questions.length) void finish();
+    else setIdx((n) => n + 1);
   }
 
   async function finish() {
@@ -126,14 +170,15 @@ export function EmotionsQuiz({ pace }: { pace: Pace }) {
     musicRef.current?.stop();
     musicRef.current = null;
     playFeedback("win", settings);
-    const finalXp = cfg.baseXp + score;
+    const coopBonus = mode === "coop" ? 15 : 0;
+    const finalXp = cfg.baseXp + score + coopBonus;
     setXpAwarded(finalXp);
     writeCompletion({ pace, score, xp: finalXp, at: Date.now() });
     if (user) {
       const { error } = await supabase.from("xp_events").insert({
         user_id: user.id,
         amount: finalXp,
-        source: `mission:emotions-${pace}`,
+        source: `mission:emotions-${pace}${mode === "coop" ? ":coop" : ""}`,
       });
       if (error) console.error("[xp_events]", error);
     }
@@ -146,9 +191,62 @@ export function EmotionsQuiz({ pace }: { pace: Pace }) {
     setStarted(false);
   }
 
-  // ---------- intro screen ----------
+  async function copyCode() {
+    const url = `${window.location.origin}${window.location.pathname}?code=${code}`;
+    try { await navigator.clipboard.writeText(url); setCopied(true); toast.success("Invite link copied!"); setTimeout(() => setCopied(false), 1500); }
+    catch { toast.error("Copy failed"); }
+  }
+
+  // ---------- mode chooser ----------
+  if (mode === "choose") {
+    return (
+      <div className="mx-auto max-w-md px-5 py-6">
+        <BackBar />
+        <div className={`mt-3 rounded-3xl p-6 shadow-pop text-center ${
+          pace === "quick"
+            ? "bg-gradient-to-br from-orange-500 to-pink-500 text-white"
+            : "bg-gradient-to-br from-emerald-400 to-teal-500 text-white"
+        }`}>
+          <div className="text-5xl">{cfg.emoji}</div>
+          <h1 className="mt-2 text-2xl font-black">{cfg.title}</h1>
+          <p className="mt-1 text-xs font-bold opacity-90">{cfg.tagline}</p>
+        </div>
+
+        <div className="mt-5 space-y-3">
+          <button
+            onClick={() => setMode("solo")}
+            className="w-full rounded-2xl bg-card p-5 text-left shadow-card transition active:scale-[0.99]"
+          >
+            <div className="flex items-center gap-3">
+              <span className="text-3xl">🎯</span>
+              <div className="flex-1">
+                <div className="text-base font-black text-foreground">Play solo</div>
+                <div className="text-xs font-bold text-text-secondary">Just you and the questions.</div>
+              </div>
+            </div>
+          </button>
+
+          <button
+            onClick={() => { setCode(makeCode()); setMode("coop"); }}
+            className="w-full rounded-2xl bg-card p-5 text-left shadow-card transition active:scale-[0.99]"
+          >
+            <div className="flex items-center gap-3">
+              <span className="text-3xl">👥</span>
+              <div className="flex-1">
+                <div className="text-base font-black text-foreground">Play against a friend</div>
+                <div className="text-xs font-bold text-text-secondary">Live scoreboard. +15 XP bonus.</div>
+              </div>
+            </div>
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ---------- intro / lobby screen ----------
   if (!started) {
     const completion = readCompletion(pace);
+    const peerList = Object.values(peers);
     return (
       <div className="mx-auto max-w-md px-5 py-6">
         <BackBar />
@@ -167,6 +265,33 @@ export function EmotionsQuiz({ pace }: { pace: Pace }) {
           )}
         </div>
 
+        {mode === "coop" && (
+          <div className="mt-4 rounded-2xl bg-card p-4 shadow-card">
+            <div className="flex items-center gap-2 text-xs font-extrabold text-foreground">
+              <Users size={14} /> Co-op lobby
+            </div>
+            <div className="mt-3 flex items-center gap-2">
+              <code className="flex-1 rounded-pill bg-muted px-4 py-2 text-center text-lg font-black tracking-[0.3em] text-foreground">{code}</code>
+              <button
+                onClick={copyCode}
+                className="flex items-center gap-1 rounded-pill bg-primary px-3 py-2 text-[11px] font-extrabold text-primary-foreground"
+              >
+                {copied ? <Check size={12} /> : <Copy size={12} />}
+                {copied ? "Copied" : "Share"}
+              </button>
+            </div>
+            <div className="mt-3 text-[11px] font-bold text-text-secondary">
+              Players in lobby ({peerList.length || 1}):
+            </div>
+            <div className="mt-1 flex flex-wrap gap-1">
+              <span className="rounded-pill bg-primary/10 px-2 py-0.5 text-[11px] font-extrabold text-primary">{myName} (you)</span>
+              {peerList.filter((p) => p.name !== myName).map((p, i) => (
+                <span key={i} className="rounded-pill bg-muted px-2 py-0.5 text-[11px] font-extrabold text-foreground">{p.name}</span>
+              ))}
+            </div>
+          </div>
+        )}
+
         {completion && (
           <div className="mt-4 rounded-2xl bg-card p-3 text-xs font-bold text-text-secondary shadow-card">
             ✓ Last score: <span className="text-foreground">{completion.score}</span> · earned <span className="text-foreground">+{completion.xp} XP</span>
@@ -177,7 +302,7 @@ export function EmotionsQuiz({ pace }: { pace: Pace }) {
           <Row label="Questions" value={`${questions.length}`} />
           <Row label="Pace" value={pace === "quick" ? "8s per question" : "Self-paced"} />
           <Row label="Music" value={pace === "quick" ? "Fast & energetic" : "Soothing ambient"} />
-          <Row label="Base XP" value={`+${cfg.baseXp}`} />
+          <Row label="Base XP" value={`+${cfg.baseXp}${mode === "coop" ? " (+15 co-op)" : ""}`} />
         </div>
 
         <div className="mt-5 flex items-center justify-between rounded-2xl bg-card p-3 shadow-card">
@@ -198,7 +323,7 @@ export function EmotionsQuiz({ pace }: { pace: Pace }) {
             pace === "quick" ? "bg-orange-500 text-white" : "bg-primary text-primary-foreground"
           }`}
         >
-          Start mission →
+          {mode === "coop" ? "Start race →" : "Start mission →"}
         </button>
       </div>
     );
@@ -206,8 +331,11 @@ export function EmotionsQuiz({ pace }: { pace: Pace }) {
 
   // ---------- results screen ----------
   if (done && xpAwarded != null) {
-    const correct = questions.filter((_, i) => true).length; // placeholder, recompute below
-    // Recompute correct count from score? Easier: track during play; for now derive from XP gained per right
+    const allScores: PeerScore[] = [
+      { name: `${myName} (you)`, score, answered: questions.length, done: true },
+      ...Object.values(peers).filter((p) => p.name !== myName),
+    ].sort((a, b) => b.score - a.score);
+
     return (
       <div className="mx-auto max-w-md px-5 py-6">
         <Confetti />
@@ -229,6 +357,22 @@ export function EmotionsQuiz({ pace }: { pace: Pace }) {
           <Stat label="Questions" value={questions.length} />
         </div>
 
+        {mode === "coop" && allScores.length > 1 && (
+          <div className="mt-5 rounded-2xl bg-card p-4 shadow-card">
+            <div className="flex items-center gap-2 text-xs font-extrabold text-foreground">
+              <Trophy size={14} /> Final scoreboard
+            </div>
+            <div className="mt-3 space-y-1.5">
+              {allScores.map((p, i) => (
+                <div key={i} className="flex items-center justify-between rounded-pill bg-muted px-3 py-1.5 text-xs font-extrabold">
+                  <span className="text-foreground">#{i + 1} {p.name}</span>
+                  <span className="text-primary">{p.score} pts {!p.done && "(playing…)"}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="mt-6 space-y-2">
           <button onClick={restart} className="w-full rounded-pill bg-primary py-3 text-sm font-extrabold text-primary-foreground shadow-pop">
             Play again
@@ -247,13 +391,13 @@ export function EmotionsQuiz({ pace }: { pace: Pace }) {
   const showFeedback = picked != null;
   const isQuick = pace === "quick";
   const timePct = Math.max(0, Math.min(100, (timeLeft / QUICK_TIME) * 100));
+  const peerList = Object.values(peers).filter((p) => p.name !== myName);
 
-  // Blooket-style 4 colored option tiles
   const tileColors = [
-    "bg-[#E94B6F] text-white", // red/pink
-    "bg-[#3FB6E0] text-white", // blue
-    "bg-[#F5A623] text-white", // orange
-    "bg-[#5DBE63] text-white", // green
+    "bg-[#E94B6F] text-white",
+    "bg-[#3FB6E0] text-white",
+    "bg-[#F5A623] text-white",
+    "bg-[#5DBE63] text-white",
   ];
 
   return (
@@ -269,7 +413,6 @@ export function EmotionsQuiz({ pace }: { pace: Pace }) {
         </button>
       </div>
 
-      {/* Progress bar */}
       <div className="mt-3 flex items-center gap-2">
         <span className="text-[10px] font-extrabold text-text-secondary">{idx + 1} / {questions.length}</span>
         <div className="h-2 flex-1 rounded-pill bg-muted overflow-hidden">
@@ -278,7 +421,16 @@ export function EmotionsQuiz({ pace }: { pace: Pace }) {
         <span className="rounded-pill bg-card px-2 py-0.5 text-[10px] font-extrabold text-foreground shadow-card">{score} pts</span>
       </div>
 
-      {/* Quick-mode timer */}
+      {mode === "coop" && peerList.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-1">
+          {peerList.map((p, i) => (
+            <span key={i} className="rounded-pill bg-card px-2 py-0.5 text-[10px] font-extrabold text-text-secondary shadow-card">
+              {p.name}: {p.score}pts
+            </span>
+          ))}
+        </div>
+      )}
+
       {isQuick && (
         <div className="mt-3 flex items-center gap-2">
           <Clock size={14} className={timeLeft < 3 ? "text-red-500" : "text-text-secondary"} />
@@ -292,20 +444,17 @@ export function EmotionsQuiz({ pace }: { pace: Pace }) {
         </div>
       )}
 
-      {/* Streak indicator */}
       {streak >= 2 && (
         <div className="mt-3 inline-flex items-center gap-1 rounded-pill bg-orange-100 px-3 py-1 text-xs font-extrabold text-orange-700">
           <Flame size={12} /> {streak} streak!
         </div>
       )}
 
-      {/* Question */}
       <div className="mt-4 rounded-3xl bg-card p-5 text-center shadow-card">
         <div className="text-[10px] font-extrabold uppercase tracking-wider text-text-secondary">Question {idx + 1}</div>
         <p className={`mt-2 font-black text-foreground ${settings.largeText ? "text-2xl" : "text-xl"}`}>{q.q}</p>
       </div>
 
-      {/* Options grid */}
       <div className="mt-4 grid grid-cols-2 gap-2.5">
         {q.options.map((opt, i) => {
           const isPicked = picked === i;
