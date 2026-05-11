@@ -1,4 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
+import { Home, Map, BarChart3, Users, Settings } from "lucide-react";
 import { useGame } from "./GameContext";
 
 export function TopBar({ layer, totalLayers }: { layer?: number; totalLayers?: number }) {
