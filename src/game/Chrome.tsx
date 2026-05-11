@@ -38,9 +38,7 @@ export function TopBar({ layer, totalLayers }: { layer?: number; totalLayers?: n
             }`}
           >
             <span className="text-base">{autoRead ? "🔊" : "🔈"}</span>
-            <span className="text-[10px] font-extrabold uppercase tracking-wider">
-              {autoRead ? "On" : "Off"}
-            </span>
+            <span className="text-[10px] font-extrabold uppercase tracking-wider">{autoRead ? "On" : "Off"}</span>
           </button>
         )}
 
@@ -56,17 +54,13 @@ export function TopBar({ layer, totalLayers }: { layer?: number; totalLayers?: n
             <span className="text-[11px] font-bold uppercase tracking-wider text-text-secondary">
               Layer {layer} of {totalLayers}
             </span>
-            <span className="text-[11px] font-bold text-text-secondary">
-              The Happy Stall
-            </span>
+            <span className="text-[11px] font-bold text-text-secondary">The Happy Stall</span>
           </div>
           <div className="mt-1.5 flex gap-1.5">
             {Array.from({ length: totalLayers }).map((_, i) => (
               <div
                 key={i}
-                className={`h-1.5 flex-1 rounded-pill transition-all ${
-                  i < layer ? "bg-primary" : "bg-muted"
-                }`}
+                className={`h-1.5 flex-1 rounded-pill transition-all ${i < layer ? "bg-primary" : "bg-muted"}`}
               />
             ))}
           </div>
@@ -82,28 +76,25 @@ const NAV_ITEMS: Array<{
   label: string;
   to: NavTo;
 }> = [
-  { icon: Home,      label: "My World",     to: "/" },
-  { icon: Map,       label: "My Journey",   to: "/journey" },
-  { icon: BarChart3, label: "My Growth",    to: "/profile" },
-  { icon: Users,     label: "Sementa Club", to: "/profile" },
-  { icon: Settings,  label: "Settings",     to: "/studio" },
+  { icon: Home, label: "My World", to: "/" },
+  { icon: Map, label: "My Journey", to: "/journey" },
+  { icon: BarChart3, label: "My Growth", to: "/profile" },
+  { icon: Users, label: "Sementa Club", to: "/profile" },
+  { icon: Settings, label: "Settings", to: "/studio" },
 ];
 
 export function BottomNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-white/20 bg-white/20 backdrop-blur-2xl backdrop-saturate-150 lg:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-white/10 backdrop-blur-2xl backdrop-saturate-150 lg:hidden"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       <div className="grid grid-cols-5 px-2 pt-2 pb-2">
         {NAV_ITEMS.map((it, idx) => {
           // Active when pathname matches; for duplicate targets (My Growth + Sementa
           // Club both → /profile) only the first one lights up.
-          const matches =
-            it.to === "/"
-              ? pathname === "/"
-              : pathname === it.to || pathname.startsWith(it.to + "/");
+          const matches = it.to === "/" ? pathname === "/" : pathname === it.to || pathname.startsWith(it.to + "/");
           const firstMatchIdx = NAV_ITEMS.findIndex((n) =>
             n.to === "/" ? pathname === "/" : pathname === n.to || pathname.startsWith(n.to + "/"),
           );
@@ -117,9 +108,7 @@ export function BottomNav() {
             >
               <span
                 className={`flex h-11 w-11 items-center justify-center rounded-full transition-colors ${
-                  active
-                    ? "bg-primary text-primary-foreground shadow-pop"
-                    : "bg-muted text-foreground/70"
+                  active ? "bg-primary text-primary-foreground shadow-pop" : "bg-muted text-foreground/70"
                 }`}
               >
                 <Icon size={20} strokeWidth={2.25} />
