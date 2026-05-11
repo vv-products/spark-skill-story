@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Toaster } from "@/components/ui/sonner";
 import { PlayerAuthProvider } from "@/game/PlayerAuth";
+import { PlayerShell } from "@/game/PlayerShell";
 import { GameProvider } from "@/game/GameContext";
 import { ClassPlayer } from "@/game/GamePlayer";
 
@@ -19,15 +20,13 @@ export const Route = createFileRoute("/play/$slug")({
 function PlayPage() {
   const { slug } = Route.useParams();
   return (
-    <div className="min-h-[100dvh] w-full bg-[#E5E5F2]">
-      <div className="mx-auto min-h-[100dvh] w-full max-w-[430px] bg-background shadow-2xl">
-        <PlayerAuthProvider>
-          <GameProvider>
-            <ClassPlayer slug={slug} />
-            <Toaster position="bottom-center" richColors />
-          </GameProvider>
-        </PlayerAuthProvider>
-      </div>
-    </div>
+    <PlayerAuthProvider>
+      <PlayerShell>
+        <GameProvider>
+          <ClassPlayer slug={slug} />
+          <Toaster position="bottom-center" richColors />
+        </GameProvider>
+      </PlayerShell>
+    </PlayerAuthProvider>
   );
 }

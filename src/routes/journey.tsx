@@ -1,4 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { PlayerAuthProvider } from "@/game/PlayerAuth";
+import { PlayerShell } from "@/game/PlayerShell";
 import { MyJourney } from "@/game/MyJourney";
 
 export const Route = createFileRoute("/journey")({
@@ -13,10 +15,10 @@ export const Route = createFileRoute("/journey")({
 
 function JourneyRoute() {
   return (
-    <div className="min-h-[100dvh] w-full bg-[#E5E5F2]">
-      <div className="mx-auto min-h-[100dvh] w-full max-w-[430px] overflow-hidden bg-background shadow-2xl">
+    <PlayerAuthProvider>
+      <PlayerShell bleed>
         <MyJourney />
-      </div>
-    </div>
+      </PlayerShell>
+    </PlayerAuthProvider>
   );
 }
