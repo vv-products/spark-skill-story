@@ -22,6 +22,7 @@ export function StudioLayout({ children, title, actions }: { children: ReactNode
     view.kind === "task-types" ? "task-types" :
     view.kind === "welcome-cards" ? "welcome-cards" :
     view.kind === "avatars" ? "avatars" :
+    view.kind === "missions" ? "missions" :
     "library";
 
   const sidebarContent = (
