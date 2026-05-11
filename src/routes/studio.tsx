@@ -39,6 +39,7 @@ function Router() {
     case "task-types": return <TaskTypesScreen />;
     case "welcome-cards": return <WelcomeCardsScreen />;
     case "avatars": return <AvatarsScreen />;
+    case "missions": return <MissionsScreen />;
     case "admin": return null;
   }
 }
