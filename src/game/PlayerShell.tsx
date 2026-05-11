@@ -37,21 +37,12 @@ export function PlayerShell({
 }) {
   return (
     <div className="min-h-[100dvh] w-full bg-[#E5E5F2] lg:bg-gradient-to-br lg:from-[#EFEAFB] lg:via-[#E5E5F2] lg:to-[#FCE9F0]">
-      <div
-        className={`mx-auto flex min-h-[100dvh] w-full ${
-          bleed ? "" : "max-w-[1440px] lg:gap-8 lg:px-8 lg:py-6"
-        }`}
-      >
-        {!bleed && <DesktopSidebar />}
-        {bleed && (
-          <div className="hidden lg:block">
-            <DesktopSidebar />
-          </div>
-        )}
+      <div className="mx-auto flex min-h-[100dvh] w-full max-w-[1440px] lg:gap-8 lg:px-8 lg:py-6">
+        <DesktopSidebar />
         <div
           className={
             bleed
-              ? "relative flex min-h-[100dvh] w-full flex-1 flex-col bg-background overflow-hidden"
+              ? "relative flex min-h-[100dvh] w-full flex-1 flex-col overflow-hidden bg-background lg:min-h-[calc(100dvh-3rem)] lg:rounded-[28px] lg:shadow-[0_30px_80px_-30px_rgba(60,40,120,0.35)]"
               : "relative mx-auto flex min-h-[100dvh] w-full max-w-[430px] flex-1 flex-col bg-background shadow-2xl md:max-w-[720px] lg:min-h-[calc(100dvh-3rem)] lg:max-w-[960px] lg:rounded-[28px] lg:shadow-[0_30px_80px_-30px_rgba(60,40,120,0.35)]"
           }
         >
