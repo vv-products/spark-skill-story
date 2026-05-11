@@ -16,6 +16,7 @@ import { Route as ClubRouteImport } from './routes/club'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProfileEditRouteImport } from './routes/profile.edit'
 import { Route as PlaySlugRouteImport } from './routes/play.$slug'
+import { Route as MissionEmotionsCrosswordRouteImport } from './routes/mission.emotions-crossword'
 import { Route as ClubJoinCodeRouteImport } from './routes/club.join.$code'
 
 const StudioRoute = StudioRouteImport.update({
@@ -53,6 +54,12 @@ const PlaySlugRoute = PlaySlugRouteImport.update({
   path: '/play/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MissionEmotionsCrosswordRoute =
+  MissionEmotionsCrosswordRouteImport.update({
+    id: '/mission/emotions-crossword',
+    path: '/mission/emotions-crossword',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ClubJoinCodeRoute = ClubJoinCodeRouteImport.update({
   id: '/join/$code',
   path: '/join/$code',
@@ -65,6 +72,7 @@ export interface FileRoutesByFullPath {
   '/journey': typeof JourneyRoute
   '/profile': typeof ProfileRouteWithChildren
   '/studio': typeof StudioRoute
+  '/mission/emotions-crossword': typeof MissionEmotionsCrosswordRoute
   '/play/$slug': typeof PlaySlugRoute
   '/profile/edit': typeof ProfileEditRoute
   '/club/join/$code': typeof ClubJoinCodeRoute
@@ -75,6 +83,7 @@ export interface FileRoutesByTo {
   '/journey': typeof JourneyRoute
   '/profile': typeof ProfileRouteWithChildren
   '/studio': typeof StudioRoute
+  '/mission/emotions-crossword': typeof MissionEmotionsCrosswordRoute
   '/play/$slug': typeof PlaySlugRoute
   '/profile/edit': typeof ProfileEditRoute
   '/club/join/$code': typeof ClubJoinCodeRoute
@@ -86,6 +95,7 @@ export interface FileRoutesById {
   '/journey': typeof JourneyRoute
   '/profile': typeof ProfileRouteWithChildren
   '/studio': typeof StudioRoute
+  '/mission/emotions-crossword': typeof MissionEmotionsCrosswordRoute
   '/play/$slug': typeof PlaySlugRoute
   '/profile/edit': typeof ProfileEditRoute
   '/club/join/$code': typeof ClubJoinCodeRoute
@@ -98,6 +108,7 @@ export interface FileRouteTypes {
     | '/journey'
     | '/profile'
     | '/studio'
+    | '/mission/emotions-crossword'
     | '/play/$slug'
     | '/profile/edit'
     | '/club/join/$code'
@@ -108,6 +119,7 @@ export interface FileRouteTypes {
     | '/journey'
     | '/profile'
     | '/studio'
+    | '/mission/emotions-crossword'
     | '/play/$slug'
     | '/profile/edit'
     | '/club/join/$code'
@@ -118,6 +130,7 @@ export interface FileRouteTypes {
     | '/journey'
     | '/profile'
     | '/studio'
+    | '/mission/emotions-crossword'
     | '/play/$slug'
     | '/profile/edit'
     | '/club/join/$code'
@@ -129,6 +142,7 @@ export interface RootRouteChildren {
   JourneyRoute: typeof JourneyRoute
   ProfileRoute: typeof ProfileRouteWithChildren
   StudioRoute: typeof StudioRoute
+  MissionEmotionsCrosswordRoute: typeof MissionEmotionsCrosswordRoute
   PlaySlugRoute: typeof PlaySlugRoute
 }
 
@@ -183,6 +197,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlaySlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/mission/emotions-crossword': {
+      id: '/mission/emotions-crossword'
+      path: '/mission/emotions-crossword'
+      fullPath: '/mission/emotions-crossword'
+      preLoaderRoute: typeof MissionEmotionsCrosswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/club/join/$code': {
       id: '/club/join/$code'
       path: '/join/$code'
@@ -220,8 +241,18 @@ const rootRouteChildren: RootRouteChildren = {
   JourneyRoute: JourneyRoute,
   ProfileRoute: ProfileRouteWithChildren,
   StudioRoute: StudioRoute,
+  MissionEmotionsCrosswordRoute: MissionEmotionsCrosswordRoute,
   PlaySlugRoute: PlaySlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
