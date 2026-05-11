@@ -1,5 +1,5 @@
 import { useGame } from "../GameContext";
-import { BottomNav } from "../Chrome";
+
 import leo from "@/assets/leo.jpg";
 import maya from "@/assets/maya.jpg";
 import { useEffect, useState } from "react";
@@ -234,8 +234,6 @@ export function HomeScreen() {
           <span className="font-display text-base text-text-secondary">Sementa</span>
         </p>
       </main>
-
-      <BottomNav />
     </div>
   );
 }

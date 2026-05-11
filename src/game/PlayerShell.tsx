@@ -2,6 +2,7 @@ import { type ReactNode } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Home, Map, User, Settings } from "lucide-react";
 import { usePlayerAuth } from "./PlayerAuth";
+import { BottomNav } from "./Chrome";
 
 type NavItem = {
   to: "/" | "/journey" | "/profile" | "/studio";
@@ -47,6 +48,7 @@ export function PlayerShell({
           }
         >
           {children}
+          <BottomNav />
         </div>
       </div>
     </div>
