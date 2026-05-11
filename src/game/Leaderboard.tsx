@@ -11,19 +11,54 @@ type Props = {
 export function Leaderboard({ currentUserId, onSelect }: Props) {
   const [rows, setRows] = useState<LeaderboardEntry[] | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  const [scope, setScope] = useState<"all" | "friends">("all");
 
   useEffect(() => {
-    loadLeaderboard(20)
+    setRows(null);
+    setErr(null);
+    loadLeaderboard(20, scope)
       .then(setRows)
       .catch((e: unknown) => setErr(e instanceof Error ? e.message : "Couldn't load leaderboard"));
-  }, []);
+  }, [scope]);
+
+  const toggle = (
+    <div className="mb-2 flex gap-1 rounded-full bg-[#F0F0FA] p-1">
+      <button
+        onClick={() => setScope("all")}
+        className={`flex-1 rounded-full px-3 py-1.5 text-[11px] font-extrabold transition-colors ${
+          scope === "all" ? "bg-white text-[#1A1A2E] shadow-sm" : "text-[#666]"
+        }`}
+      >
+        🌍 Everyone
+      </button>
+      <button
+        onClick={() => setScope("friends")}
+        className={`flex-1 rounded-full px-3 py-1.5 text-[11px] font-extrabold transition-colors ${
+          scope === "friends" ? "bg-white text-[#7B2FBE] shadow-sm" : "text-[#666]"
+        }`}
+      >
+        🤝 Friends
+      </button>
+    </div>
+  );
 
   if (err) return <div className="rounded-2xl bg-white p-4 text-sm text-[#A33]">{err}</div>;
-  if (!rows) return <div className="rounded-2xl bg-white p-4 text-sm text-[#666]">Loading leaderboard…</div>;
-  if (rows.length === 0) return <div className="rounded-2xl bg-white p-4 text-sm text-[#666]">No players yet.</div>;
+  if (!rows) return <div>{toggle}<div className="rounded-2xl bg-white p-4 text-sm text-[#666]">Loading leaderboard…</div></div>;
+  if (rows.length === 0) {
+    return (
+      <div>
+        {toggle}
+        <div className="rounded-2xl bg-white p-4 text-sm text-[#666]">
+          {scope === "friends" ? "Add friends in Sementa Club to see them here." : "No players yet."}
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="rounded-2xl bg-white p-3 shadow border border-[#EBEBF5]">
+    <div>
+      {toggle}
+      <div className="rounded-2xl bg-white p-3 shadow border border-[#EBEBF5]">
       <ol className="flex flex-col gap-1.5">
         {rows.map((r, i) => {
           const rank = i + 1;
