@@ -83,10 +83,10 @@ const SCENE: Array<{
   zIndex: number;
   footOffset: string;
 }> = [
-  { id: "pip",  left: "0%",  width: "25%",   bottom: "52%", zIndex: 10, footOffset: "0px" },
-  { id: "leo",  left: "-8%", width: "72.5%", bottom: "8%",  zIndex: 11, footOffset: "12px" },
-  { id: "maya", left: "35%", width: "72.5%", bottom: "8%",  zIndex: 11, footOffset: "12px" },
-  { id: "dash", left: "36%", width: "28%",   bottom: "0%",  zIndex: 14, footOffset: "0px"  },
+  { id: "pip",  left: "4%",  width: "20%", bottom: "50%", zIndex: 10, footOffset: "0px" },
+  { id: "leo",  left: "16%", width: "44%", bottom: "6%",  zIndex: 11, footOffset: "12px" },
+  { id: "maya", left: "44%", width: "44%", bottom: "6%",  zIndex: 11, footOffset: "12px" },
+  { id: "dash", left: "38%", width: "24%", bottom: "0%",  zIndex: 14, footOffset: "0px"  },
 ];
 // Note: tune footOffset per-character (e.g. "24px") if name pills
 // appear mid-body due to transparent padding at bottom of PNG.
@@ -192,8 +192,10 @@ export function MyJourney() {
         className="absolute inset-0 z-0"
         style={{
           backgroundImage: `url(${BG_IMG})`,
-          backgroundSize: "cover",
+          backgroundSize: "auto 100%",
           backgroundPosition: "center bottom",
+          backgroundRepeat: "no-repeat",
+          backgroundColor: "#cfe7d4",
           transition: "filter 0.55s ease",
           filter: active
             ? "brightness(0.45) blur(3px)"
