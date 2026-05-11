@@ -593,6 +593,85 @@ function EmotionsCrosswordCard() {
   );
 }
 
+function EmotionsQuizCard() {
+  const [c, setC] = useState<{ score: number; xp: number } | null>(null);
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem("sementa.mission.emotions-quiz.self-paced");
+      if (raw) setC(JSON.parse(raw));
+    } catch { /* ignore */ }
+  }, []);
+  return (
+    <Link
+      to="/mission/emotions-quiz"
+      className="flex w-[260px] shrink-0 flex-col overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 shadow-card"
+    >
+      <div className="relative flex h-32 w-full items-center justify-center text-6xl">
+        🌿
+        {c && (
+          <div className="absolute right-2 top-2 flex items-center gap-1 rounded-pill bg-white/95 px-2 py-1 text-[10px] font-extrabold text-emerald-700 shadow">
+            ✓ +{c.xp} XP
+          </div>
+        )}
+      </div>
+      <div className="flex flex-1 flex-col bg-card p-3">
+        <p className="text-sm font-extrabold leading-tight text-foreground">Emotions Quiz</p>
+        <p className="mt-0.5 text-[11px] font-bold text-text-secondary">
+          {c ? `Last score: ${c.score} · +${c.xp} XP` : "Self-paced · soothing music"}
+        </p>
+        <div className="mt-3 w-full rounded-pill bg-emerald-500 py-2 text-center text-xs font-extrabold text-white shadow-pop">
+          {c ? "Replay →" : "Start →"}
+        </div>
+        <div className="mt-2 flex flex-wrap gap-1">
+          <span className="rounded-pill bg-tag px-2 py-0.5 text-[10px] font-extrabold text-tag-foreground">10 MCQs</span>
+          <span className="rounded-pill bg-tag px-2 py-0.5 text-[10px] font-extrabold text-tag-foreground">Self-paced</span>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+function EmotionsQuickFireCard() {
+  const [c, setC] = useState<{ score: number; xp: number } | null>(null);
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem("sementa.mission.emotions-quiz.quick");
+      if (raw) setC(JSON.parse(raw));
+    } catch { /* ignore */ }
+  }, []);
+  return (
+    <Link
+      to="/mission/emotions-quickfire"
+      className="relative flex w-[260px] shrink-0 flex-col overflow-hidden rounded-2xl bg-gradient-to-br from-orange-500 via-pink-500 to-rose-500 shadow-pop"
+    >
+      <div className="absolute left-2 top-2 z-10 inline-flex items-center gap-1 rounded-pill bg-white/95 px-2 py-1 text-[9px] font-black uppercase tracking-wider text-rose-700 shadow">
+        ✦ Rare
+      </div>
+      <div className="relative flex h-32 w-full items-center justify-center text-6xl">
+        ⚡
+        {c && (
+          <div className="absolute right-2 top-2 flex items-center gap-1 rounded-pill bg-white/95 px-2 py-1 text-[10px] font-extrabold text-rose-700 shadow">
+            ✓ +{c.xp} XP
+          </div>
+        )}
+      </div>
+      <div className="flex flex-1 flex-col bg-card p-3">
+        <p className="text-sm font-extrabold leading-tight text-foreground">Emotions Quick-Fire</p>
+        <p className="mt-0.5 text-[11px] font-bold text-text-secondary">
+          {c ? `Last score: ${c.score} · +${c.xp} XP` : "8s/question · fast music"}
+        </p>
+        <div className="mt-3 w-full rounded-pill bg-rose-600 py-2 text-center text-xs font-extrabold text-white shadow-pop">
+          {c ? "Try again →" : "Start →"}
+        </div>
+        <div className="mt-2 flex flex-wrap gap-1">
+          <span className="rounded-pill bg-tag px-2 py-0.5 text-[10px] font-extrabold text-tag-foreground">⚡ Quick</span>
+          <span className="rounded-pill bg-tag px-2 py-0.5 text-[10px] font-extrabold text-tag-foreground">+ Speed XP</span>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
 function MissionCard({
   slug, image, title, subtitle, tags, cta, ctaVariant, progress, customTo,
 }: {
