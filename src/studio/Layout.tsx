@@ -7,6 +7,7 @@ import { Btn } from "./ui";
 const NAV = [
   { key: "dashboard", label: "Dashboard", icon: "▦" },
   { key: "library", label: "Content Library", icon: "▤" },
+  { key: "missions", label: "Missions", icon: "✦" },
   { key: "welcome-cards", label: "Welcome Cards", icon: "★" },
   { key: "avatars", label: "Avatars", icon: "☻" },
   { key: "task-types", label: "Task Types", icon: "◇" },
