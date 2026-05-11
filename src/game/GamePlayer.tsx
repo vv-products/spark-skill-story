@@ -348,16 +348,8 @@ export function GameHome() {
             ctaVariant="primary"
             progress={45}
           />
-          <MissionCard
-            slug=""
-            customTo="/mission/emotions-crossword"
-            image={missionStorytimeImg}
-            title="Emotions Crossword"
-            subtitle="Solo or with a friend"
-            tags={["Feelings", "Co-op"]}
-            cta="Play →"
-            ctaVariant="primary"
-          />
+          <EmotionsCrosswordCard />
+
         </div>
 
         {/* Fun Activities */}
