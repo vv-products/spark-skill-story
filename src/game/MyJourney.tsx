@@ -259,8 +259,8 @@ export function MyJourney() {
       {/* ── Characters ── */}
       <div className="relative z-20 flex flex-1 items-end justify-center pb-28">
         <div
-          className="relative w-full"
-          style={{ maxWidth: 440, height: "68vh" }}
+          className="relative w-full max-w-[440px] md:max-w-[680px] lg:max-w-[880px]"
+          style={{ height: "68vh" }}
           onClick={(e) => e.stopPropagation()}
         >
           {SCENE.map((s) => {
