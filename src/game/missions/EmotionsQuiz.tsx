@@ -5,7 +5,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, Clock, Flame, Sparkles, Music, MusicOff } from "lucide-react";
+import { ArrowLeft, Clock, Flame, Sparkles, Music, VolumeX } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { usePlayerAuth } from "@/game/PlayerAuth";
@@ -182,7 +182,7 @@ export function EmotionsQuiz({ pace }: { pace: Pace }) {
 
         <div className="mt-5 flex items-center justify-between rounded-2xl bg-card p-3 shadow-card">
           <div className="flex items-center gap-2 text-xs font-extrabold text-foreground">
-            {musicOn ? <Music size={14} /> : <MusicOff size={14} />} Background music
+            {musicOn ? <Music size={14} /> : <VolumeX size={14} />} Background music
           </div>
           <button
             onClick={() => setMusicOn((v) => !v)}
@@ -265,7 +265,7 @@ export function EmotionsQuiz({ pace }: { pace: Pace }) {
           aria-label={musicOn ? "Mute music" : "Play music"}
           className="flex items-center gap-1 rounded-pill bg-card px-2.5 py-1 text-[11px] font-extrabold text-foreground shadow-card"
         >
-          {musicOn ? <Music size={12} /> : <MusicOff size={12} />}
+          {musicOn ? <Music size={12} /> : <VolumeX size={12} />}
         </button>
       </div>
 
