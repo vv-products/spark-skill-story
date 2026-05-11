@@ -36,10 +36,11 @@ export function PlayerShell({
   children: ReactNode;
   bleed?: boolean;
 }) {
+  const { user } = usePlayerAuth();
   return (
     <div className="min-h-[100dvh] w-full bg-[#E5E5F2] lg:bg-gradient-to-br lg:from-[#EFEAFB] lg:via-[#E5E5F2] lg:to-[#FCE9F0]">
       <div className="mx-auto flex min-h-[100dvh] w-full max-w-[1440px] lg:gap-8 lg:px-8 lg:py-6">
-        <DesktopSidebar />
+        {user && <DesktopSidebar />}
         <div
           className={
             bleed
@@ -48,7 +49,7 @@ export function PlayerShell({
           }
         >
           {children}
-          <BottomNav />
+          {user && <BottomNav />}
         </div>
       </div>
     </div>
