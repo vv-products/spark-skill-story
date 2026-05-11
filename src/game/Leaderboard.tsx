@@ -3,44 +3,64 @@ import { Avatar } from "./avatar/Avatar";
 import { avatarFromSeed } from "./avatar/config";
 import { loadLeaderboard, type LeaderboardEntry } from "./profileApi";
 
+type Scope = "all" | "friends" | "nearby";
+
 type Props = {
   currentUserId?: string | null;
   onSelect?: (entry: LeaderboardEntry) => void;
+  showNearMe?: boolean;
+  limit?: number;
 };
 
-export function Leaderboard({ currentUserId, onSelect }: Props) {
+export function Leaderboard({ currentUserId, onSelect, showNearMe = false, limit = 20 }: Props) {
   const [rows, setRows] = useState<LeaderboardEntry[] | null>(null);
   const [err, setErr] = useState<string | null>(null);
-  const [scope, setScope] = useState<"all" | "friends">("all");
+  const [scope, setScope] = useState<Scope>("all");
 
   useEffect(() => {
+    if (scope === "nearby") {
+      setRows([]);
+      setErr(null);
+      return;
+    }
     setRows(null);
     setErr(null);
-    loadLeaderboard(20, scope)
+    loadLeaderboard(limit, scope)
       .then(setRows)
       .catch((e: unknown) => setErr(e instanceof Error ? e.message : "Couldn't load leaderboard"));
-  }, [scope]);
+  }, [scope, limit]);
+
+  const tabBtn = (s: Scope, label: string, activeColor: string) => (
+    <button
+      onClick={() => setScope(s)}
+      className={`flex-1 rounded-full px-3 py-1.5 text-[11px] font-extrabold transition-colors ${
+        scope === s ? `bg-white ${activeColor} shadow-sm` : "text-[#666]"
+      }`}
+    >
+      {label}
+    </button>
+  );
 
   const toggle = (
     <div className="mb-2 flex gap-1 rounded-full bg-[#F0F0FA] p-1">
-      <button
-        onClick={() => setScope("all")}
-        className={`flex-1 rounded-full px-3 py-1.5 text-[11px] font-extrabold transition-colors ${
-          scope === "all" ? "bg-white text-[#1A1A2E] shadow-sm" : "text-[#666]"
-        }`}
-      >
-        🌍 Everyone
-      </button>
-      <button
-        onClick={() => setScope("friends")}
-        className={`flex-1 rounded-full px-3 py-1.5 text-[11px] font-extrabold transition-colors ${
-          scope === "friends" ? "bg-white text-[#7B2FBE] shadow-sm" : "text-[#666]"
-        }`}
-      >
-        🤝 Friends
-      </button>
+      {tabBtn("all", "🌍 Everyone", "text-[#1A1A2E]")}
+      {tabBtn("friends", "🤝 Friends", "text-[#7B2FBE]")}
+      {showNearMe && tabBtn("nearby", "📍 Near me", "text-[#2F8FBE]")}
     </div>
   );
+
+  if (scope === "nearby") {
+    return (
+      <div>
+        {toggle}
+        <div className="rounded-2xl bg-white p-6 text-center text-sm text-[#666] border border-[#EBEBF5]">
+          <div className="text-2xl mb-2">📍</div>
+          <div className="font-extrabold text-[#1A1A2E]">Near me — coming soon</div>
+          <div className="mt-1 text-[11px]">We'll show kids in your school and area here.</div>
+        </div>
+      </div>
+    );
+  }
 
   if (err) return <div className="rounded-2xl bg-white p-4 text-sm text-[#A33]">{err}</div>;
   if (!rows) return <div>{toggle}<div className="rounded-2xl bg-white p-4 text-sm text-[#666]">Loading leaderboard…</div></div>;
