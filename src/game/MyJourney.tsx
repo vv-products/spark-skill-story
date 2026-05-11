@@ -155,7 +155,6 @@ export function MyJourney() {
           width: 100%;
           display: block;
           background: transparent;
-          mix-blend-mode: multiply;
           transform-origin: bottom center;
           cursor: pointer;
           -webkit-tap-highlight-color: transparent;
