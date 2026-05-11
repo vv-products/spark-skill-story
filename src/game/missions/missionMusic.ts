@@ -18,8 +18,9 @@ export type MusicKind = "fast" | "soothing";
 function noteHz(midi: number) { return 440 * Math.pow(2, (midi - 69) / 12); }
 
 export function startMusic(kind: MusicKind, volume = 0.08): MusicHandle {
-  const ac = getCtx();
-  if (!ac) return { stop: () => {} };
+  const acNullable = getCtx();
+  if (!acNullable) return { stop: () => {} };
+  const ac: AudioContext = acNullable;
   // Ensure context is resumed (browser autoplay policies)
   if (ac.state === "suspended") void ac.resume();
 
