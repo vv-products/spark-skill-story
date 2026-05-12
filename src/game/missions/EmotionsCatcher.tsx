@@ -233,7 +233,7 @@ export function EmotionsCatcher() {
   function restart() {
     setStarted(false); setDone(false); setScore(0); setStreak(0); setBestStreak(0);
     setCaught(0); setMissed(0); setLives(MAX_LIVES); setTimeLeft(ROUND_SECONDS);
-    setXpAwarded(null); setPromptIdx(0); setFliers([]);
+    setXpAwarded(null); setOrbsEarned(0); setPromptIdx(0); setFliers([]);
   }
 
   // ---------- intro ----------
