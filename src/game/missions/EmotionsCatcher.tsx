@@ -133,12 +133,12 @@ export function EmotionsCatcher() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lives, started, done]);
 
-  // Spawn loop
+  // Spawn loop — speed, frequency, distractor mix come from difficulty
   useEffect(() => {
     if (!started || done) return;
     const spawn = () => {
-      const correctChance = Math.random() < 0.45; // ~45% correct
-      const label = correctChance
+      const isCorrect = Math.random() < diffCfg.correctChance;
+      const label = isCorrect
         ? current.correct
         : (allLabels.filter((l) => l !== current.correct)[Math.floor(Math.random() * Math.max(1, allLabels.length - 1))] ?? "Calm");
       const f: Flier = {
@@ -146,17 +146,16 @@ export function EmotionsCatcher() {
         label,
         isCorrect: label === current.correct,
         topPct: 8 + Math.random() * 70,
-        duration: 1 + Math.random(),     // 1–2 seconds across screen
+        duration: diffCfg.durMin + Math.random() * (diffCfg.durMax - diffCfg.durMin),
         startedAt: Date.now(),
         color: TILE_COLORS[Math.floor(Math.random() * TILE_COLORS.length)],
       };
       setFliers((prev) => [...prev, f]);
     };
-    // initial flurry + interval
     spawn();
-    const interval = setInterval(spawn, 650);
+    const interval = setInterval(spawn, diffCfg.spawnMs);
     return () => clearInterval(interval);
-  }, [started, done, current, allLabels]);
+  }, [started, done, current, allLabels, diffCfg]);
 
   // Cleanup expired fliers + count misses
   useEffect(() => {
