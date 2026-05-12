@@ -241,7 +241,10 @@ export function EmotionsCatcher() {
     const last = readCompletion();
     return (
       <div className="mx-auto max-w-md px-5 py-6">
-        <BackBar />
+        <div className="flex items-center justify-between">
+          <BackBar />
+          <FlaskBadge />
+        </div>
         <div className="mt-3 rounded-3xl bg-gradient-to-br from-fuchsia-500 to-indigo-600 p-6 text-center text-white shadow-pop">
           <div className="text-5xl">🦋</div>
           <h1 className="mt-2 text-2xl font-black">Emotion Catcher</h1>
@@ -257,12 +260,41 @@ export function EmotionsCatcher() {
           </div>
         )}
 
-        <div className="mt-5 space-y-2 rounded-2xl bg-card p-4 shadow-card">
+        {/* Difficulty selector */}
+        <div className="mt-5 rounded-2xl bg-card p-4 shadow-card">
+          <div className="mb-2 text-[11px] font-extrabold uppercase tracking-wider text-text-secondary">Difficulty</div>
+          <div className="grid grid-cols-3 gap-2">
+            {(Object.keys(DIFFICULTIES) as Difficulty[]).map((d) => {
+              const cfg = DIFFICULTIES[d];
+              const active = difficulty === d;
+              return (
+                <button
+                  key={d}
+                  onClick={() => chooseDifficulty(d)}
+                  className={`rounded-2xl px-2 py-3 text-center transition ${
+                    active
+                      ? "bg-gradient-to-br from-fuchsia-500 to-indigo-600 text-white shadow-pop"
+                      : "bg-muted text-foreground hover:bg-muted/80"
+                  }`}
+                >
+                  <div className="text-lg">{cfg.emoji}</div>
+                  <div className="text-[11px] font-extrabold">{cfg.label}</div>
+                  <div className={`text-[9px] font-bold ${active ? "opacity-90" : "text-text-secondary"}`}>×{cfg.xpMultiplier} XP</div>
+                </button>
+              );
+            })}
+          </div>
+          <p className="mt-2 text-[11px] font-bold text-text-secondary">{diffCfg.blurb}</p>
+        </div>
+
+        <div className="mt-3 space-y-2 rounded-2xl bg-card p-4 shadow-card">
           <Row label="Round" value={`${ROUND_SECONDS}s`} />
           <Row label="Lives" value={`${MAX_LIVES} ❤️`} />
-          <Row label="Speed" value="1–2s per flier" />
+          <Row label="Speed" value={`${diffCfg.durMin.toFixed(1)}–${diffCfg.durMax.toFixed(1)}s per flier`} />
+          <Row label="Spawn" value={`every ${(diffCfg.spawnMs / 1000).toFixed(2)}s`} />
+          <Row label="Correct flier mix" value={`${Math.round(diffCfg.correctChance * 100)}%`} />
           <Row label="Music" value="Fast & energetic" />
-          <Row label="Base XP" value="+40 + 10 per catch" />
+          <Row label="Reward" value="XP + 🧪 orbs to spend in shop" />
         </div>
 
         <div className="mt-5 flex items-center justify-between rounded-2xl bg-card p-3 shadow-card">
