@@ -351,7 +351,6 @@ export function GameHome() {
           <EmotionsCrosswordCard />
           <EmotionsQuizCard />
           <EmotionsQuickFireCard />
-          <EmotionsCatcherCard />
           <FriendMissionCard to="/mission/emotion-duel"   emoji="⚔️" title="Emotion Duel"   subtitle="1v1 head-to-head" gradient="from-rose-500 via-fuchsia-500 to-violet-600" tag="Vs friend" />
           <FriendMissionCard to="/mission/reaction-race"  emoji="⚡" title="Reaction Race"  subtitle="Best of 7 — fastest wins" gradient="from-amber-500 via-orange-500 to-red-500" tag="Vs friend" />
           <FriendMissionCard to="/mission/empathy-relay"  emoji="🤝" title="Empathy Relay"  subtitle="Take turns to win together" gradient="from-emerald-400 via-teal-500 to-cyan-500" tag="Co-op" />
