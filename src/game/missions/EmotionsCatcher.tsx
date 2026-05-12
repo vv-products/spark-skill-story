@@ -227,7 +227,7 @@ export function EmotionsCatcher() {
       });
       if (error) console.error("[xp_events]", error);
     }
-    toast.success(`Mission complete! +${finalXp} XP · +${orbs} 🧪`);
+    toast.success(`Mission complete! +${finalXp} XP · +${orbs} 🧪 shop XP`);
   }
 
   function restart() {
@@ -294,7 +294,7 @@ export function EmotionsCatcher() {
           <Row label="Spawn" value={`every ${(diffCfg.spawnMs / 1000).toFixed(2)}s`} />
           <Row label="Correct flier mix" value={`${Math.round(diffCfg.correctChance * 100)}%`} />
           <Row label="Music" value="Fast & energetic" />
-          <Row label="Reward" value="XP + 🧪 orbs to spend in shop" />
+          <Row label="Reward" value="XP + 🧪 shop XP" />
         </div>
 
         <div className="mt-5 flex items-center justify-between rounded-2xl bg-card p-3 shadow-card">
@@ -328,7 +328,7 @@ export function EmotionsCatcher() {
             </span>
             <span className="inline-flex items-center gap-1 rounded-pill bg-white/95 px-4 py-2 text-foreground shadow">
               <FlaskConical size={14} className="text-violet-600" />
-              <span className="text-sm font-black">+{orbsEarned} orbs</span>
+              <span className="text-sm font-black">+{orbsEarned} 🧪 XP</span>
             </span>
           </div>
           <div className="mt-2 text-[11px] font-extrabold uppercase tracking-wider opacity-90">
@@ -343,7 +343,7 @@ export function EmotionsCatcher() {
         <div className="mt-6 space-y-2">
           <button onClick={restart} className="w-full rounded-pill bg-primary py-3 text-sm font-extrabold text-primary-foreground shadow-pop">Play again</button>
           <Link to="/shop" className="block w-full rounded-pill bg-gradient-to-r from-cyan-500 to-violet-500 py-3 text-center text-sm font-extrabold text-white shadow-pop">
-            🧪 Spend orbs in the shop
+            🧪 Spend XP in the Shop
           </Link>
           <Link to="/" className="block w-full rounded-pill bg-foreground py-3 text-center text-sm font-extrabold text-primary-foreground">Back to home</Link>
         </div>

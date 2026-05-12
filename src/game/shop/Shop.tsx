@@ -29,7 +29,7 @@ export function FlaskBadge({ className = "" }: { className?: string }) {
     <Link
       to="/shop"
       className={`inline-flex items-center gap-1 rounded-pill bg-gradient-to-r from-cyan-500 to-violet-500 px-2.5 py-1 text-[11px] font-extrabold text-white shadow-pop ${className}`}
-      title="Flask Orbs — spend in the shop"
+      title="XP — spend in the shop"
     >
       <FlaskConical size={12} className="drop-shadow" />
       <span className="tabular-nums">{balance}</span>
@@ -44,7 +44,7 @@ export function Shop() {
   function buy(item: ShopItem) {
     if (owned.includes(item.id)) return;
     if (balance < item.cost) {
-      toast.error(`Need ${item.cost - balance} more orbs!`);
+      toast.error(`Need ${item.cost - balance} more XP!`);
       return;
     }
     if (purchaseItem(item.id, item.cost)) {
@@ -64,8 +64,8 @@ export function Shop() {
             <FlaskConical size={32} />
           </div>
           <div>
-            <h1 className="text-2xl font-black">Orb Lab</h1>
-            <p className="text-xs font-bold opacity-90">Spend Flask Orbs on cosmetics, titles & boosts.</p>
+            <h1 className="text-2xl font-black">Shop</h1>
+            <p className="text-xs font-bold opacity-90">Spend XP on cosmetics, titles &amp; boosts.</p>
           </div>
         </div>
         <div className="mt-4 flex items-center justify-between rounded-2xl bg-white/20 px-4 py-3">
@@ -75,7 +75,7 @@ export function Shop() {
           </span>
         </div>
         <p className="mt-3 text-[11px] font-bold opacity-90">
-          Earn orbs by playing missions — every 5 XP brews 1 orb in your flask.
+          Earn XP by playing missions — every 5 mission XP adds 1 to your shop XP flask.
         </p>
       </div>
 
