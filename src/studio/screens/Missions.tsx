@@ -1,5 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { StudioLayout } from "../Layout";
+import { useStudio } from "../StudioContext";
+import { PUZZLES, type Difficulty } from "@/game/missions/emotionsCrosswordPuzzles";
+import { SELF_PACED_QUIZ, QUICK_FIRE_QUIZ } from "@/game/missions/emotionsQuiz";
 import { PUZZLES, type Difficulty } from "@/game/missions/emotionsCrosswordPuzzles";
 import { SELF_PACED_QUIZ, QUICK_FIRE_QUIZ } from "@/game/missions/emotionsQuiz";
 
