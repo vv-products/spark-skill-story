@@ -240,7 +240,7 @@ export function EmotionsCatcher() {
   if (!started) {
     const last = readCompletion();
     return (
-      <div className="mx-auto max-w-md px-5 py-6">
+      <div className="mx-auto max-w-md px-5 py-6 pb-32">
         <div className="flex items-center justify-between">
           <BackBar />
           <FlaskBadge />
