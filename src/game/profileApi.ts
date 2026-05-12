@@ -58,6 +58,13 @@ export async function loadLeaderboard(limit = 20, scope: "all" | "friends" = "al
   }));
 }
 
+export type XpBreakdownRow = { source: string; events: number; total_xp: number };
+export async function loadXpBreakdown(userId: string): Promise<XpBreakdownRow[]> {
+  const { data, error } = await supabase.rpc("get_user_xp_breakdown" as any, { _user_id: userId });
+  if (error) throw error;
+  return ((data ?? []) as any[]).map((r) => ({ source: r.source, events: Number(r.events ?? 0), total_xp: Number(r.total_xp ?? 0) }));
+}
+
 export async function saveProfile(
   userId: string,
   patch: { display_name?: string; bio?: string | null; age?: number | null; avatar_config?: AvatarConfig }
