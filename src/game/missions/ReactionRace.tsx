@@ -3,7 +3,7 @@
 // (host generates and broadcasts). First to tap the matching emoji wins the round.
 
 import { useEffect, useRef, useState } from "react";
-import { Zap, Trophy } from "lucide-react";
+import { Zap} from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { usePlayerAuth } from "@/game/PlayerAuth";

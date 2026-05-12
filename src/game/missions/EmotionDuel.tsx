@@ -2,7 +2,7 @@
 // Live opponent score visible. Highest score wins; tie = both win.
 
 import { useEffect, useRef, useState } from "react";
-import { Sparkles, Trophy } from "lucide-react";
+import { Sparkles} from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { usePlayerAuth } from "@/game/PlayerAuth";
