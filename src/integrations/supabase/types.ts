@@ -221,6 +221,230 @@ export type Database = {
           },
         ]
       }
+      mission_crossword_variants: {
+        Row: {
+          cols: number
+          created_at: string
+          crossword_id: string
+          difficulty: string
+          id: string
+          label: string
+          rows: number
+          updated_at: string
+          xp_reward: number
+        }
+        Insert: {
+          cols?: number
+          created_at?: string
+          crossword_id: string
+          difficulty: string
+          id?: string
+          label: string
+          rows?: number
+          updated_at?: string
+          xp_reward?: number
+        }
+        Update: {
+          cols?: number
+          created_at?: string
+          crossword_id?: string
+          difficulty?: string
+          id?: string
+          label?: string
+          rows?: number
+          updated_at?: string
+          xp_reward?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mission_crossword_variants_crossword_id_fkey"
+            columns: ["crossword_id"]
+            isOneToOne: false
+            referencedRelation: "mission_crosswords"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mission_crossword_words: {
+        Row: {
+          answer: string
+          clue: string
+          col: number
+          created_at: string
+          direction: string
+          id: string
+          number: number
+          position: number
+          row: number
+          variant_id: string
+        }
+        Insert: {
+          answer: string
+          clue: string
+          col: number
+          created_at?: string
+          direction: string
+          id?: string
+          number: number
+          position?: number
+          row: number
+          variant_id: string
+        }
+        Update: {
+          answer?: string
+          clue?: string
+          col?: number
+          created_at?: string
+          direction?: string
+          id?: string
+          number?: number
+          position?: number
+          row?: number
+          variant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mission_crossword_words_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "mission_crossword_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mission_crosswords: {
+        Row: {
+          created_at: string
+          id: string
+          slug: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          slug: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          slug?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      mission_quiz_choices: {
+        Row: {
+          created_at: string
+          id: string
+          is_correct: boolean
+          label: string
+          position: number
+          question_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_correct?: boolean
+          label: string
+          position?: number
+          question_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_correct?: boolean
+          label?: string
+          position?: number
+          question_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mission_quiz_choices_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "mission_quiz_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mission_quiz_questions: {
+        Row: {
+          created_at: string
+          explain: string | null
+          id: string
+          position: number
+          prompt: string
+          quiz_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          explain?: string | null
+          id?: string
+          position?: number
+          prompt: string
+          quiz_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          explain?: string | null
+          id?: string
+          position?: number
+          prompt?: string
+          quiz_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mission_quiz_questions_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "mission_quizzes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mission_quizzes: {
+        Row: {
+          base_xp: number
+          created_at: string
+          id: string
+          pace: string
+          per_right_xp: number
+          slug: string
+          time_limit_sec: number | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          base_xp?: number
+          created_at?: string
+          id?: string
+          pace: string
+          per_right_xp?: number
+          slug: string
+          time_limit_sec?: number | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          base_xp?: number
+          created_at?: string
+          id?: string
+          pace?: string
+          per_right_xp?: number
+          slug?: string
+          time_limit_sec?: number | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       modules: {
         Row: {
           created_at: string
@@ -515,6 +739,14 @@ export type Database = {
           display_name: string
           total_xp: number
           user_id: string
+        }[]
+      }
+      get_user_xp_breakdown: {
+        Args: { _user_id: string }
+        Returns: {
+          events: number
+          source: string
+          total_xp: number
         }[]
       }
       has_role: {
