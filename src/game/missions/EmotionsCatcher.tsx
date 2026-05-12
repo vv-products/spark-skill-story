@@ -86,9 +86,17 @@ export function EmotionsCatcher() {
   const [xpAwarded, setXpAwarded] = useState<number | null>(null);
   const [promptIdx, setPromptIdx] = useState(0);
   const [fliers, setFliers] = useState<Flier[]>([]);
+  const [difficulty, setDifficulty] = useState<Difficulty>(readDifficulty);
+  const [orbsEarned, setOrbsEarned] = useState(0);
+  const diffCfg = DIFFICULTIES[difficulty];
   const musicRef = useRef<MusicHandle | null>(null);
   const idRef = useRef(1);
   const [, force] = useState(0);
+
+  function chooseDifficulty(d: Difficulty) {
+    setDifficulty(d);
+    try { window.localStorage.setItem(DIFFICULTY_KEY, d); } catch { /* ignore */ }
+  }
 
   // Pool of prompts: pull from quick-fire quiz; "catch the answer to: …"
   const prompts = useMemo(() => QUICK_FIRE_QUIZ.map((q) => ({
