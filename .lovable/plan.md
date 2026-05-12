@@ -1,57 +1,95 @@
+# Plan: Reliable co-op + CMS authoring + XP visibility
 
-# Sementa Club — MVP (Friends only)
+Four related improvements across missions, leaderboard, and Studio CMS.
 
-A new in-app space where kids connect with their real friends through a personal join code, QR, or share link. Once two kids are friends (mutual accept), the leaderboard can be filtered to show just them and their friends. Location/school clubs and mission co-op are intentionally deferred to a later iteration.
+## 1. Co-op reconnect & late-join sync (Quiz + Crossword)
 
-## What we're building
+Goal: A friend who refreshes (or joins late) lands on the current question/grid with the correct shared scoreboard.
 
-1. **New route `/club`** — the "Sementa Club" tab (already in the bottom nav, currently pointing to `/profile`; we'll repoint it).
-2. **Your join card** — shows the kid's avatar + display name, a friendly 6-character join code (e.g. `MAYA-7K2`), a QR code of the share link, and a "Copy link / Share" button (uses native share sheet on mobile).
-3. **Add a friend** — input field to type/paste a code, or scan QR via the device camera. Sends a friend request.
-4. **Requests inbox** — incoming requests with Accept / Decline; outgoing pending requests (cancel).
-5. **Friends list** — avatars + names of accepted friends, with a remove option.
-6. **Friend-filtered leaderboard** — on the existing leaderboard (currently in `Leaderboard.tsx` / shown on profile), add a toggle: **All players ⇄ Friends only**. "Friends only" includes the kid + their accepted friends, ranked by XP.
-7. **Deep link `/club/join/:code`** — opening a shared link auto-fills the code and prompts "Send friend request to {name}?".
+Approach (Supabase Realtime broadcast — already used):
+- On mount in co-op, send a `sync-request` with our peer id; existing peers reply with `sync-state` containing the **earliest authoritative snapshot** (host wins; otherwise the peer with the smallest joinedAt timestamp).
+- Snapshot payload (Quiz): `{ pace, questionIndex, startedAt, perQuestionStartedAt, scores, answers, finished }`.
+- Snapshot payload (Crossword): `{ difficulty, grid, activeClue, scores, completedWords }`.
+- Add a presence channel (`channel.track({ peerId, joinedAt, name })`) so we know who is "host" deterministically (lowest joinedAt). Replaces ad-hoc handshake.
+- On each state change, the host re-broadcasts an incremental `state-delta` with a monotonic `version` int. Peers ignore deltas with `version <= local.version` to fix ordering.
+- On `visibilitychange` → visible, peers send a `sync-request` to re-pull current state (handles tab-switch + flaky network).
+- Persist last snapshot in `sessionStorage` keyed by `code` so a true page refresh shows a "Reconnecting…" state instead of resetting.
+- Add a Reconnect banner with manual "Resync" button that re-emits `sync-request`.
 
-## What's deferred (stated, not built)
+Files: `src/game/missions/EmotionsQuiz.tsx`, `src/game/missions/EmotionsCrossword.tsx`, plus a small shared helper `src/game/missions/coopChannel.ts` to centralize presence + versioning.
 
-- Location-based clubs and school clubs (browse + kid-created).
-- Co-op mission sessions and mission invites with shared progress.
-- Notifications/badges beyond a simple count on the inbox tab.
+## 2. Leaderboard XP breakdown by mission & mode
 
-These will be follow-up plans once the friends MVP is in users' hands.
+Goal: Verify mission XP is being counted; split by source.
 
-## Backend changes (Lovable Cloud)
+- Click a leaderboard row → opens a drawer/sheet with a breakdown for that user.
+- Query `xp_events` grouped by `source`. We already use sources like:
+  - `mission:emotions-crossword:solo` / `:coop`
+  - `mission:emotions-quiz:solo` / `:coop`
+  - `mission:emotions-quickfire:solo` / `:coop`
+  - `class:<id>` for normal classes
+- Render grouped table: Mission · Mode · Events · Total XP. Add a totals row.
+- Add a `get_user_xp_breakdown(_user_id uuid)` SQL function (SECURITY DEFINER, returns aggregated rows) so the leaderboard can call it for any visible profile without exposing raw events.
 
-Two new tables + one helper function. All RLS-protected.
+Files: new migration for `get_user_xp_breakdown`, `src/game/Leaderboard.tsx` (or `GrowthPage.tsx`) to add the drawer.
 
-- **`friend_codes`** — one row per user. Fields: `user_id` (PK, FK to profiles), `code` (unique, short, human-readable). Auto-created on first visit to `/club` if missing. Anyone signed in can read (so codes can be looked up); only the owner can rotate.
-- **`friendships`** — Fields: `requester_id`, `addressee_id`, `status` (`pending` | `accepted` | `declined`), unique on the unordered pair. RLS: a user can read/write rows where they are requester or addressee.
-- **`get_friend_leaderboard(_limit)`** — security-definer SQL function returning the same shape as the existing `get_leaderboard`, restricted to the caller + accepted friends.
+## 3. CMS Crossword Builder
 
-No changes to existing tables.
+Goal: Author the Emotions Crossword grid, words, clues, and difficulty variants in Studio.
 
-## Frontend changes
+Data model (new tables):
+- `mission_crosswords` — id, slug ("emotions"), title.
+- `mission_crossword_variants` — id, crossword_id, difficulty (`easy|medium|hard`), grid_rows, grid_cols, xp_reward.
+- `mission_crossword_words` — id, variant_id, answer (uppercased), clue, row, col, direction (`across|down`), number.
+- RLS: public read; editors/admins manage (mirror existing `pillars` policies).
 
-- New file `src/routes/club.tsx` (route shell, wraps in `PlayerAuthProvider` + `PlayerShell` like `/profile`).
-- New file `src/routes/club.join.$code.tsx` for the deep-link accept flow.
-- New folder `src/game/club/` with: `ClubPage.tsx` (tabs: My Code · Friends · Requests), `JoinCard.tsx` (QR + code + share), `AddFriend.tsx` (input + scan), `FriendsList.tsx`, `RequestsInbox.tsx`, `clubApi.ts` (typed Supabase calls).
-- Add a `scope: "all" | "friends"` toggle to `Leaderboard.tsx`; when "friends", call the new RPC.
-- Update `src/game/Chrome.tsx` `NAV_ITEMS`: change "Sementa Club" `to: "/profile"` → `to: "/club"` (and adjust the active-state dedupe so My Growth stays on `/profile`).
+Studio screen: `src/studio/screens/CrosswordBuilder.tsx`
+- Variant tabs (Easy/Medium/Hard) with per-variant XP.
+- Grid size inputs + visual grid preview that highlights letters and clue numbers.
+- Word table: answer, direction, start row/col, clue. Add/remove rows. Validates that the word fits the grid and crossings match.
+- Save persists to DB.
 
-## Libraries
+Runtime: `emotionsCrosswordPuzzles.ts` is updated to fetch from DB (cached, with the current hardcoded set as fallback for offline/dev).
 
-- `qrcode.react` for the QR image (tiny, no native deps).
-- Camera scanning: use the browser's built-in `BarcodeDetector` where supported; otherwise show "paste the code" fallback (avoids a heavy scanner dependency for v1).
+## 4. CMS Quiz Editor
 
-## Visual style
+Goal: Author quiz questions, answer choices, and correct answers per quiz variant.
 
-Matches existing app: soft purple/pink gradient backdrop, white rounded cards (`rounded-3xl`, `shadow-card`), `bg-primary` purple for primary actions, friendly emoji accents (👋 add friend, ⭐ XP, 🤝 friends). Bottom-nav glass bar stays as-is.
+Data model (new tables):
+- `mission_quizzes` — id, slug (`emotions-quiz` | `emotions-quickfire`), pace (`self-paced|quick`), title, base_xp, time_limit_sec (nullable).
+- `mission_quiz_questions` — id, quiz_id, position, prompt.
+- `mission_quiz_choices` — id, question_id, label, is_correct, position.
+- RLS: public read; editors manage.
 
-## Done when
+Studio screen: `src/studio/screens/QuizEditor.tsx`
+- Quiz selector (Self-paced / Quick-fire).
+- Reorderable question list, per-question prompt + 4 choices (radio for correct).
+- Validation: exactly one correct, min 2 choices, non-empty prompt.
 
-- A kid can open `/club`, see their code + QR, share a link.
-- A second kid can paste the code (or open the link) and send a request.
-- The first kid sees the request, accepts, and both appear in each other's Friends list.
-- On the leaderboard, toggling "Friends" filters to just them + accepted friends.
+Runtime: `emotionsQuiz.ts` is updated to fetch from DB and cache; the existing in-code arrays remain as the seed.
 
+## Studio sidebar
+
+Add two new entries under **Missions**:
+- Crossword Builder → `view: "crossword-builder"`
+- Quiz Editor → `view: "quiz-editor"`
+
+Wire into `StudioContext`, `Layout` sidebar, and the `studio.tsx` router switch.
+
+## Migrations & seeding
+
+One migration creates all 5 new tables + RLS + a seed insert of the current hardcoded crossword/quiz content so the Studio shows existing data immediately. Plus the `get_user_xp_breakdown` function for #2.
+
+## Out of scope (this pass)
+
+- Authoring brand-new mission types (only Emotions Crossword + Quiz variants).
+- Co-op reconnect for users who close the browser entirely for >5 minutes (we keep `sessionStorage` snapshot only).
+- Editing crossword/quiz from inside the player UI.
+
+## Order of execution
+
+1. Migration (tables + RLS + seed + `get_user_xp_breakdown`).
+2. Studio: Crossword Builder + Quiz Editor screens, sidebar wiring.
+3. Runtime fetchers in `emotionsCrosswordPuzzles.ts` / `emotionsQuiz.ts` with hardcoded fallbacks.
+4. Co-op reconnect: shared `coopChannel.ts`, refactor Quiz + Crossword to use presence/version/visibility resync.
+5. Leaderboard XP breakdown drawer.
