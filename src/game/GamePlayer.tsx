@@ -689,6 +689,33 @@ function EmotionsQuickFireCard() {
   );
 }
 
+function FriendMissionCard({
+  to, emoji, title, subtitle, gradient, tag,
+}: { to: string; emoji: string; title: string; subtitle: string; gradient: string; tag: string }) {
+  return (
+    <Link
+      to={to as any}
+      className={`relative flex w-[260px] shrink-0 flex-col overflow-hidden rounded-2xl bg-gradient-to-br ${gradient} shadow-pop`}
+    >
+      <div className="absolute left-2 top-2 z-10 inline-flex items-center gap-1 rounded-pill bg-white/95 px-2 py-1 text-[9px] font-black uppercase tracking-wider text-foreground shadow">
+        👯 {tag}
+      </div>
+      <div className="flex h-32 w-full items-center justify-center text-6xl">{emoji}</div>
+      <div className="flex flex-1 flex-col bg-card p-3">
+        <p className="text-sm font-extrabold leading-tight text-foreground">{title}</p>
+        <p className="mt-0.5 text-[11px] font-bold text-text-secondary">{subtitle}</p>
+        <div className="mt-3 w-full rounded-pill bg-foreground py-2 text-center text-xs font-extrabold text-primary-foreground shadow-pop">
+          Invite a friend →
+        </div>
+        <div className="mt-2 flex flex-wrap gap-1">
+          <span className="rounded-pill bg-tag px-2 py-0.5 text-[10px] font-extrabold text-tag-foreground">Friends only</span>
+          <span className="rounded-pill bg-tag px-2 py-0.5 text-[10px] font-extrabold text-tag-foreground">Live</span>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
 function MissionCard({
   slug, image, title, subtitle, tags, cta, ctaVariant, progress, customTo,
 }: {
