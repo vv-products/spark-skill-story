@@ -7,11 +7,11 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { usePlayerAuth } from "@/game/PlayerAuth";
 import { Confetti } from "@/game/Effects";
-import { useMissionSettings, playFeedback } from "../missionSettings";
-import { startMusic, type MusicHandle } from "../missionMusic";
-import { QUICK_FIRE_QUIZ } from "../emotionsQuiz";
+import { useMissionSettings, playFeedback } from "./missionSettings";
+import { startMusic, type MusicHandle } from "./missionMusic";
+import { QUICK_FIRE_QUIZ } from "./emotionsQuiz";
 import { awardOrbs, xpToOrbs } from "@/game/shop/flaskOrbs";
-import { FriendGate, MultiplayerLobby } from "../multiplayer/MultiplayerLobby";
+import { FriendGate, MultiplayerLobby } from "./multiplayer/MultiplayerLobby";
 
 const QUESTION_COUNT = 10;
 const PER_Q_SECONDS = 8;
