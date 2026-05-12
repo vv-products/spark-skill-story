@@ -99,23 +99,30 @@ export function MissionsScreen() {
               </div>
 
               <div className="mt-4 flex gap-2">
-                <Link
-                  to={m.to}
-                  className="flex-1 rounded-[8px] bg-[#7B2FBE] px-3 py-2 text-center text-[12px] font-semibold text-white hover:bg-[#6a26a6]"
-                >
+                <Link to={m.to} className="flex-1 rounded-[8px] bg-[#7B2FBE] px-3 py-2 text-center text-[12px] font-semibold text-white hover:bg-[#6a26a6]">
                   Preview ↗
                 </Link>
+                {m.id === "emotions-crossword" && <EditBtn view="crossword-builder">Edit</EditBtn>}
+                {(m.id === "emotions-quiz" || m.id === "emotions-quickfire") && <EditBtn view="quiz-editor">Edit</EditBtn>}
               </div>
             </div>
           ))}
         </div>
 
         <div className="mt-8 rounded-[10px] border border-[#EBEBF5] bg-white p-4 text-[12px] text-[#666680]">
-          <strong className="text-[#1A1A2E]">Note:</strong> Mission content (clues, questions, difficulty grids) is
-          currently authored in code. Editing here will be added when missions move to a database-backed catalog.
+          <strong className="text-[#1A1A2E]">Note:</strong> Crossword & Quiz content is now CMS-managed. Edit grids, words, clues, questions and choices from the side panels.
         </div>
       </div>
     </StudioLayout>
+  );
+}
+
+function EditBtn({ view, children }: { view: "crossword-builder" | "quiz-editor"; children: React.ReactNode }) {
+  const { setView } = useStudio();
+  return (
+    <button onClick={() => setView({ kind: view })} className="rounded-[8px] border border-[#EBEBF5] bg-white px-3 py-2 text-[12px] font-semibold text-[#1A1A2E] hover:bg-[#F8F8FC]">
+      {children}
+    </button>
   );
 }
 
