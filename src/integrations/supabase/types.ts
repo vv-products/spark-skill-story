@@ -725,6 +725,8 @@ export type Database = {
           avatar_image_url: string
           bio: string
           display_name: string
+          level: number
+          stars: number
           total_xp: number
           user_id: string
         }[]
@@ -737,6 +739,8 @@ export type Database = {
           avatar_image_url: string
           bio: string
           display_name: string
+          level: number
+          stars: number
           total_xp: number
           user_id: string
         }[]
