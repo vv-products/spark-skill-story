@@ -378,6 +378,19 @@ export function GameHome() {
           />
         </div>
 
+        {/* Orb Lab shop shortcut */}
+        <Link
+          to="/shop"
+          className="mt-5 flex items-center gap-3 rounded-3xl bg-gradient-to-br from-cyan-500 via-violet-500 to-fuchsia-500 p-4 text-white shadow-pop active:scale-[0.99]"
+        >
+          <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-white/20 text-2xl">🧪</div>
+          <div className="min-w-0 flex-1">
+            <div className="text-sm font-black">Orb Lab Shop</div>
+            <div className="text-[11px] font-bold opacity-90">Spend your Flask Orbs on frames, titles & boosts.</div>
+          </div>
+          <span className="shrink-0 rounded-pill bg-white/20 px-3 py-1 text-[11px] font-extrabold">Open →</span>
+        </Link>
+
         {/* Leaderboard with podium */}
         <SectionHeader
           title="Leaderboard"
