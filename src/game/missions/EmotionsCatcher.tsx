@@ -322,8 +322,17 @@ export function EmotionsCatcher() {
           <div className="text-5xl">🦋</div>
           <div className="mt-2 text-xs font-extrabold uppercase tracking-wider opacity-90">Mission Complete</div>
           <h1 className="mt-1 text-2xl font-black">Emotion Catcher</h1>
-          <div className="mt-4 inline-flex items-center gap-2 rounded-pill bg-white/95 px-4 py-2 text-foreground shadow">
-            <span className="text-base">⭐</span><span className="text-sm font-black">+{xpAwarded} XP</span>
+          <div className="mt-4 inline-flex flex-wrap items-center justify-center gap-2">
+            <span className="inline-flex items-center gap-1 rounded-pill bg-white/95 px-4 py-2 text-foreground shadow">
+              <span className="text-base">⭐</span><span className="text-sm font-black">+{xpAwarded} XP</span>
+            </span>
+            <span className="inline-flex items-center gap-1 rounded-pill bg-white/95 px-4 py-2 text-foreground shadow">
+              <FlaskConical size={14} className="text-violet-600" />
+              <span className="text-sm font-black">+{orbsEarned} orbs</span>
+            </span>
+          </div>
+          <div className="mt-2 text-[11px] font-extrabold uppercase tracking-wider opacity-90">
+            {DIFFICULTIES[difficulty].emoji} {DIFFICULTIES[difficulty].label} · ×{diffCfg.xpMultiplier} XP
           </div>
         </div>
         <div className="mt-5 grid grid-cols-3 gap-2">
@@ -333,6 +342,9 @@ export function EmotionsCatcher() {
         </div>
         <div className="mt-6 space-y-2">
           <button onClick={restart} className="w-full rounded-pill bg-primary py-3 text-sm font-extrabold text-primary-foreground shadow-pop">Play again</button>
+          <Link to="/shop" className="block w-full rounded-pill bg-gradient-to-r from-cyan-500 to-violet-500 py-3 text-center text-sm font-extrabold text-white shadow-pop">
+            🧪 Spend orbs in the shop
+          </Link>
           <Link to="/" className="block w-full rounded-pill bg-foreground py-3 text-center text-sm font-extrabold text-primary-foreground">Back to home</Link>
         </div>
       </div>
