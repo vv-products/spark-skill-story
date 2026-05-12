@@ -20,6 +20,8 @@ export function makeRoomCode(len = 5): string {
 }
 
 export type LobbyPeer = { key: string; name: string };
+export type LobbyChannel = ReturnType<typeof supabase.channel>;
+export type LobbyStartCtx = { code: string; channel: LobbyChannel; isHost: boolean; me: LobbyPeer; peers: LobbyPeer[] };
 
 export function FriendGate({ children }: { children: React.ReactNode }) {
   const { user, loading } = usePlayerAuth();
