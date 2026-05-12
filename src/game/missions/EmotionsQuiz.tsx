@@ -14,6 +14,7 @@ import { Confetti } from "@/game/Effects";
 import { useMissionSettings, playFeedback } from "./missionSettings";
 import { startMusic, type MusicHandle, type MusicKind } from "./missionMusic";
 import { SELF_PACED_QUIZ, QUICK_FIRE_QUIZ, type MCQ } from "./emotionsQuiz";
+import { loadQuizQuestions } from "./missionContent";
 
 type Pace = "self-paced" | "quick";
 type Mode = "choose" | "solo" | "coop";
@@ -51,7 +52,8 @@ export function EmotionsQuiz({ pace, initialCode }: { pace: Pace; initialCode?: 
   const { user } = usePlayerAuth();
   const { settings } = useMissionSettings();
   const cfg = PACE_CONFIG[pace];
-  const questions = useMemo<MCQ[]>(() => (pace === "quick" ? QUICK_FIRE_QUIZ : SELF_PACED_QUIZ), [pace]);
+  const [questions, setQuestions] = useState<MCQ[]>(() => (pace === "quick" ? QUICK_FIRE_QUIZ : SELF_PACED_QUIZ));
+  useEffect(() => { let alive = true; loadQuizQuestions(pace).then((q) => { if (alive && q.length) setQuestions(q); }); return () => { alive = false; }; }, [pace]);
 
   const [mode, setMode] = useState<Mode>(initialCode ? "coop" : "choose");
   const [code, setCode] = useState<string>(initialCode ?? "");

@@ -16,6 +16,8 @@ type View =
   | { kind: "welcome-cards" }
   | { kind: "avatars" }
   | { kind: "missions" }
+  | { kind: "crossword-builder" }
+  | { kind: "quiz-editor" }
   | { kind: "admin" };
 
 type Ctx = {

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Avatar } from "./avatar/Avatar";
 import { avatarFromSeed } from "./avatar/config";
-import { loadLeaderboard, type LeaderboardEntry } from "./profileApi";
+import { loadLeaderboard, loadXpBreakdown, type LeaderboardEntry, type XpBreakdownRow } from "./profileApi";
 
 type Scope = "all" | "friends" | "nearby";
 
@@ -160,6 +160,7 @@ export function ProfilePreviewCard({
               {entry.bio}
             </p>
           )}
+          <XpBreakdown userId={entry.user_id} />
         </div>
         <button
           onClick={onClose}
@@ -167,6 +168,65 @@ export function ProfilePreviewCard({
         >
           Close
         </button>
+      </div>
+    </div>
+  );
+}
+
+function prettySource(src: string): { mission: string; mode: string } {
+  // mission:emotions-crossword:medium:coop, mission:emotions-quiz:coop, class:<id>
+  if (src.startsWith("mission:")) {
+    const parts = src.split(":");
+    const slug = parts[1] ?? "mission";
+    const isCoop = parts.includes("coop");
+    const tail = parts.slice(2).filter((p) => p !== "coop").join(" · ");
+    const labels: Record<string, string> = {
+      "emotions-crossword": "🧩 Crossword",
+      "emotions-quiz": "🌿 Quiz",
+      "emotions-quickfire": "⚡ Quick-Fire",
+    };
+    const m = labels[slug] ?? slug;
+    return { mission: tail ? `${m} (${tail})` : m, mode: isCoop ? "Co-op" : "Solo" };
+  }
+  if (src.startsWith("class:")) return { mission: "📚 Class", mode: "—" };
+  return { mission: src, mode: "—" };
+}
+
+function XpBreakdown({ userId }: { userId: string }) {
+  const [rows, setRows] = useState<XpBreakdownRow[] | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+  useEffect(() => {
+    loadXpBreakdown(userId).then(setRows).catch((e) => setErr(e?.message ?? "Couldn't load"));
+  }, [userId]);
+  if (err) return <div className="mt-4 text-xs text-[#A33]">{err}</div>;
+  if (!rows) return <div className="mt-4 text-xs text-[#666]">Loading XP breakdown…</div>;
+  if (rows.length === 0) return <div className="mt-4 text-xs text-[#666]">No XP yet.</div>;
+  const total = rows.reduce((s, r) => s + r.total_xp, 0);
+  return (
+    <div className="mt-4 w-full text-left">
+      <div className="mb-1 text-[11px] font-extrabold uppercase tracking-wider text-[#666]">XP breakdown</div>
+      <div className="rounded-xl border border-[#EBEBF5] bg-white">
+        <div className="grid grid-cols-12 px-3 py-1.5 text-[10px] font-bold uppercase text-[#888]">
+          <span className="col-span-7">Mission</span>
+          <span className="col-span-2">Mode</span>
+          <span className="col-span-1 text-right">×</span>
+          <span className="col-span-2 text-right">XP</span>
+        </div>
+        {rows.map((r, i) => {
+          const { mission, mode } = prettySource(r.source);
+          return (
+            <div key={i} className="grid grid-cols-12 border-t border-[#F0F0FA] px-3 py-1.5 text-[12px]">
+              <span className="col-span-7 truncate font-semibold text-[#1A1A2E]">{mission}</span>
+              <span className="col-span-2 text-[#666]">{mode}</span>
+              <span className="col-span-1 text-right text-[#666]">{r.events}</span>
+              <span className="col-span-2 text-right font-extrabold text-[#7B2FBE]">+{r.total_xp}</span>
+            </div>
+          );
+        })}
+        <div className="grid grid-cols-12 border-t border-[#F0F0FA] bg-[#FAFAFC] px-3 py-1.5 text-[12px] font-extrabold">
+          <span className="col-span-10">Total</span>
+          <span className="col-span-2 text-right text-[#7B2FBE]">+{total}</span>
+        </div>
       </div>
     </div>
   );
