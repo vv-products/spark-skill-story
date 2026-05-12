@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { usePlayerAuth } from "@/game/PlayerAuth";
 import { Confetti } from "@/game/Effects";
 import { PUZZLES, emptyGridFor, badgeForDifficulty, type Difficulty, type Puzzle, type WordRef } from "./emotionsCrosswordPuzzles";
+import { loadCrosswordPuzzle } from "./missionContent";
 import { useMissionSettings, playFeedback, type MissionSettings } from "./missionSettings";
 
 const COMPLETION_KEY = "sementa.mission.emotions-crossword.completion";
@@ -49,7 +50,8 @@ export function EmotionsCrossword({ initialCode }: { initialCode?: string }) {
   const [code, setCode] = useState<string>(initialCode ?? "");
   const [showSettings, setShowSettings] = useState(false);
 
-  const puzzle = PUZZLES[difficulty];
+  const [puzzle, setPuzzle] = useState<Puzzle>(() => PUZZLES[difficulty]);
+  useEffect(() => { let alive = true; loadCrosswordPuzzle(difficulty).then((p) => { if (alive) setPuzzle(p); }); return () => { alive = false; }; }, [difficulty]);
   const [grid, setGrid] = useState<string[][]>(() => emptyGridFor(puzzle));
   const [active, setActive] = useState<{ r: number; c: number; dir: "A" | "D" }>({ r: 0, c: 0, dir: "A" });
   const [peers, setPeers] = useState<{ name: string; cells: { r: number; c: number } }[]>([]);
