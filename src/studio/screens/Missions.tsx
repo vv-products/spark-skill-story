@@ -58,6 +58,19 @@ const MISSIONS: MissionEntry[] = [
     to: "/mission/emotions-quickfire",
     contentSummary: `${QUICK_FIRE_QUIZ.length} questions · 8s timer each`,
   },
+  {
+    id: "emotions-catcher",
+    title: "Emotion Catcher",
+    emoji: "🦋",
+    type: "Quick-Fire MCQ",
+    rarity: "Rare",
+    modes: ["Solo"],
+    music: "Fast & energetic",
+    baseXp: 40,
+    bonusNote: "+10 XP per catch · streak bonus up to +15",
+    to: "/mission/emotions-catcher",
+    contentSummary: "45s round · fliers cross in 1–2s · 3 lives",
+  },
 ];
 
 export function MissionsScreen() {
