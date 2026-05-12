@@ -113,7 +113,9 @@ export function Leaderboard({ currentUserId, onSelect, showNearMe = false, limit
                   <span className="block truncate text-sm font-extrabold text-[#1A1A2E]">
                     {name}{me && <span className="ml-1 text-[10px] font-bold text-[#7B2FBE]">YOU</span>}
                   </span>
-                  <span className="block text-[11px] font-semibold text-[#666]">{r.total_xp} XP</span>
+                  <span className="block text-[11px] font-semibold text-[#666]">
+                    Lv {r.level} · ⭐ {r.stars} · {r.total_xp} XP
+                  </span>
                 </span>
                 <span className="text-[#7B2FBE]">→</span>
               </button>
@@ -152,8 +154,16 @@ export function ProfilePreviewCard({
           {entry.age != null && (
             <p className="text-xs font-semibold text-[#666]">Age {entry.age}</p>
           )}
-          <div className="mt-3 inline-flex items-center gap-1 rounded-full bg-[#FFF8E8] px-3 py-1 text-xs font-extrabold text-[#A66D00]">
-            ⭐ {entry.total_xp} XP
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-1.5">
+            <span className="inline-flex items-center gap-1 rounded-full bg-[#EEF1FF] px-3 py-1 text-xs font-extrabold text-[#3B3B7A]">
+              🎚 Level {entry.level}
+            </span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-[#FFF8E8] px-3 py-1 text-xs font-extrabold text-[#A66D00]">
+              ⭐ {entry.stars} stars
+            </span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-[#F4ECFB] px-3 py-1 text-xs font-extrabold text-[#7B2FBE]">
+              {entry.total_xp} XP
+            </span>
           </div>
           {entry.bio && (
             <p className="mt-4 rounded-2xl bg-[#F8F8FC] px-4 py-3 text-sm text-[#1A1A2E]">
