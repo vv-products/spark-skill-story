@@ -214,16 +214,20 @@ export function EmotionsCatcher() {
     musicRef.current = null;
     playFeedback("win", settings);
     const streakBonus = bestStreak >= 5 ? 15 : bestStreak >= 3 ? 8 : 0;
-    const finalXp = 40 + score + streakBonus;
+    const rawXp = 40 + score + streakBonus;
+    const finalXp = Math.round(rawXp * diffCfg.xpMultiplier);
+    const orbs = xpToOrbs(finalXp);
     setXpAwarded(finalXp);
+    setOrbsEarned(orbs);
+    awardOrbs(orbs);
     writeCompletion({ score, xp: finalXp, at: Date.now() });
     if (user) {
       const { error } = await supabase.from("xp_events").insert({
-        user_id: user.id, amount: finalXp, source: "mission:emotions-catcher",
+        user_id: user.id, amount: finalXp, source: `mission:emotions-catcher:${difficulty}`,
       });
       if (error) console.error("[xp_events]", error);
     }
-    toast.success(`Mission complete! +${finalXp} XP`);
+    toast.success(`Mission complete! +${finalXp} XP · +${orbs} 🧪`);
   }
 
   function restart() {
