@@ -11,6 +11,8 @@ import { TaskTypesScreen } from "@/studio/screens/TaskTypesRef";
 import { WelcomeCardsScreen } from "@/studio/screens/WelcomeCards";
 import { AvatarsScreen } from "@/studio/screens/Avatars";
 import { MissionsScreen } from "@/studio/screens/Missions";
+import { CrosswordBuilderScreen } from "@/studio/screens/CrosswordBuilder";
+import { QuizEditorScreen } from "@/studio/screens/QuizEditor";
 
 export const Route = createFileRoute("/studio")({
   head: () => ({
@@ -40,6 +42,8 @@ function Router() {
     case "welcome-cards": return <WelcomeCardsScreen />;
     case "avatars": return <AvatarsScreen />;
     case "missions": return <MissionsScreen />;
+    case "crossword-builder": return <CrosswordBuilderScreen />;
+    case "quiz-editor": return <QuizEditorScreen />;
     case "admin": return null;
   }
 }

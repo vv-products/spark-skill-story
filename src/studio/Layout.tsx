@@ -8,6 +8,8 @@ const NAV = [
   { key: "dashboard", label: "Dashboard", icon: "▦" },
   { key: "library", label: "Content Library", icon: "▤" },
   { key: "missions", label: "Missions", icon: "✦" },
+  { key: "crossword-builder", label: "Crossword Builder", icon: "🧩" },
+  { key: "quiz-editor", label: "Quiz Editor", icon: "❓" },
   { key: "welcome-cards", label: "Welcome Cards", icon: "★" },
   { key: "avatars", label: "Avatars", icon: "☻" },
   { key: "task-types", label: "Task Types", icon: "◇" },
@@ -23,6 +25,8 @@ export function StudioLayout({ children, title, actions }: { children: ReactNode
     view.kind === "welcome-cards" ? "welcome-cards" :
     view.kind === "avatars" ? "avatars" :
     view.kind === "missions" ? "missions" :
+    view.kind === "crossword-builder" ? "crossword-builder" :
+    view.kind === "quiz-editor" ? "quiz-editor" :
     "library";
 
   const sidebarContent = (
@@ -53,6 +57,8 @@ export function StudioLayout({ children, title, actions }: { children: ReactNode
                 else if (item.key === "welcome-cards") setView({ kind: "welcome-cards" });
                 else if (item.key === "avatars") setView({ kind: "avatars" });
                 else if (item.key === "missions") setView({ kind: "missions" });
+                else if (item.key === "crossword-builder") setView({ kind: "crossword-builder" });
+                else if (item.key === "quiz-editor") setView({ kind: "quiz-editor" });
                 setMobileOpen(false);
               }}
               className={`mb-1 flex w-full items-center gap-3 rounded-[8px] px-3 py-2.5 text-left text-sm font-medium transition-colors ${
