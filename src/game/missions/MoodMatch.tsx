@@ -109,7 +109,7 @@ function MoodInner({ initialCode }: { initialCode?: string }) {
         channelKey="mood-match"
         startLabel="Start matching"
         initialCode={initialCode}
-        onStart={({ channel, me, peers, isHost }) => {
+        onStart={({ channel, me, peers, isHost }: import("./multiplayer/MultiplayerLobby").LobbyStartCtx) => {
           channelRef.current = channel;
           myKeyRef.current = me.key;
           isHostRef.current = isHost;

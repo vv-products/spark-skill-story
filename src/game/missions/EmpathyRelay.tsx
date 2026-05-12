@@ -95,7 +95,7 @@ function RelayInner({ initialCode }: { initialCode?: string }) {
         channelKey="empathy-relay"
         startLabel="Start the relay"
         initialCode={initialCode}
-        onStart={({ channel, me, peers, isHost }) => {
+        onStart={({ channel, me, peers, isHost }: import("./multiplayer/MultiplayerLobby").LobbyStartCtx) => {
           channelRef.current = channel;
           myKeyRef.current = me.key;
           setMyName(me.name);

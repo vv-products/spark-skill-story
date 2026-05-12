@@ -117,7 +117,7 @@ function DuelInner({ initialCode }: { initialCode?: string }) {
         channelKey="emotion-duel"
         initialCode={initialCode}
         startLabel="Start the duel"
-        onStart={({ channel, me, peers }) => {
+        onStart={({ channel, me, peers }: import("./multiplayer/MultiplayerLobby").LobbyStartCtx) => {
           channelRef.current = channel;
           myKeyRef.current = me.key;
           const opp = peers.find((p) => p.key !== me.key);

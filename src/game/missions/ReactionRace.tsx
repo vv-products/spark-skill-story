@@ -128,7 +128,7 @@ function RaceInner({ initialCode }: { initialCode?: string }) {
         channelKey="reaction-race"
         initialCode={initialCode}
         startLabel="Start the race"
-        onStart={({ channel, me, peers, isHost }) => {
+        onStart={({ channel, me, peers, isHost }: import("./multiplayer/MultiplayerLobby").LobbyStartCtx) => {
           channelRef.current = channel;
           isHostRef.current = isHost;
           myKeyRef.current = me.key;
