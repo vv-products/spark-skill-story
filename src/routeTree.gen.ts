@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as StudioRouteImport } from './routes/studio'
+import { Route as ShopRouteImport } from './routes/shop'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as JourneyRouteImport } from './routes/journey'
 import { Route as ClubRouteImport } from './routes/club'
@@ -25,6 +26,11 @@ import { Route as ClubJoinCodeRouteImport } from './routes/club.join.$code'
 const StudioRoute = StudioRouteImport.update({
   id: '/studio',
   path: '/studio',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShopRoute = ShopRouteImport.update({
+  id: '/shop',
+  path: '/shop',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileRoute = ProfileRouteImport.update({
@@ -90,6 +96,7 @@ export interface FileRoutesByFullPath {
   '/club': typeof ClubRouteWithChildren
   '/journey': typeof JourneyRoute
   '/profile': typeof ProfileRouteWithChildren
+  '/shop': typeof ShopRoute
   '/studio': typeof StudioRoute
   '/mission/emotions-catcher': typeof MissionEmotionsCatcherRoute
   '/mission/emotions-crossword': typeof MissionEmotionsCrosswordRoute
@@ -104,6 +111,7 @@ export interface FileRoutesByTo {
   '/club': typeof ClubRouteWithChildren
   '/journey': typeof JourneyRoute
   '/profile': typeof ProfileRouteWithChildren
+  '/shop': typeof ShopRoute
   '/studio': typeof StudioRoute
   '/mission/emotions-catcher': typeof MissionEmotionsCatcherRoute
   '/mission/emotions-crossword': typeof MissionEmotionsCrosswordRoute
@@ -119,6 +127,7 @@ export interface FileRoutesById {
   '/club': typeof ClubRouteWithChildren
   '/journey': typeof JourneyRoute
   '/profile': typeof ProfileRouteWithChildren
+  '/shop': typeof ShopRoute
   '/studio': typeof StudioRoute
   '/mission/emotions-catcher': typeof MissionEmotionsCatcherRoute
   '/mission/emotions-crossword': typeof MissionEmotionsCrosswordRoute
@@ -135,6 +144,7 @@ export interface FileRouteTypes {
     | '/club'
     | '/journey'
     | '/profile'
+    | '/shop'
     | '/studio'
     | '/mission/emotions-catcher'
     | '/mission/emotions-crossword'
@@ -149,6 +159,7 @@ export interface FileRouteTypes {
     | '/club'
     | '/journey'
     | '/profile'
+    | '/shop'
     | '/studio'
     | '/mission/emotions-catcher'
     | '/mission/emotions-crossword'
@@ -163,6 +174,7 @@ export interface FileRouteTypes {
     | '/club'
     | '/journey'
     | '/profile'
+    | '/shop'
     | '/studio'
     | '/mission/emotions-catcher'
     | '/mission/emotions-crossword'
@@ -178,6 +190,7 @@ export interface RootRouteChildren {
   ClubRoute: typeof ClubRouteWithChildren
   JourneyRoute: typeof JourneyRoute
   ProfileRoute: typeof ProfileRouteWithChildren
+  ShopRoute: typeof ShopRoute
   StudioRoute: typeof StudioRoute
   MissionEmotionsCatcherRoute: typeof MissionEmotionsCatcherRoute
   MissionEmotionsCrosswordRoute: typeof MissionEmotionsCrosswordRoute
@@ -193,6 +206,13 @@ declare module '@tanstack/react-router' {
       path: '/studio'
       fullPath: '/studio'
       preLoaderRoute: typeof StudioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shop': {
+      id: '/shop'
+      path: '/shop'
+      fullPath: '/shop'
+      preLoaderRoute: typeof ShopRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile': {
@@ -301,6 +321,7 @@ const rootRouteChildren: RootRouteChildren = {
   ClubRoute: ClubRouteWithChildren,
   JourneyRoute: JourneyRoute,
   ProfileRoute: ProfileRouteWithChildren,
+  ShopRoute: ShopRoute,
   StudioRoute: StudioRoute,
   MissionEmotionsCatcherRoute: MissionEmotionsCatcherRoute,
   MissionEmotionsCrosswordRoute: MissionEmotionsCrosswordRoute,

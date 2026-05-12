@@ -5,7 +5,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { ArrowLeft, Music, VolumeX, Heart, Sparkles, Clock } from "lucide-react";
+import { ArrowLeft, Music, VolumeX, Heart, Sparkles, Clock, FlaskConical } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { usePlayerAuth } from "@/game/PlayerAuth";
@@ -13,10 +13,35 @@ import { Confetti } from "@/game/Effects";
 import { useMissionSettings, playFeedback } from "./missionSettings";
 import { startMusic, type MusicHandle } from "./missionMusic";
 import { QUICK_FIRE_QUIZ } from "./emotionsQuiz";
+import { awardOrbs, xpToOrbs } from "@/game/shop/flaskOrbs";
+import { FlaskBadge } from "@/game/shop/Shop";
 
 const COMPLETION_KEY = "sementa.mission.emotions-catcher";
+const DIFFICULTY_KEY = "sementa.mission.emotions-catcher.difficulty";
 const ROUND_SECONDS = 45;
 const MAX_LIVES = 3;
+
+type Difficulty = "easy" | "medium" | "hard";
+type DiffConfig = {
+  label: string;
+  emoji: string;
+  blurb: string;
+  spawnMs: number;        // ms between fliers
+  durMin: number;         // seconds across screen (slower = easier)
+  durMax: number;
+  correctChance: number;  // 0..1 — higher = easier
+  xpMultiplier: number;
+};
+const DIFFICULTIES: Record<Difficulty, DiffConfig> = {
+  easy:   { label: "Easy",   emoji: "🌱", blurb: "Slow fliers, mostly correct answers.",      spawnMs: 950, durMin: 2.0, durMax: 3.0, correctChance: 0.65, xpMultiplier: 0.8 },
+  medium: { label: "Medium", emoji: "⚡", blurb: "Balanced speed, mix of distractors.",       spawnMs: 650, durMin: 1.4, durMax: 2.2, correctChance: 0.45, xpMultiplier: 1.0 },
+  hard:   { label: "Hard",   emoji: "🔥", blurb: "Fast fliers, lots of tricky distractors.", spawnMs: 420, durMin: 0.9, durMax: 1.5, correctChance: 0.30, xpMultiplier: 1.4 },
+};
+function readDifficulty(): Difficulty {
+  if (typeof window === "undefined") return "medium";
+  const v = window.localStorage.getItem(DIFFICULTY_KEY);
+  return v === "easy" || v === "medium" || v === "hard" ? v : "medium";
+}
 const TILE_COLORS = [
   "bg-[#E94B6F] text-white",
   "bg-[#3FB6E0] text-white",
@@ -61,9 +86,17 @@ export function EmotionsCatcher() {
   const [xpAwarded, setXpAwarded] = useState<number | null>(null);
   const [promptIdx, setPromptIdx] = useState(0);
   const [fliers, setFliers] = useState<Flier[]>([]);
+  const [difficulty, setDifficulty] = useState<Difficulty>(readDifficulty);
+  const [orbsEarned, setOrbsEarned] = useState(0);
+  const diffCfg = DIFFICULTIES[difficulty];
   const musicRef = useRef<MusicHandle | null>(null);
   const idRef = useRef(1);
   const [, force] = useState(0);
+
+  function chooseDifficulty(d: Difficulty) {
+    setDifficulty(d);
+    try { window.localStorage.setItem(DIFFICULTY_KEY, d); } catch { /* ignore */ }
+  }
 
   // Pool of prompts: pull from quick-fire quiz; "catch the answer to: …"
   const prompts = useMemo(() => QUICK_FIRE_QUIZ.map((q) => ({
@@ -100,12 +133,12 @@ export function EmotionsCatcher() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lives, started, done]);
 
-  // Spawn loop
+  // Spawn loop — speed, frequency, distractor mix come from difficulty
   useEffect(() => {
     if (!started || done) return;
     const spawn = () => {
-      const correctChance = Math.random() < 0.45; // ~45% correct
-      const label = correctChance
+      const isCorrect = Math.random() < diffCfg.correctChance;
+      const label = isCorrect
         ? current.correct
         : (allLabels.filter((l) => l !== current.correct)[Math.floor(Math.random() * Math.max(1, allLabels.length - 1))] ?? "Calm");
       const f: Flier = {
@@ -113,17 +146,16 @@ export function EmotionsCatcher() {
         label,
         isCorrect: label === current.correct,
         topPct: 8 + Math.random() * 70,
-        duration: 1 + Math.random(),     // 1–2 seconds across screen
+        duration: diffCfg.durMin + Math.random() * (diffCfg.durMax - diffCfg.durMin),
         startedAt: Date.now(),
         color: TILE_COLORS[Math.floor(Math.random() * TILE_COLORS.length)],
       };
       setFliers((prev) => [...prev, f]);
     };
-    // initial flurry + interval
     spawn();
-    const interval = setInterval(spawn, 650);
+    const interval = setInterval(spawn, diffCfg.spawnMs);
     return () => clearInterval(interval);
-  }, [started, done, current, allLabels]);
+  }, [started, done, current, allLabels, diffCfg]);
 
   // Cleanup expired fliers + count misses
   useEffect(() => {
@@ -182,22 +214,26 @@ export function EmotionsCatcher() {
     musicRef.current = null;
     playFeedback("win", settings);
     const streakBonus = bestStreak >= 5 ? 15 : bestStreak >= 3 ? 8 : 0;
-    const finalXp = 40 + score + streakBonus;
+    const rawXp = 40 + score + streakBonus;
+    const finalXp = Math.round(rawXp * diffCfg.xpMultiplier);
+    const orbs = xpToOrbs(finalXp);
     setXpAwarded(finalXp);
+    setOrbsEarned(orbs);
+    awardOrbs(orbs);
     writeCompletion({ score, xp: finalXp, at: Date.now() });
     if (user) {
       const { error } = await supabase.from("xp_events").insert({
-        user_id: user.id, amount: finalXp, source: "mission:emotions-catcher",
+        user_id: user.id, amount: finalXp, source: `mission:emotions-catcher:${difficulty}`,
       });
       if (error) console.error("[xp_events]", error);
     }
-    toast.success(`Mission complete! +${finalXp} XP`);
+    toast.success(`Mission complete! +${finalXp} XP · +${orbs} 🧪`);
   }
 
   function restart() {
     setStarted(false); setDone(false); setScore(0); setStreak(0); setBestStreak(0);
     setCaught(0); setMissed(0); setLives(MAX_LIVES); setTimeLeft(ROUND_SECONDS);
-    setXpAwarded(null); setPromptIdx(0); setFliers([]);
+    setXpAwarded(null); setOrbsEarned(0); setPromptIdx(0); setFliers([]);
   }
 
   // ---------- intro ----------
@@ -205,7 +241,10 @@ export function EmotionsCatcher() {
     const last = readCompletion();
     return (
       <div className="mx-auto max-w-md px-5 py-6">
-        <BackBar />
+        <div className="flex items-center justify-between">
+          <BackBar />
+          <FlaskBadge />
+        </div>
         <div className="mt-3 rounded-3xl bg-gradient-to-br from-fuchsia-500 to-indigo-600 p-6 text-center text-white shadow-pop">
           <div className="text-5xl">🦋</div>
           <h1 className="mt-2 text-2xl font-black">Emotion Catcher</h1>
@@ -221,12 +260,41 @@ export function EmotionsCatcher() {
           </div>
         )}
 
-        <div className="mt-5 space-y-2 rounded-2xl bg-card p-4 shadow-card">
+        {/* Difficulty selector */}
+        <div className="mt-5 rounded-2xl bg-card p-4 shadow-card">
+          <div className="mb-2 text-[11px] font-extrabold uppercase tracking-wider text-text-secondary">Difficulty</div>
+          <div className="grid grid-cols-3 gap-2">
+            {(Object.keys(DIFFICULTIES) as Difficulty[]).map((d) => {
+              const cfg = DIFFICULTIES[d];
+              const active = difficulty === d;
+              return (
+                <button
+                  key={d}
+                  onClick={() => chooseDifficulty(d)}
+                  className={`rounded-2xl px-2 py-3 text-center transition ${
+                    active
+                      ? "bg-gradient-to-br from-fuchsia-500 to-indigo-600 text-white shadow-pop"
+                      : "bg-muted text-foreground hover:bg-muted/80"
+                  }`}
+                >
+                  <div className="text-lg">{cfg.emoji}</div>
+                  <div className="text-[11px] font-extrabold">{cfg.label}</div>
+                  <div className={`text-[9px] font-bold ${active ? "opacity-90" : "text-text-secondary"}`}>×{cfg.xpMultiplier} XP</div>
+                </button>
+              );
+            })}
+          </div>
+          <p className="mt-2 text-[11px] font-bold text-text-secondary">{diffCfg.blurb}</p>
+        </div>
+
+        <div className="mt-3 space-y-2 rounded-2xl bg-card p-4 shadow-card">
           <Row label="Round" value={`${ROUND_SECONDS}s`} />
           <Row label="Lives" value={`${MAX_LIVES} ❤️`} />
-          <Row label="Speed" value="1–2s per flier" />
+          <Row label="Speed" value={`${diffCfg.durMin.toFixed(1)}–${diffCfg.durMax.toFixed(1)}s per flier`} />
+          <Row label="Spawn" value={`every ${(diffCfg.spawnMs / 1000).toFixed(2)}s`} />
+          <Row label="Correct flier mix" value={`${Math.round(diffCfg.correctChance * 100)}%`} />
           <Row label="Music" value="Fast & energetic" />
-          <Row label="Base XP" value="+40 + 10 per catch" />
+          <Row label="Reward" value="XP + 🧪 orbs to spend in shop" />
         </div>
 
         <div className="mt-5 flex items-center justify-between rounded-2xl bg-card p-3 shadow-card">
@@ -254,8 +322,17 @@ export function EmotionsCatcher() {
           <div className="text-5xl">🦋</div>
           <div className="mt-2 text-xs font-extrabold uppercase tracking-wider opacity-90">Mission Complete</div>
           <h1 className="mt-1 text-2xl font-black">Emotion Catcher</h1>
-          <div className="mt-4 inline-flex items-center gap-2 rounded-pill bg-white/95 px-4 py-2 text-foreground shadow">
-            <span className="text-base">⭐</span><span className="text-sm font-black">+{xpAwarded} XP</span>
+          <div className="mt-4 inline-flex flex-wrap items-center justify-center gap-2">
+            <span className="inline-flex items-center gap-1 rounded-pill bg-white/95 px-4 py-2 text-foreground shadow">
+              <span className="text-base">⭐</span><span className="text-sm font-black">+{xpAwarded} XP</span>
+            </span>
+            <span className="inline-flex items-center gap-1 rounded-pill bg-white/95 px-4 py-2 text-foreground shadow">
+              <FlaskConical size={14} className="text-violet-600" />
+              <span className="text-sm font-black">+{orbsEarned} orbs</span>
+            </span>
+          </div>
+          <div className="mt-2 text-[11px] font-extrabold uppercase tracking-wider opacity-90">
+            {DIFFICULTIES[difficulty].emoji} {DIFFICULTIES[difficulty].label} · ×{diffCfg.xpMultiplier} XP
           </div>
         </div>
         <div className="mt-5 grid grid-cols-3 gap-2">
@@ -265,6 +342,9 @@ export function EmotionsCatcher() {
         </div>
         <div className="mt-6 space-y-2">
           <button onClick={restart} className="w-full rounded-pill bg-primary py-3 text-sm font-extrabold text-primary-foreground shadow-pop">Play again</button>
+          <Link to="/shop" className="block w-full rounded-pill bg-gradient-to-r from-cyan-500 to-violet-500 py-3 text-center text-sm font-extrabold text-white shadow-pop">
+            🧪 Spend orbs in the shop
+          </Link>
           <Link to="/" className="block w-full rounded-pill bg-foreground py-3 text-center text-sm font-extrabold text-primary-foreground">Back to home</Link>
         </div>
       </div>
