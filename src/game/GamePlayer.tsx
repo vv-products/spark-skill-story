@@ -10,7 +10,7 @@ import { avatarFromSeed, type AvatarConfig } from "./avatar/config";
 import { loadProfile } from "./profileApi";
 import { AvatarPicker } from "./AvatarPicker";
 import { ProfilePreviewCard } from "./Leaderboard";
-import { loadLeaderboard, type LeaderboardEntry } from "./profileApi";
+import { loadLeaderboard, levelFromXp, type LeaderboardEntry } from "./profileApi";
 import leoImg from "@/assets/leo.jpg";
 import leoHeroImg from "@/assets/leo-hero.jpg";
 import mayaImg from "@/assets/maya.jpg";
@@ -282,7 +282,7 @@ export function GameHome() {
         {/* Stat cards */}
         <div className="mt-4 grid grid-cols-3 gap-3">
           <StatCard bg="bg-card-warm" icon={iconStar} label="Your Stars" value={user ? progress.totalXp.toLocaleString() : "—"} />
-          <StatCard bg="bg-card-gold" icon={iconTrophy} label="Your Level" value={user ? `Level ${Math.max(1, Math.floor(progress.totalXp / 200) + 1)}` : "—"} />
+          <StatCard bg="bg-card-gold" icon={iconTrophy} label="Your Level" value={user ? `Level ${levelFromXp(progress.totalXp)}` : "—"} />
           <StatCard
             bg="bg-card-warm"
             icon={iconFire}
