@@ -355,8 +355,7 @@ export function GameHome() {
           <FriendMissionCard to="/mission/reaction-race"  emoji="⚡" title="Reaction Race"  subtitle="Best of 7 — fastest wins" gradient="from-amber-500 via-orange-500 to-red-500" tag="Vs friend" />
           <FriendMissionCard to="/mission/empathy-relay"  emoji="🤝" title="Empathy Relay"  subtitle="Take turns to win together" gradient="from-emerald-400 via-teal-500 to-cyan-500" tag="Co-op" />
           <FriendMissionCard to="/mission/mood-match"     emoji="💞" title="Mood Match"     subtitle="Sync the same emotion" gradient="from-pink-500 via-fuchsia-500 to-purple-600" tag="Co-op" />
-
-
+          <EmotionsCatcherCard />
         </div>
 
         {/* Fun Activities */}
@@ -996,4 +995,45 @@ function LayerWrap({ layer, onComplete }: { layer: any; onComplete: (xp: number)
   useEffect(() => { import("./LayerRenderer").then((m) => setComp(() => m.LayerRenderer)); }, []);
   if (!Comp) return <div className="flex h-full items-center justify-center text-[#666]">Loading…</div>;
   return <Comp layer={layer} onComplete={onComplete} />;
+}
+
+function EmotionsCatcherCard() {
+  const [c, setC] = useState<{ score: number; xp: number } | null>(null);
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem("sementa.mission.emotions-catcher.last");
+      if (raw) setC(JSON.parse(raw));
+    } catch { /* ignore */ }
+  }, []);
+  return (
+    <Link
+      to="/mission/emotions-catcher"
+      className="relative flex w-[260px] shrink-0 flex-col overflow-hidden rounded-2xl bg-gradient-to-br from-sky-500 via-indigo-500 to-purple-600 shadow-pop"
+    >
+      <div className="absolute left-2 top-2 z-10 inline-flex items-center gap-1 rounded-pill bg-white/95 px-2 py-1 text-[9px] font-black uppercase tracking-wider text-indigo-700 shadow">
+        ✦ New
+      </div>
+      <div className="relative flex h-32 w-full items-center justify-center text-6xl">
+        🪄
+        {c && (
+          <div className="absolute right-2 top-2 flex items-center gap-1 rounded-pill bg-white/95 px-2 py-1 text-[10px] font-extrabold text-indigo-700 shadow">
+            ✓ +{c.xp} XP
+          </div>
+        )}
+      </div>
+      <div className="flex flex-1 flex-col bg-card p-3">
+        <p className="text-sm font-extrabold leading-tight text-foreground">Emotion Catcher</p>
+        <p className="mt-0.5 text-[11px] font-bold text-text-secondary">
+          {c ? `Last score: ${c.score} · +${c.xp} XP` : "Catch the right emotions!"}
+        </p>
+        <div className="mt-3 w-full rounded-pill bg-indigo-600 py-2 text-center text-xs font-extrabold text-white shadow-pop">
+          {c ? "Replay →" : "Start →"}
+        </div>
+        <div className="mt-2 flex flex-wrap gap-1">
+          <span className="rounded-pill bg-tag px-2 py-0.5 text-[10px] font-extrabold text-tag-foreground">🪄 Arcade</span>
+          <span className="rounded-pill bg-tag px-2 py-0.5 text-[10px] font-extrabold text-tag-foreground">+ XP</span>
+        </div>
+      </div>
+    </Link>
+  );
 }
