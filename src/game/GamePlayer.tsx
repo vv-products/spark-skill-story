@@ -10,7 +10,7 @@ import { avatarFromSeed, type AvatarConfig } from "./avatar/config";
 import { loadProfile } from "./profileApi";
 import { AvatarPicker } from "./AvatarPicker";
 import { ProfilePreviewCard } from "./Leaderboard";
-import { loadLeaderboard, type LeaderboardEntry } from "./profileApi";
+import { loadLeaderboard, levelFromXp, type LeaderboardEntry } from "./profileApi";
 import leoImg from "@/assets/leo.jpg";
 import leoHeroImg from "@/assets/leo-hero.jpg";
 import mayaImg from "@/assets/maya.jpg";
