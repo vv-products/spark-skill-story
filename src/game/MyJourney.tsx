@@ -345,7 +345,7 @@ export function MyJourney() {
 
       {/* ── Neutral hint ── */}
       {!active && (
-        <div className="absolute bottom-8 left-0 right-0 z-20 flex justify-center">
+        <div className="absolute bottom-28 left-0 right-0 z-20 flex justify-center lg:bottom-8">
           <div
             className="rounded-full px-5 py-2 text-xs font-bold text-white shadow-md"
             style={{
