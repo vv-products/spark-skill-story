@@ -48,7 +48,9 @@ export function PlayerShell({
               : "relative mx-auto flex min-h-[100dvh] w-full max-w-[430px] flex-1 flex-col bg-background shadow-2xl md:max-w-[720px] lg:min-h-[calc(100dvh-3rem)] lg:max-w-[960px] lg:rounded-[28px] lg:shadow-[0_30px_80px_-30px_rgba(60,40,120,0.35)]"
           }
         >
-          {children}
+          <div className={user && !bleed ? "flex flex-1 flex-col pb-28 lg:pb-0" : "flex flex-1 flex-col"}>
+            {children}
+          </div>
           {user && <BottomNav />}
         </div>
       </div>
