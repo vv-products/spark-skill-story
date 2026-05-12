@@ -19,6 +19,7 @@ import { Route as PlaySlugRouteImport } from './routes/play.$slug'
 import { Route as MissionEmotionsQuizRouteImport } from './routes/mission.emotions-quiz'
 import { Route as MissionEmotionsQuickfireRouteImport } from './routes/mission.emotions-quickfire'
 import { Route as MissionEmotionsCrosswordRouteImport } from './routes/mission.emotions-crossword'
+import { Route as MissionEmotionsCatcherRouteImport } from './routes/mission.emotions-catcher'
 import { Route as ClubJoinCodeRouteImport } from './routes/club.join.$code'
 
 const StudioRoute = StudioRouteImport.update({
@@ -73,6 +74,11 @@ const MissionEmotionsCrosswordRoute =
     path: '/mission/emotions-crossword',
     getParentRoute: () => rootRouteImport,
   } as any)
+const MissionEmotionsCatcherRoute = MissionEmotionsCatcherRouteImport.update({
+  id: '/mission/emotions-catcher',
+  path: '/mission/emotions-catcher',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ClubJoinCodeRoute = ClubJoinCodeRouteImport.update({
   id: '/join/$code',
   path: '/join/$code',
@@ -85,6 +91,7 @@ export interface FileRoutesByFullPath {
   '/journey': typeof JourneyRoute
   '/profile': typeof ProfileRouteWithChildren
   '/studio': typeof StudioRoute
+  '/mission/emotions-catcher': typeof MissionEmotionsCatcherRoute
   '/mission/emotions-crossword': typeof MissionEmotionsCrosswordRoute
   '/mission/emotions-quickfire': typeof MissionEmotionsQuickfireRoute
   '/mission/emotions-quiz': typeof MissionEmotionsQuizRoute
@@ -98,6 +105,7 @@ export interface FileRoutesByTo {
   '/journey': typeof JourneyRoute
   '/profile': typeof ProfileRouteWithChildren
   '/studio': typeof StudioRoute
+  '/mission/emotions-catcher': typeof MissionEmotionsCatcherRoute
   '/mission/emotions-crossword': typeof MissionEmotionsCrosswordRoute
   '/mission/emotions-quickfire': typeof MissionEmotionsQuickfireRoute
   '/mission/emotions-quiz': typeof MissionEmotionsQuizRoute
@@ -112,6 +120,7 @@ export interface FileRoutesById {
   '/journey': typeof JourneyRoute
   '/profile': typeof ProfileRouteWithChildren
   '/studio': typeof StudioRoute
+  '/mission/emotions-catcher': typeof MissionEmotionsCatcherRoute
   '/mission/emotions-crossword': typeof MissionEmotionsCrosswordRoute
   '/mission/emotions-quickfire': typeof MissionEmotionsQuickfireRoute
   '/mission/emotions-quiz': typeof MissionEmotionsQuizRoute
@@ -127,6 +136,7 @@ export interface FileRouteTypes {
     | '/journey'
     | '/profile'
     | '/studio'
+    | '/mission/emotions-catcher'
     | '/mission/emotions-crossword'
     | '/mission/emotions-quickfire'
     | '/mission/emotions-quiz'
@@ -140,6 +150,7 @@ export interface FileRouteTypes {
     | '/journey'
     | '/profile'
     | '/studio'
+    | '/mission/emotions-catcher'
     | '/mission/emotions-crossword'
     | '/mission/emotions-quickfire'
     | '/mission/emotions-quiz'
@@ -153,6 +164,7 @@ export interface FileRouteTypes {
     | '/journey'
     | '/profile'
     | '/studio'
+    | '/mission/emotions-catcher'
     | '/mission/emotions-crossword'
     | '/mission/emotions-quickfire'
     | '/mission/emotions-quiz'
@@ -167,6 +179,7 @@ export interface RootRouteChildren {
   JourneyRoute: typeof JourneyRoute
   ProfileRoute: typeof ProfileRouteWithChildren
   StudioRoute: typeof StudioRoute
+  MissionEmotionsCatcherRoute: typeof MissionEmotionsCatcherRoute
   MissionEmotionsCrosswordRoute: typeof MissionEmotionsCrosswordRoute
   MissionEmotionsQuickfireRoute: typeof MissionEmotionsQuickfireRoute
   MissionEmotionsQuizRoute: typeof MissionEmotionsQuizRoute
@@ -245,6 +258,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MissionEmotionsCrosswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/mission/emotions-catcher': {
+      id: '/mission/emotions-catcher'
+      path: '/mission/emotions-catcher'
+      fullPath: '/mission/emotions-catcher'
+      preLoaderRoute: typeof MissionEmotionsCatcherRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/club/join/$code': {
       id: '/club/join/$code'
       path: '/join/$code'
@@ -282,6 +302,7 @@ const rootRouteChildren: RootRouteChildren = {
   JourneyRoute: JourneyRoute,
   ProfileRoute: ProfileRouteWithChildren,
   StudioRoute: StudioRoute,
+  MissionEmotionsCatcherRoute: MissionEmotionsCatcherRoute,
   MissionEmotionsCrosswordRoute: MissionEmotionsCrosswordRoute,
   MissionEmotionsQuickfireRoute: MissionEmotionsQuickfireRoute,
   MissionEmotionsQuizRoute: MissionEmotionsQuizRoute,
@@ -290,12 +311,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
