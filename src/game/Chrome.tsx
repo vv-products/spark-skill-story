@@ -86,9 +86,50 @@ const NAV_ITEMS: Array<{
 
 export function BottomNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const [hidden, setHidden] = useState(false);
+  const lastY = useRef(0);
+  const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    lastY.current = window.scrollY;
+    const showAndScheduleHide = () => {
+      setHidden(false);
+      if (idleTimer.current) clearTimeout(idleTimer.current);
+      idleTimer.current = setTimeout(() => setHidden(true), 2200);
+    };
+    const onScroll = () => {
+      const y = window.scrollY;
+      const dy = y - lastY.current;
+      if (Math.abs(dy) > 4) {
+        // Hide when scrolling down past a threshold; show when scrolling up
+        if (dy > 0 && y > 80) setHidden(true);
+        else setHidden(false);
+        lastY.current = y;
+      }
+      if (idleTimer.current) clearTimeout(idleTimer.current);
+      idleTimer.current = setTimeout(() => {
+        // After idle, reveal so it's reachable
+        setHidden(false);
+      }, 1500);
+    };
+    const onTouch = () => showAndScheduleHide();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("touchstart", onTouch, { passive: true });
+    window.addEventListener("mousemove", onTouch, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("touchstart", onTouch);
+      window.removeEventListener("mousemove", onTouch);
+      if (idleTimer.current) clearTimeout(idleTimer.current);
+    };
+  }, []);
+
+  // Always reveal on route change
+  useEffect(() => { setHidden(false); }, [pathname]);
+
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-white/30 bg-gradient-to-r from-[#EFEAFB]/70 via-white/60 to-[#FCE9F0]/70 backdrop-blur-xl backdrop-saturate-150 lg:hidden"
+      className={`fixed inset-x-0 bottom-0 z-40 border-t border-white/30 bg-gradient-to-r from-[#EFEAFB]/70 via-white/60 to-[#FCE9F0]/70 backdrop-blur-xl backdrop-saturate-150 transition-transform duration-300 ease-out lg:hidden ${hidden ? "translate-y-full" : "translate-y-0"}`}
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       <div className="grid grid-cols-5 px-2 pt-2 pb-2">
