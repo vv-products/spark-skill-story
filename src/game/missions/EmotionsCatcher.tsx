@@ -5,7 +5,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { ArrowLeft, Music, VolumeX, Heart, Sparkles, Clock } from "lucide-react";
+import { ArrowLeft, Music, VolumeX, Heart, Sparkles, Clock, FlaskConical } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { usePlayerAuth } from "@/game/PlayerAuth";
@@ -13,10 +13,35 @@ import { Confetti } from "@/game/Effects";
 import { useMissionSettings, playFeedback } from "./missionSettings";
 import { startMusic, type MusicHandle } from "./missionMusic";
 import { QUICK_FIRE_QUIZ } from "./emotionsQuiz";
+import { awardOrbs, xpToOrbs } from "@/game/shop/flaskOrbs";
+import { FlaskBadge } from "@/game/shop/Shop";
 
 const COMPLETION_KEY = "sementa.mission.emotions-catcher";
+const DIFFICULTY_KEY = "sementa.mission.emotions-catcher.difficulty";
 const ROUND_SECONDS = 45;
 const MAX_LIVES = 3;
+
+type Difficulty = "easy" | "medium" | "hard";
+type DiffConfig = {
+  label: string;
+  emoji: string;
+  blurb: string;
+  spawnMs: number;        // ms between fliers
+  durMin: number;         // seconds across screen (slower = easier)
+  durMax: number;
+  correctChance: number;  // 0..1 — higher = easier
+  xpMultiplier: number;
+};
+const DIFFICULTIES: Record<Difficulty, DiffConfig> = {
+  easy:   { label: "Easy",   emoji: "🌱", blurb: "Slow fliers, mostly correct answers.",      spawnMs: 950, durMin: 2.0, durMax: 3.0, correctChance: 0.65, xpMultiplier: 0.8 },
+  medium: { label: "Medium", emoji: "⚡", blurb: "Balanced speed, mix of distractors.",       spawnMs: 650, durMin: 1.4, durMax: 2.2, correctChance: 0.45, xpMultiplier: 1.0 },
+  hard:   { label: "Hard",   emoji: "🔥", blurb: "Fast fliers, lots of tricky distractors.", spawnMs: 420, durMin: 0.9, durMax: 1.5, correctChance: 0.30, xpMultiplier: 1.4 },
+};
+function readDifficulty(): Difficulty {
+  if (typeof window === "undefined") return "medium";
+  const v = window.localStorage.getItem(DIFFICULTY_KEY);
+  return v === "easy" || v === "medium" || v === "hard" ? v : "medium";
+}
 const TILE_COLORS = [
   "bg-[#E94B6F] text-white",
   "bg-[#3FB6E0] text-white",
