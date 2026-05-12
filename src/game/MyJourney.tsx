@@ -331,7 +331,7 @@ export function MyJourney() {
 
       {/* ── CTA ── */}
       {activeChar && visible && (
-        <div className="absolute inset-x-0 bottom-8 z-30 flex justify-center rise-up">
+        <div className="absolute inset-x-0 bottom-28 z-30 flex justify-center rise-up lg:bottom-8">
           <button
             type="button"
             className="cta-btn rounded-full px-8 py-4 text-[0.95rem] font-black text-white shadow-2xl"
@@ -345,7 +345,7 @@ export function MyJourney() {
 
       {/* ── Neutral hint ── */}
       {!active && (
-        <div className="absolute bottom-8 left-0 right-0 z-20 flex justify-center">
+        <div className="absolute bottom-28 left-0 right-0 z-20 flex justify-center lg:bottom-8">
           <div
             className="rounded-full px-5 py-2 text-xs font-bold text-white shadow-md"
             style={{
