@@ -848,7 +848,7 @@ function PodiumLeaderboard({
               <p className="mt-1.5 max-w-[6.5rem] truncate text-[11px] font-extrabold text-foreground">
                 {entry.display_name ?? "Explorer"}
               </p>
-              <p className="text-[10px] font-bold text-text-secondary">{entry.total_xp} XP</p>
+              <p className="text-[10px] font-bold text-text-secondary">Lv {entry.level} · ⭐ {entry.stars}</p>
               <div className={`mt-2 flex w-full items-start justify-center rounded-t-xl ${color} ${height} pt-2 text-base font-black text-white`}>
                 {realRank}
               </div>
@@ -887,7 +887,7 @@ function PodiumLeaderboard({
                     {entry.display_name ?? "Explorer"}
                     {me && <span className="ml-1 text-[10px] font-bold text-primary">YOU</span>}
                   </p>
-                  <p className="text-[10px] font-bold text-text-secondary">{entry.total_xp} XP</p>
+                  <p className="text-[10px] font-bold text-text-secondary">Lv {entry.level} · ⭐ {entry.stars} · {entry.total_xp} XP</p>
                 </div>
                 <span className="text-primary">→</span>
               </button>

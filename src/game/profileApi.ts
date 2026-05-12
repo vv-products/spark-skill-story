@@ -41,21 +41,33 @@ export type LeaderboardEntry = {
   age: number | null;
   bio: string | null;
   total_xp: number;
+  level: number;
+  stars: number;
 };
+
+/** XP-to-level: every 100 XP unlocks the next level. Level 1 starts at 0 XP. */
+export function levelFromXp(xp: number): number {
+  return Math.floor(Math.max(0, xp) / 100) + 1;
+}
 
 export async function loadLeaderboard(limit = 20, scope: "all" | "friends" = "all"): Promise<LeaderboardEntry[]> {
   const fn = scope === "friends" ? "get_friend_leaderboard" : "get_leaderboard";
   const { data, error } = await supabase.rpc(fn, { _limit: limit });
   if (error) throw error;
-  return (data ?? []).map((r: any) => ({
-    user_id: r.user_id,
-    display_name: r.display_name,
-    avatar_config: (r.avatar_config as AvatarConfig | null) ?? null,
-    avatar_image_url: r.avatar_image_url ?? null,
-    age: r.age,
-    bio: r.bio,
-    total_xp: Number(r.total_xp ?? 0),
-  }));
+  return (data ?? []).map((r: any) => {
+    const total_xp = Number(r.total_xp ?? 0);
+    return {
+      user_id: r.user_id,
+      display_name: r.display_name,
+      avatar_config: (r.avatar_config as AvatarConfig | null) ?? null,
+      avatar_image_url: r.avatar_image_url ?? null,
+      age: r.age,
+      bio: r.bio,
+      total_xp,
+      level: Number(r.level ?? levelFromXp(total_xp)),
+      stars: Number(r.stars ?? 0),
+    };
+  });
 }
 
 export type XpBreakdownRow = { source: string; events: number; total_xp: number };
