@@ -51,6 +51,7 @@ export function WorldPage({ pillarSlug }: { pillarSlug: string }) {
   const [pillars, setPillars] = useState<HPillar[]>([]);
   const [progress, setProgress] = useState<UserProgress>(EMPTY);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const [selectedTopicId, setSelectedTopicId] = useState<string | null>(null);
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(null);
