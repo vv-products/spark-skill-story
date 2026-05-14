@@ -342,7 +342,27 @@ export function MyJourney() {
                   }}
                 />
 
-                {/* Name pill — positioned at feet using footOffset */}
+              </div>
+            );
+          })}
+
+          {/* Name pills — separate top layer so no character covers them */}
+          {SCENE.map((s) => {
+            const char = CHARACTERS.find((c) => c.id === s.id)!;
+            const isActive = active === s.id;
+            const isDimmed = active !== null && !isActive;
+            return (
+              <div
+                key={`pill-${s.id}`}
+                style={{
+                  position: "absolute",
+                  left: s.left,
+                  bottom: s.bottom,
+                  width: s.width,
+                  zIndex: 50,
+                  pointerEvents: "none",
+                }}
+              >
                 <div
                   className="name-pill"
                   style={{
