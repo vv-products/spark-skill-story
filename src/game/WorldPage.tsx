@@ -133,10 +133,38 @@ export function WorldPage({ pillarSlug }: { pillarSlug: string }) {
     }
   }, [pillar, progress, pillarSlug, user]);
 
-  if (loading || !pillar) {
+  if (loading) {
+    return <WorldSkeleton theme={theme} />;
+  }
+
+  if (!pillar) {
     return (
-      <div className="flex min-h-[60dvh] items-center justify-center text-sm font-bold text-text-secondary">
-        Loading world…
+      <div
+        className="flex min-h-[100dvh] flex-col items-center justify-center gap-3 px-6 text-center"
+        style={{ background: `linear-gradient(180deg, ${theme.glow} 0%, transparent 55%)` }}
+      >
+        <div className="text-4xl">🧭</div>
+        <div className="text-base font-black text-foreground">
+          {loadError ? "Couldn't load this world" : "World not found"}
+        </div>
+        <div className="max-w-xs text-xs font-semibold text-text-secondary">
+          {loadError ?? "We couldn't find this world. It may have been moved or isn't published yet."}
+        </div>
+        <div className="mt-2 flex gap-2">
+          <button
+            onClick={() => window.location.reload()}
+            className="rounded-full bg-white px-4 py-2 text-xs font-extrabold text-foreground shadow-sm hover:bg-white/90"
+          >
+            Try again
+          </button>
+          <button
+            onClick={() => navigate({ to: "/journey" })}
+            className="rounded-full px-4 py-2 text-xs font-extrabold text-white shadow-sm"
+            style={{ background: theme.accent }}
+          >
+            Back to journey
+          </button>
+        </div>
       </div>
     );
   }
