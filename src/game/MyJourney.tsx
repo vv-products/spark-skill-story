@@ -284,9 +284,10 @@ export function MyJourney() {
         <div
           className="relative mx-auto h-full w-auto max-h-[78dvh]"
           style={{ aspectRatio: "848 / 1264" }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          {/* Background image — same box as characters */}
+          onClick={handleSceneClick}
+        />
+
+
           <img
             src={BG_IMG}
             alt=""
