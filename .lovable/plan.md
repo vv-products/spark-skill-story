@@ -1,62 +1,102 @@
-## Goal
+## World Page Upgrades
 
-Turn each character's "Explore world" CTA into a real navigable world page that shows topics → modules as interactive progress pills, with the multi-level locking rules you described.
+Big visual + functional pass on `/world/$slug`. All work is frontend on `WorldPage.tsx` plus a small helper file. No DB schema, no new artwork, no new routes.
 
-## Routing
+A few items from the brainstorm need server work or new assets and are explicitly deferred — listed at the end.
 
-- New route file: `src/routes/world.$slug.tsx` — slug is the pillar slug (`inner`, `social`, `action`, `real`).
-- Map character → pillar:
-  - maya → inner, leo → social, dash → action, pip → real.
-- `MyJourney` CTA becomes a `<Link to="/world/$slug" params={{ slug }}>` instead of a plain button.
-- Page rendered inside the existing `PlayerShell` (keeps bottom nav + auto-hide behavior).
-- Back button in the top-left of the world page → navigates to `/journey`.
+---
 
-## Data
+### What ships
 
-Reuse existing helpers — no schema changes:
-- `loadFullCatalog()` from `src/studio/catalog.ts` for the pillar/topic/module/class hierarchy.
-- `loadPublishedClasses()` to know which classes are actually playable (filter out drafts).
-- `loadUserProgress(userId)` from `src/game/progress.ts` for `completedClassIds`.
+**1. Themed hero header**
+- Pillar-tinted gradient background already exists; expand it to a proper hero band with the matching character image (`maya/leo/dash/pip-world.png`) on the right.
+- Title (e.g. "Inner World") + tagline + a row of 4 small pillar dots that quick-jump to the other 3 worlds (active dot highlighted).
+- Sticky compact header on scroll.
 
-Derived helpers (added in a small new file `src/game/unlocks.ts`):
-- `isClassComplete(classId)` — `progress.completedClassIds.has(classId)`.
-- `moduleProgress(module)` → `{ completed, total, isComplete }` over its **published** classes.
-- `topicProgress(topic)` → sum across modules.
-- `isModuleUnlocked(topic, moduleIndex)` — true if `moduleIndex === 0` or previous module `isComplete`.
-- `isTopicUnlocked(pillar, topicIndex)` — true if `topicIndex === 0` or **first module of previous topic** is complete (your nuance).
-- `isClassUnlocked(module, classIndex)` — true if `classIndex === 0` or previous class complete.
+**2. World progress ring**
+- Big circular ring inside the hero showing `% of all published classes in this world completed`.
+- Below the ring: `X / Y classes`, `Z XP earned in this world`, and current streak badge.
+- XP-in-this-world derived by summing `progress.perClass[classId].xp` for class IDs that belong to the pillar.
 
-Pillars are always unlocked (no gating between worlds).
+**3. "Continue where you left off" card**
+- Hero-level card directly under the ring.
+- Picks the most recently touched in-progress class in this world (uses `perClass.lastAt`); falls back to "Start Topic 1 → Module 1 → Class 1" if nothing started yet; hidden when 100% complete (replaced by a "World complete!" card).
+- One-tap → `/play/$slug`.
 
-## World page UX
+**4. Next-unlock teaser**
+- Small chip under the continue card, e.g. "Finish 1 more class to unlock Topic 3 ✨". Computed from `isTopicUnlocked` + `moduleProgress` on the first locked topic.
 
-Two states inside one page, animated:
+**5. Filter pills (Topic list view)**
+- Row above the topic list: `All • In progress • Completed • Locked`.
+- Filter is purely client-side, persists in `localStorage` per pillar.
 
-**State A — Topic list (default)**
-- Header: world name + character tagline + back button.
-- Vertical stack of topic pills. Each pill is full-width, rounded, shows:
-  - Topic title
-  - Progress bar fill = `topicProgress.completed / total`
-  - Lock icon + dimmed style if `!isTopicUnlocked`
-- Tap an unlocked pill → transitions to State B (other topics fade/slide out, selected pill animates to top).
+**6. Topic preview sheet**
+- Add an info icon on each `TopicPill`. Tapping it opens a small bottom sheet (shadcn `Sheet`) with: topic name, module count, estimated total time, list of module names with their lock state. Tapping a module from the sheet selects the topic and scrolls to that module.
 
-**State B — Modules of selected topic**
-- Selected topic stays pinned at top as a header pill (tap or back chevron returns to State A).
-- Below it: 5 module pills, same progress-bar treatment.
-- Locked modules show lock icon + are non-interactive.
-- Tap an unlocked module → navigates into the first incomplete (or first) class of that module using the existing class entry (reuse the navigation `GamePlayer` already does — `play/$slug` route with the class slug). If the module has zero published classes, show a small "Coming soon" hint instead.
+**7. Third drill-down level: classes inside a module**
+- Currently tapping a module jumps straight to the next playable class. Change to: tap a module → expand inline (or push a third state) showing the module's published classes as `ClassPill`s.
+- Each `ClassPill` shows: number, title, status icon (✓ done / ▶ in-progress / 🔒 locked), XP earned, estimated minutes.
+- Locked classes are disabled. Done classes show a "Replay" affordance. In-progress classes show "Continue".
+- Tapping a playable class navigates to `/play/$slug`.
 
-Animations: simple Tailwind transitions (`transition-all`, opacity + translate-y), no new libs. Match the playful style already in `MyJourney` (Nunito, soft shadows, accent color from the active character).
+**8. Module estimated time**
+- Sum of `class.estimated_minutes` for published classes in the module, surfaced on `ModulePill` and the new class-list header ("~12 min").
+- Requires reading `estimated_minutes` from the catalog. If `HClass` doesn't currently include it, extend the catalog mapper to expose it (DB column exists on `classes`).
 
-## Files to add / change
+**9. Completion celebrations**
+- When the user lands on the world page and a topic or module just hit 100% (compared against a `lastSeenCompletions` set in `localStorage`), trigger a one-shot confetti burst and a toast: "Module complete! +badge".
+- Reuse the existing `Confetti` component from `src/game/Effects.tsx`.
 
-- **Add** `src/routes/world.$slug.tsx` — route, loads catalog + progress, renders `<WorldPage>`.
-- **Add** `src/game/WorldPage.tsx` — the two-state UI described above.
-- **Add** `src/game/unlocks.ts` — pure helpers listed above (also exported for future reuse on the Home/Journey screens).
-- **Edit** `src/game/MyJourney.tsx` — replace the CTA `<button>` with a `<Link>` to the new route, keyed by character→pillar slug map.
+**10. Polish**
+- Replace plain `border bg-white` pills with subtle shadow + rounded-3xl, animated progress fill (existing `animate-in` utilities).
+- Animate transitions between topic list ↔ module list ↔ class list with `fade-in` + `slide-in-from-bottom-2`.
+- Empty / loading states refined (skeleton pills instead of plain text).
+- Add `head()` metadata per pillar so each `/world/<slug>` has its own title + description for SEO.
 
-## Out of scope (call out, don't do)
+---
 
-- No DB / RLS changes.
-- No changes to class playback itself — we just route into the existing class flow.
-- Home screen "Your Level" card and other surfaces stay as-is. We can wire `unlocks.ts` into them in a follow-up if you want consistent lock indicators everywhere.
+### File changes
+
+**Edit `src/game/WorldPage.tsx`** — the bulk of the work:
+- Add hero with `<ProgressRing />`, mascot image, pillar quick-jump dots.
+- Add `<ContinueCard />`, next-unlock teaser, filter pills.
+- Extend the state machine: `view = "topics" | "modules" | "classes"` with `selectedTopicId` + `selectedModuleId`.
+- Render `TopicPill`, `ModulePill`, new `ClassPill`.
+- Hook up `Sheet` for topic preview.
+- Wire localStorage for filter + last-seen completions; trigger `Confetti`.
+
+**Edit `src/game/unlocks.ts`** — add helpers:
+- `worldProgress(pillar, p)` → `{ completed, total, xpEarned, isComplete }`.
+- `nextLockedTopic(pillar, p)` → `{ topic, classesNeeded } | null`.
+- `mostRecentInProgressClass(pillar, p)` → `HClass | null`.
+- `moduleEstimatedMinutes(module)` → number.
+
+**Edit `src/studio/catalog.ts`** — surface `estimated_minutes` and `subtitle` on `HClass` (DB columns already selected? if not, add to the select + map).
+
+**Edit `src/routes/world.$slug.tsx`** — add per-pillar `head()` metadata (title, description, og:title, og:description per the four pillars).
+
+**New `src/game/world/` components** (split for readability):
+- `ProgressRing.tsx` — SVG ring, accepts `pct`, `accent`, optional center label.
+- `ContinueCard.tsx` — hero-style card with class title, progress, CTA.
+- `PillarDots.tsx` — 4 dots, active highlighted, navigates between worlds.
+- `ClassPill.tsx` — single class row with status icon + XP + minutes.
+- `TopicPreviewSheet.tsx` — shadcn `Sheet` content.
+
+---
+
+### Tech notes
+
+- Pillar slug → mascot image: small map identical to the one in `MyJourney.tsx`. Extract to `src/game/pillarTheme.ts` so both files share it (also moves `PILLAR_THEME` colors out of `WorldPage`).
+- All progress reads stay local: `loadFullCatalog` + `loadUserProgress(user.id)` once per mount. No new server functions.
+- Celebrations: store `mem-completions-${pillarSlug}` in localStorage as a JSON array of completed module/topic ids. Diff on mount; fire confetti for new entries; rewrite the storage.
+- Filter + selected view persist in URL search params (`?view=modules&topic=<id>`) so back button works between drill levels.
+
+---
+
+### Deferred (need more setup; flagging now so we don't quietly drop them)
+
+- **Friends' progress dots on topics** and **per-world leaderboard** — `class_progress` RLS only allows users to read their own rows, so we'd need either a Postgres view + RPC, or denormalised aggregate columns. Treat as a separate task.
+- **Pillar-themed full-scene background** (each world its own illustrated environment) — needs 4 new generated images. Can be added later by swapping the gradient for a hero `<img>` once art is produced.
+- **Daily mission tied to a pillar**, **parent/teacher notes**, **reflection journal** — all need new tables/columns. Out of scope here.
+
+If you want any of those three pulled into this pass, say which and I'll fold them in.
