@@ -92,11 +92,18 @@ const SCENE: Array<{
   bottom: string;
   zIndex: number;
   footOffset: string;
+  // Hit-area inset (% of the wrapper) so clicks only register on the
+  // character's visible body, not transparent PNG padding that overlaps
+  // neighbours. left/right/top/bottom each default to "0%".
+  hit?: { left?: string; right?: string; top?: string; bottom?: string };
 }> = [
   { id: "pip",  left: "10%",  width: "18%", bottom: "38%", zIndex: 10, footOffset: "0px"  },
-  { id: "leo",  left: "26%",  width: "47%", bottom: "2%",  zIndex: 11, footOffset: "12px" },
-  { id: "maya", left: "61%",  width: "57%", bottom: "2%",  zIndex: 11, footOffset: "12px" },
-  { id: "dash", left: "44%",  width: "45%", bottom: "0%",  zIndex: 14, footOffset: "0px"  },
+  { id: "leo",  left: "26%",  width: "47%", bottom: "2%",  zIndex: 11, footOffset: "12px",
+    hit: { left: "10%", right: "55%", top: "8%", bottom: "8%" } },
+  { id: "maya", left: "61%",  width: "57%", bottom: "2%",  zIndex: 11, footOffset: "12px",
+    hit: { left: "8%",  right: "50%", top: "8%", bottom: "8%" } },
+  { id: "dash", left: "44%",  width: "45%", bottom: "0%",  zIndex: 14, footOffset: "0px",
+    hit: { left: "20%", right: "20%", top: "20%", bottom: "0%" } },
 ];
 // Note: tune footOffset per-character (e.g. "24px") if name pills
 // appear mid-body due to transparent padding at bottom of PNG.
