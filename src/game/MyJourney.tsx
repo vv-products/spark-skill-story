@@ -1,6 +1,12 @@
 import { useState, useEffect } from "react";
+import { Link } from "@tanstack/react-router";
 
-type CharId = "maya" | "leo" | "dash" | "pip";
+const PILLAR_SLUG: Record<"maya" | "leo" | "dash" | "pip", "inner" | "social" | "action" | "real"> = {
+  maya: "inner",
+  leo: "social",
+  dash: "action",
+  pip: "real",
+};
 
 import mayaImg from "@/assets/images/maya-world.png";
 import leoImg  from "@/assets/images/leo-world.png";
