@@ -99,12 +99,12 @@ const SCENE: Array<{
 }> = [
   { id: "pip",  left: "10%",  width: "18%", bottom: "38%", zIndex: 10, footOffset: "0px",
     bodyCenter: { x: 18, y: 58 } },
-  { id: "leo",  left: "26%",  width: "47%", bottom: "2%",  zIndex: 11, footOffset: "12px",
-    bodyCenter: { x: 38, y: 48 } },
-  { id: "maya", left: "61%",  width: "57%", bottom: "2%",  zIndex: 11, footOffset: "12px",
-    bodyCenter: { x: 70, y: 48 } },
-  { id: "dash", left: "44%",  width: "45%", bottom: "0%",  zIndex: 14, footOffset: "0px",
-    bodyCenter: { x: 56, y: 78 } },
+  { id: "leo",  left: "16%",  width: "47%", bottom: "2%",  zIndex: 11, footOffset: "12px",
+    bodyCenter: { x: 28, y: 48 } },
+  { id: "maya", left: "43%",  width: "57%", bottom: "2%",  zIndex: 11, footOffset: "12px",
+    bodyCenter: { x: 52, y: 48 } },
+  { id: "dash", left: "34%",  width: "45%", bottom: "0%",  zIndex: 14, footOffset: "0px",
+    bodyCenter: { x: 46, y: 78 } },
 ];
 // Note: tune footOffset per-character (e.g. "24px") if name pills
 // appear mid-body due to transparent padding at bottom of PNG.
@@ -377,21 +377,6 @@ export function MyJourney() {
         </div>
       )}
 
-      {/* ── Neutral hint ── */}
-      {!active && (
-        <div className="absolute bottom-28 left-0 right-0 z-20 flex justify-center lg:bottom-8">
-          <div
-            className="rounded-full px-5 py-2 text-xs font-bold text-white shadow-md"
-            style={{
-              background: "rgba(0,0,0,0.3)",
-              backdropFilter: "blur(8px)",
-              WebkitBackdropFilter: "blur(8px)",
-            }}
-          >
-            👆 Tap any character
-          </div>
-        </div>
-      )}
     </div>
   );
 }
