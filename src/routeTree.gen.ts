@@ -15,6 +15,7 @@ import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as JourneyRouteImport } from './routes/journey'
 import { Route as ClubRouteImport } from './routes/club'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as WorldSlugRouteImport } from './routes/world.$slug'
 import { Route as ProfileEditRouteImport } from './routes/profile.edit'
 import { Route as PlaySlugRouteImport } from './routes/play.$slug'
 import { Route as MissionReactionRaceRouteImport } from './routes/mission.reaction-race'
@@ -55,6 +56,11 @@ const ClubRoute = ClubRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WorldSlugRoute = WorldSlugRouteImport.update({
+  id: '/world/$slug',
+  path: '/world/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileEditRoute = ProfileEditRouteImport.update({
@@ -132,6 +138,7 @@ export interface FileRoutesByFullPath {
   '/mission/reaction-race': typeof MissionReactionRaceRoute
   '/play/$slug': typeof PlaySlugRoute
   '/profile/edit': typeof ProfileEditRoute
+  '/world/$slug': typeof WorldSlugRoute
   '/club/join/$code': typeof ClubJoinCodeRoute
 }
 export interface FileRoutesByTo {
@@ -151,6 +158,7 @@ export interface FileRoutesByTo {
   '/mission/reaction-race': typeof MissionReactionRaceRoute
   '/play/$slug': typeof PlaySlugRoute
   '/profile/edit': typeof ProfileEditRoute
+  '/world/$slug': typeof WorldSlugRoute
   '/club/join/$code': typeof ClubJoinCodeRoute
 }
 export interface FileRoutesById {
@@ -171,6 +179,7 @@ export interface FileRoutesById {
   '/mission/reaction-race': typeof MissionReactionRaceRoute
   '/play/$slug': typeof PlaySlugRoute
   '/profile/edit': typeof ProfileEditRoute
+  '/world/$slug': typeof WorldSlugRoute
   '/club/join/$code': typeof ClubJoinCodeRoute
 }
 export interface FileRouteTypes {
@@ -192,6 +201,7 @@ export interface FileRouteTypes {
     | '/mission/reaction-race'
     | '/play/$slug'
     | '/profile/edit'
+    | '/world/$slug'
     | '/club/join/$code'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -211,6 +221,7 @@ export interface FileRouteTypes {
     | '/mission/reaction-race'
     | '/play/$slug'
     | '/profile/edit'
+    | '/world/$slug'
     | '/club/join/$code'
   id:
     | '__root__'
@@ -230,6 +241,7 @@ export interface FileRouteTypes {
     | '/mission/reaction-race'
     | '/play/$slug'
     | '/profile/edit'
+    | '/world/$slug'
     | '/club/join/$code'
   fileRoutesById: FileRoutesById
 }
@@ -249,6 +261,7 @@ export interface RootRouteChildren {
   MissionMoodMatchRoute: typeof MissionMoodMatchRoute
   MissionReactionRaceRoute: typeof MissionReactionRaceRoute
   PlaySlugRoute: typeof PlaySlugRoute
+  WorldSlugRoute: typeof WorldSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -293,6 +306,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/world/$slug': {
+      id: '/world/$slug'
+      path: '/world/$slug'
+      fullPath: '/world/$slug'
+      preLoaderRoute: typeof WorldSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile/edit': {
@@ -412,7 +432,17 @@ const rootRouteChildren: RootRouteChildren = {
   MissionMoodMatchRoute: MissionMoodMatchRoute,
   MissionReactionRaceRoute: MissionReactionRaceRoute,
   PlaySlugRoute: PlaySlugRoute,
+  WorldSlugRoute: WorldSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
