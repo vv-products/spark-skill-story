@@ -124,11 +124,28 @@ export function MyJourney() {
     }
   }, [active]);
 
-  const handleTap = (id: CharId, e: React.MouseEvent) => {
-    e.stopPropagation();
+  const triggerTap = (id: CharId) => {
     setBouncing(id);
     setTimeout(() => setBouncing(null), 520);
     setActive((prev) => (prev === id ? null : id));
+  };
+
+  // Pick the character whose body center is nearest to the click point
+  // (in % of the scene box). Avoids transparent-PNG bbox overlap issues.
+  const handleSceneClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    let best: { id: CharId; d: number } | null = null;
+    for (const s of SCENE) {
+      const dx = x - s.bodyCenter.x;
+      const dy = y - s.bodyCenter.y;
+      const d = Math.sqrt(dx * dx + dy * dy);
+      if (!best || d < best.d) best = { id: s.id, d };
+    }
+    if (best && best.d < 22) triggerTap(best.id);
+    else setActive(null);
   };
 
   return (
