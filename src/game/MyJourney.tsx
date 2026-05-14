@@ -94,7 +94,7 @@ const SCENE: Array<{
   footOffset: string;
 }> = [
   { id: "pip",  left: "10%",  width: "18%", bottom: "38%", zIndex: 10, footOffset: "0px"  },
-  { id: "leo",  left: "21%",  width: "57%", bottom: "2%",  zIndex: 11, footOffset: "12px" },
+  { id: "leo",  left: "29%",  width: "43%", bottom: "2%",  zIndex: 11, footOffset: "12px" },
   { id: "maya", left: "61%",  width: "57%", bottom: "2%",  zIndex: 11, footOffset: "12px" },
   { id: "dash", left: "44%",  width: "45%", bottom: "0%",  zIndex: 14, footOffset: "0px"  },
 ];
