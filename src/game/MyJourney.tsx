@@ -92,11 +92,19 @@ const SCENE: Array<{
   bottom: string;
   zIndex: number;
   footOffset: string;
+  // Approximate visible body center as % of the scene box.
+  // Used by the scene's click handler to pick the nearest character,
+  // since transparent PNG bboxes overlap heavily.
+  bodyCenter: { x: number; y: number };
 }> = [
-  { id: "pip",  left: "10%",  width: "18%", bottom: "38%", zIndex: 10, footOffset: "0px"  },
-  { id: "leo",  left: "26%",  width: "47%", bottom: "2%",  zIndex: 11, footOffset: "12px" },
-  { id: "maya", left: "61%",  width: "57%", bottom: "2%",  zIndex: 11, footOffset: "12px" },
-  { id: "dash", left: "44%",  width: "45%", bottom: "0%",  zIndex: 14, footOffset: "0px"  },
+  { id: "pip",  left: "10%",  width: "18%", bottom: "38%", zIndex: 10, footOffset: "0px",
+    bodyCenter: { x: 18, y: 58 } },
+  { id: "leo",  left: "26%",  width: "47%", bottom: "2%",  zIndex: 11, footOffset: "12px",
+    bodyCenter: { x: 38, y: 48 } },
+  { id: "maya", left: "61%",  width: "57%", bottom: "2%",  zIndex: 11, footOffset: "12px",
+    bodyCenter: { x: 70, y: 48 } },
+  { id: "dash", left: "44%",  width: "45%", bottom: "0%",  zIndex: 14, footOffset: "0px",
+    bodyCenter: { x: 56, y: 78 } },
 ];
 // Note: tune footOffset per-character (e.g. "24px") if name pills
 // appear mid-body due to transparent padding at bottom of PNG.
@@ -116,11 +124,28 @@ export function MyJourney() {
     }
   }, [active]);
 
-  const handleTap = (id: CharId, e: React.MouseEvent) => {
-    e.stopPropagation();
+  const triggerTap = (id: CharId) => {
     setBouncing(id);
     setTimeout(() => setBouncing(null), 520);
     setActive((prev) => (prev === id ? null : id));
+  };
+
+  // Pick the character whose body center is nearest to the click point
+  // (in % of the scene box). Avoids transparent-PNG bbox overlap issues.
+  const handleSceneClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    let best: { id: CharId; d: number } | null = null;
+    for (const s of SCENE) {
+      const dx = x - s.bodyCenter.x;
+      const dy = y - s.bodyCenter.y;
+      const d = Math.sqrt(dx * dx + dy * dy);
+      if (!best || d < best.d) best = { id: s.id, d };
+    }
+    if (best && best.d < 22) triggerTap(best.id);
+    else setActive(null);
   };
 
   return (
@@ -259,7 +284,7 @@ export function MyJourney() {
         <div
           className="relative mx-auto h-full w-auto max-h-[78dvh]"
           style={{ aspectRatio: "848 / 1264" }}
-          onClick={(e) => e.stopPropagation()}
+          onClick={handleSceneClick}
         >
           {/* Background image — same box as characters */}
           <img
@@ -313,8 +338,8 @@ export function MyJourney() {
                         : "drop-shadow(0 4px 10px rgba(0,0,0,0.25))",
                     opacity: isDimmed ? 0.4 : 1,
                     animation: anim,
+                    pointerEvents: "none",
                   }}
-                  onClick={(e) => handleTap(s.id, e)}
                 />
 
                 {/* Name pill — positioned at feet using footOffset */}
