@@ -1,6 +1,9 @@
 import type { HPillar, HTopic, HModule, HClass } from "@/studio/catalog";
 
-export type ProgressLike = { completedClassIds: Set<string> };
+export type ProgressLike = {
+  completedClassIds: Set<string>;
+  perClass?: Map<string, { xp: number; lastAt: number; layersTouched: number }>;
+};
 
 /** A class is "playable" only if it's published. We treat anything with status === "Published" as playable. */
 export function publishedClasses(m: HModule): HClass[] {
