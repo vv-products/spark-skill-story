@@ -42,6 +42,7 @@ export type HClass = {
   slug: string;
   subtitle?: string;
   heroImageUrl?: string | null;
+  estimatedMinutes?: number | null;
 };
 export type HLayer = { id: string; taskCode: string; preview: string; fields: Record<string, any> };
 export type HModule = { id: string; name: string; slug: string; status: Status; ages: AgeGroup[]; classes: HClass[] };
