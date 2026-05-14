@@ -97,7 +97,7 @@ const SCENE: Array<{
   // since transparent PNG bboxes overlap heavily.
   bodyCenter: { x: number; y: number };
 }> = [
-  { id: "pip",  left: "10%",  width: "18%", bottom: "38%", zIndex: 13, footOffset: "0px",
+  { id: "pip",  left: "10%",  width: "18%", bottom: "38%", zIndex: 10, footOffset: "0px",
     bodyCenter: { x: 18, y: 58 } },
   { id: "leo",  left: "16%",  width: "47%", bottom: "2%",  zIndex: 11, footOffset: "12px",
     bodyCenter: { x: 28, y: 48 } },
