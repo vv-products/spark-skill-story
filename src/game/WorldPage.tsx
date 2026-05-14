@@ -63,7 +63,29 @@ export function WorldPage({ pillarSlug }: { pillarSlug: string }) {
   const [showConfetti, setShowConfetti] = useState(false);
 
   useEffect(() => {
-    loadFullCatalog().then((p) => { setPillars(p); setLoading(false); }).catch(() => setLoading(false));
+    let cancelled = false;
+    // Safety: never let the spinner sit forever, even if the network hangs.
+    const safety = setTimeout(() => {
+      if (cancelled) return;
+      setLoading((l) => {
+        if (l) setLoadError("Taking longer than usual. Check your connection and try again.");
+        return false;
+      });
+    }, 8000);
+    loadFullCatalog()
+      .then((p) => {
+        if (cancelled) return;
+        setPillars(p);
+        setLoadError(null);
+        setLoading(false);
+      })
+      .catch((e: unknown) => {
+        if (cancelled) return;
+        setLoadError(e instanceof Error ? e.message : "Couldn't load this world.");
+        setLoading(false);
+      })
+      .finally(() => clearTimeout(safety));
+    return () => { cancelled = true; clearTimeout(safety); };
   }, []);
 
   useEffect(() => {
