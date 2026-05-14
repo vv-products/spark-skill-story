@@ -338,8 +338,8 @@ export function MyJourney() {
                         : "drop-shadow(0 4px 10px rgba(0,0,0,0.25))",
                     opacity: isDimmed ? 0.4 : 1,
                     animation: anim,
+                    pointerEvents: "none",
                   }}
-                  onClick={(e) => handleTap(s.id, e)}
                 />
 
                 {/* Name pill — positioned at feet using footOffset */}
