@@ -129,7 +129,6 @@ export function WorldPage({ pillarSlug }: { pillarSlug: string }) {
             </div>
             {selectedTopic.modules.map((m, i) => {
               const unlocked = isModuleUnlocked(selectedTopic, i, progress);
-              const mp = moduleProgress(m, p => p, /* not used */ ) as any;
               const real = moduleProgress(m, progress);
               const next = nextClassInModule(m, progress);
               return (
