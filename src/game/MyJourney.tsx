@@ -1,6 +1,14 @@
 import { useState, useEffect } from "react";
+import { Link } from "@tanstack/react-router";
 
 type CharId = "maya" | "leo" | "dash" | "pip";
+
+const PILLAR_SLUG: Record<CharId, "inner" | "social" | "action" | "real"> = {
+  maya: "inner",
+  leo: "social",
+  dash: "action",
+  pip: "real",
+};
 
 import mayaImg from "@/assets/images/maya-world.png";
 import leoImg  from "@/assets/images/leo-world.png";
@@ -332,14 +340,15 @@ export function MyJourney() {
       {/* ── CTA ── */}
       {activeChar && visible && (
         <div className="absolute inset-x-0 bottom-28 z-30 flex justify-center rise-up lg:bottom-8">
-          <button
-            type="button"
+          <Link
+            to="/world/$slug"
+            params={{ slug: PILLAR_SLUG[activeChar.id] }}
             className="cta-btn rounded-full px-8 py-4 text-[0.95rem] font-black text-white shadow-2xl"
             style={{ background: `${activeChar.accentColor}dd` }}
             onClick={(e) => e.stopPropagation()}
           >
             Explore {activeChar.name}'s {activeChar.world} →
-          </button>
+          </Link>
         </div>
       )}
 
