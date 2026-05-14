@@ -20,6 +20,7 @@ import {
   classStatus,
 } from "./unlocks";
 import { pillarThemeFromSlug } from "./pillarTheme";
+import { WorldSkeleton } from "./world/WorldSkeleton";
 import { ProgressRing } from "./world/ProgressRing";
 import { ContinueCard } from "./world/ContinueCard";
 import { PillarDots } from "./world/PillarDots";
