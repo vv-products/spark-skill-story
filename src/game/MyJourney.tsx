@@ -285,9 +285,8 @@ export function MyJourney() {
           className="relative mx-auto h-full w-auto max-h-[78dvh]"
           style={{ aspectRatio: "848 / 1264" }}
           onClick={handleSceneClick}
-        />
-
-
+        >
+          {/* Background image — same box as characters */}
           <img
             src={BG_IMG}
             alt=""
