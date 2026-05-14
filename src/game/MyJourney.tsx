@@ -377,21 +377,6 @@ export function MyJourney() {
         </div>
       )}
 
-      {/* ── Neutral hint ── */}
-      {!active && (
-        <div className="absolute bottom-28 left-0 right-0 z-20 flex justify-center lg:bottom-8">
-          <div
-            className="rounded-full px-5 py-2 text-xs font-bold text-white shadow-md"
-            style={{
-              background: "rgba(0,0,0,0.3)",
-              backdropFilter: "blur(8px)",
-              WebkitBackdropFilter: "blur(8px)",
-            }}
-          >
-            👆 Tap any character
-          </div>
-        </div>
-      )}
     </div>
   );
 }
