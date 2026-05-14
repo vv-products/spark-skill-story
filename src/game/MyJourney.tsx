@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
 
-const PILLAR_SLUG: Record<"maya" | "leo" | "dash" | "pip", "inner" | "social" | "action" | "real"> = {
+type CharId = "maya" | "leo" | "dash" | "pip";
+
+const PILLAR_SLUG: Record<CharId, "inner" | "social" | "action" | "real"> = {
   maya: "inner",
   leo: "social",
   dash: "action",
