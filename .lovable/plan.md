@@ -1,34 +1,33 @@
 # Moving a clone to your own Supabase project
 
-Goal: a cloned copy of this app runs fully on an external Supabase project — same tables, roles, RLS, functions, storage, auth and realtime — with no dependency on Lovable Cloud.
+You're right on the main point: `docs/DB-SETUP.sql` already covers schema, roles, RLS, grants, triggers and functions, and the rest of the project settings (auth providers, Google OAuth, redirect URLs, email confirmation) are things you do in your own Supabase dashboard.
 
-## What already ports cleanly
+Two clarifications on what's actually left:
 
-- All app data access goes through one generated client (`src/integrations/supabase/client.ts`), which reads `VITE_SUPABASE_URL` / `VITE_SUPABASE_PUBLISHABLE_KEY`. Point those at the new project and the whole app follows.
-- `docs/DB-SETUP.sql` already recreates the backend end to end: enums, ~20 tables, grants, RLS policies, `updated_at` triggers, the signup trigger, the leaderboard/XP/friend-code functions, and the three storage buckets with their policies. It is idempotent, so it can be re-run safely.
-- Multiplayer missions use Supabase Realtime broadcast channels only (no DB replication config needed).
+## 1. Storage buckets — already scripted, files are not
 
-## What needs attention
+`docs/DB-SETUP.sql` (section 15) already creates the three buckets — `avatars`, `class-hero`, `welcome-cards` — as public, and creates the read/write policies on `storage.objects` (public read, editor/admin write). So bucket *setup* is not missing.
 
-1. **Google sign-in.** `src/game/PlayerAuth.tsx` signs in through the Lovable auth broker (`@/integrations/lovable`). On an external project that broker is not available — Google must go through `supabase.auth.signInWithOAuth` with the provider enabled in the new project's dashboard, plus redirect URLs configured. Email/password needs no change.
-2. **Environment variables.** The clone needs `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY` (anon), `VITE_SUPABASE_PROJECT_ID`, plus server-side `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` (only if server-side admin work is added later).
-3. **Generated types.** `src/integrations/supabase/types.ts` is generated against the current project; on the new project it should be regenerated (or kept as-is since the schema is identical).
-4. **Auth settings that live outside SQL.** Site URL + redirect URLs, email confirmation on/off, Google provider credentials, and (optional) leaked-password protection are project settings, not migrations.
-5. **First admin.** The signup trigger grants `admin` + `editor` to the very first account created in the new project — so the first sign-up must be the intended owner, or roles get inserted manually.
-6. **Storage.** Buckets `avatars`, `class-hero`, `welcome-cards` are created public by the SQL script; existing uploaded files are not copied (content and images would need re-uploading through Studio, or a manual file copy).
-7. **Content data.** The setup script is schema-only. Pillars/topics/modules/classes/quizzes/crosswords start empty and are re-authored in `/studio` (or exported/imported separately if the current content should carry over).
+What's missing is the **files inside them** and the **content rows** that point at those files. Those don't travel with the SQL script.
+
+## 2. One code change is still required
+
+`src/game/PlayerAuth.tsx` signs in with Google through the Lovable auth broker (`@/integrations/lovable`). That broker only exists on Lovable Cloud — enabling Google in an external Supabase project is not enough on its own. The clone needs `supabase.auth.signInWithOAuth("google", { redirectTo: window.location.origin })` instead. Email/password needs no change.
+
+Also worth noting: the signup trigger grants `admin` + `editor` to the *first* account created in the new project, so the first sign-up must be the intended owner.
 
 ## Deliverable
 
-A single new document, `docs/EXTERNAL-SUPABASE-SETUP.md`, containing:
+A single document, `docs/EXTERNAL-SUPABASE-SETUP.md`, focused on the gaps rather than repeating the SQL:
 
-- Step-by-step setup order: create project → run `docs/DB-SETUP.sql` in the SQL editor → configure auth → set env vars → first sign-up becomes admin → verify.
-- Exact env var table (client vs server, which key goes where).
-- Auth configuration checklist (Site URL, redirect URLs, Google OAuth client setup, email confirmation).
-- The Google sign-in code change required for non-Lovable-Cloud hosting, with a drop-in replacement snippet for `PlayerAuth.tsx` that keeps the same `signInWithGoogle()` signature.
-- Storage bucket + file-migration notes and, optionally, how to move existing content rows.
-- A verification checklist: sign up, admin role present, `/studio` loads, image upload works, mission XP appears on leaderboard, a co-op mission syncs between two browsers.
+1. **Setup order** — create project → run `docs/DB-SETUP.sql` → configure auth in the dashboard → set env vars → first sign-up becomes admin.
+2. **Env var table** — client (`VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, `VITE_SUPABASE_PROJECT_ID`) vs server (`SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SERVICE_ROLE_KEY`), and which key must never reach the browser.
+3. **Google sign-in change** — drop-in replacement for `signInWithGoogle()` in `PlayerAuth.tsx` that keeps the same signature, plus the redirect URLs to whitelist.
+4. **Moving storage files** — a copy script that lists objects in each bucket on the old project (service-role key) and re-uploads them to the same bucket/path on the new project, so existing `image_url` values stay valid. Notes on the alternative: re-upload manually through Studio (Avatars / Welcome Cards / Class hero) and let it write fresh URLs.
+5. **Moving content rows** — export/import order that respects foreign keys (`pillars → topics → modules → classes → layers`, then `mission_crosswords → variants → words`, `mission_quizzes → questions → choices`, then `avatars`, `welcome_cards`). Note that user data (`profiles`, `xp_events`, `class_progress`, `friendships`, `friend_codes`, `user_roles`) cannot be copied as-is because it references `auth.users` ids from the old project.
+6. **Regenerating `src/integrations/supabase/types.ts`** against the new project.
+7. **Verification checklist** — sign up, admin role present, `/studio` loads, image upload works, mission XP appears on the leaderboard, a co-op mission syncs across two browsers.
 
-## Optional code change (say if you want it now)
+## Optional (say if you want it)
 
-Make Google sign-in switch automatically: use the Lovable broker when its env is present, otherwise fall back to `supabase.auth.signInWithOAuth("google", { redirectTo: window.location.origin })`. This makes the same codebase work on both Lovable Cloud and an external Supabase project with no edits after cloning.
+Make Google sign-in auto-switch: use the Lovable broker when its env is present, otherwise fall back to plain `supabase.auth.signInWithOAuth`. Then the same codebase runs on both Lovable Cloud and an external Supabase project with zero edits after cloning.
