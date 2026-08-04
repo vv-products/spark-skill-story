@@ -1,102 +1,52 @@
-## World Page Upgrades
+# Product Documentation File
 
-Big visual + functional pass on `/world/$slug`. All work is frontend on `WorldPage.tsx` plus a small helper file. No DB schema, no new artwork, no new routes.
+Create a single markdown document that captures every feature and user flow currently in the app, written from the codebase as it actually stands (routes, components, database tables and functions).
 
-A few items from the brainstorm need server work or new assets and are explicitly deferred — listed at the end.
+Output: `docs/PRODUCT-OVERVIEW.md` in the project, plus a downloadable copy in the documents area so you can share it outside the app.
 
----
+## Document outline
 
-### What ships
+**1. Overview & tech**
+Kid-facing learning game ("Sementa") + an internal Studio CMS, TanStack Start + Lovable Cloud backend.
 
-**1. Themed hero header**
-- Pillar-tinted gradient background already exists; expand it to a proper hero band with the matching character image (`maya/leo/dash/pip-world.png`) on the right.
-- Title (e.g. "Inner World") + tagline + a row of 4 small pillar dots that quick-jump to the other 3 worlds (active dot highlighted).
-- Sticky compact header on scroll.
+**2. Content model**
+Pillars → Topics → Modules → Classes → Layers (tasks). Tables: `pillars`, `topics`, `modules`, `classes`, `layers`, `class_progress`, publish status and age groups, plus how the catalog is loaded and shaped client-side.
 
-**2. World progress ring**
-- Big circular ring inside the hero showing `% of all published classes in this world completed`.
-- Below the ring: `X / Y classes`, `Z XP earned in this world`, and current streak badge.
-- XP-in-this-world derived by summing `progress.perClass[classId].xp` for class IDs that belong to the pillar.
+**3. Unlocking rules**
+- Pillars: all four open from day one
+- Topics: unlock when the first module of the previous topic is complete
+- Modules: sequential
+- Classes: sequential within a module
+- Class status states: completed / in progress / current / locked
 
-**3. "Continue where you left off" card**
-- Hero-level card directly under the ring.
-- Picks the most recently touched in-progress class in this world (uses `perClass.lastAt`); falls back to "Start Topic 1 → Module 1 → Class 1" if nothing started yet; hidden when 100% complete (replaced by a "World complete!" card).
-- One-tap → `/play/$slug`.
+**4. Player flows (route by route)**
+- Home / My World: stat card, level + stars, missions row, Shop card, leaderboard
+- My Journey `/journey`: illustrated scene, four characters (Maya, Leo, Dash, Pip), nearest-body tap selection, CTA into each world
+- World page `/world/$slug`: hero with mascot + progress ring, world XP, streak, continue/start card, next-unlock teaser, filter pills (All / In progress / Completed / Locked), three-level drill-down topics → modules → classes, topic preview sheet, completion confetti + toast, pillar quick-jump dots, skeleton loading and not-found fallback
+- Class player `/play/$slug`: intro, video, quiz, branching, reflection, complete screens; read-aloud
+- Profile / My Growth `/profile` + `/profile/edit`: profile hero, leaderboard filters (Everyone / Friends / Near me), avatar editor
+- Shop `/shop`: XP (flask) currency, frames, titles, themes, boosts
+- Sementa Club `/club`, `/club/join/$code`: friend code, QR, share link, requests inbox, friends list
 
-**4. Next-unlock teaser**
-- Small chip under the continue card, e.g. "Finish 1 more class to unlock Topic 3 ✨". Computed from `isTopicUnlocked` + `moduleProgress` on the first locked topic.
+**5. Missions**
+One section per mission with mode (solo / co-op / competitive), rules, difficulty tiers, music, XP formula, and rarity:
+Emotions Crossword, Emotions Quiz, Emotions Quick-Fire, Emotion Catcher, Emotion Duel, Reaction Race, Empathy Relay, Mood Match. Plus the shared FriendGate + MultiplayerLobby (realtime presence, broadcast, late-join sync) and mission accessibility settings (larger text, colour-blind highlights, sound/vibration).
 
-**5. Filter pills (Topic list view)**
-- Row above the topic list: `All • In progress • Completed • Locked`.
-- Filter is purely client-side, persists in `localStorage` per pillar.
+**6. XP, levels, leaderboard**
+`xp_events` as the single source of XP, level = XP/100, stars = number of XP events, ties broken by stars, leaderboard SQL functions (`get_leaderboard`, `get_friend_leaderboard`, `get_user_xp_breakdown`), Flask XP orbs for the shop.
 
-**6. Topic preview sheet**
-- Add an info icon on each `TopicPill`. Tapping it opens a small bottom sheet (shadcn `Sheet`) with: topic name, module count, estimated total time, list of module names with their lock state. Tapping a module from the sheet selects the topic and scrolls to that module.
+**7. Studio CMS `/studio`**
+Dashboard, Library, Module, Class Editor, Quiz Editor, Crossword Builder, Missions registry, Avatars, Welcome Cards, Task Types reference; role gating via `user_roles` + `has_role`.
 
-**7. Third drill-down level: classes inside a module**
-- Currently tapping a module jumps straight to the next playable class. Change to: tap a module → expand inline (or push a third state) showing the module's published classes as `ClassPill`s.
-- Each `ClassPill` shows: number, title, status icon (✓ done / ▶ in-progress / 🔒 locked), XP earned, estimated minutes.
-- Locked classes are disabled. Done classes show a "Replay" affordance. In-progress classes show "Continue".
-- Tapping a playable class navigates to `/play/$slug`.
+**8. Navigation & shell**
+Bottom nav (glass, auto-hide on scroll, signed-in only), desktop sidebar, full-bleed handling, bottom-nav clearance padding.
 
-**8. Module estimated time**
-- Sum of `class.estimated_minutes` for published classes in the module, surfaced on `ModulePill` and the new class-list header ("~12 min").
-- Requires reading `estimated_minutes` from the catalog. If `HClass` doesn't currently include it, extend the catalog mapper to expose it (DB column exists on `classes`).
+**9. Backend reference**
+Table list with purpose and access rules, database functions, auth flow and profile creation trigger.
 
-**9. Completion celebrations**
-- When the user lands on the world page and a topic or module just hit 100% (compared against a `lastSeenCompletions` set in `localStorage`), trigger a one-shot confetti burst and a toast: "Module complete! +badge".
-- Reuse the existing `Confetti` component from `src/game/Effects.tsx`.
+**10. Known gaps / deferred**
+Friends' progress on topics, per-world leaderboard, "Near me" location & school clubs, pillar-themed world backgrounds, reflection journal and parent notes.
 
-**10. Polish**
-- Replace plain `border bg-white` pills with subtle shadow + rounded-3xl, animated progress fill (existing `animate-in` utilities).
-- Animate transitions between topic list ↔ module list ↔ class list with `fade-in` + `slide-in-from-bottom-2`.
-- Empty / loading states refined (skeleton pills instead of plain text).
-- Add `head()` metadata per pillar so each `/world/<slug>` has its own title + description for SEO.
+## Notes
 
----
-
-### File changes
-
-**Edit `src/game/WorldPage.tsx`** — the bulk of the work:
-- Add hero with `<ProgressRing />`, mascot image, pillar quick-jump dots.
-- Add `<ContinueCard />`, next-unlock teaser, filter pills.
-- Extend the state machine: `view = "topics" | "modules" | "classes"` with `selectedTopicId` + `selectedModuleId`.
-- Render `TopicPill`, `ModulePill`, new `ClassPill`.
-- Hook up `Sheet` for topic preview.
-- Wire localStorage for filter + last-seen completions; trigger `Confetti`.
-
-**Edit `src/game/unlocks.ts`** — add helpers:
-- `worldProgress(pillar, p)` → `{ completed, total, xpEarned, isComplete }`.
-- `nextLockedTopic(pillar, p)` → `{ topic, classesNeeded } | null`.
-- `mostRecentInProgressClass(pillar, p)` → `HClass | null`.
-- `moduleEstimatedMinutes(module)` → number.
-
-**Edit `src/studio/catalog.ts`** — surface `estimated_minutes` and `subtitle` on `HClass` (DB columns already selected? if not, add to the select + map).
-
-**Edit `src/routes/world.$slug.tsx`** — add per-pillar `head()` metadata (title, description, og:title, og:description per the four pillars).
-
-**New `src/game/world/` components** (split for readability):
-- `ProgressRing.tsx` — SVG ring, accepts `pct`, `accent`, optional center label.
-- `ContinueCard.tsx` — hero-style card with class title, progress, CTA.
-- `PillarDots.tsx` — 4 dots, active highlighted, navigates between worlds.
-- `ClassPill.tsx` — single class row with status icon + XP + minutes.
-- `TopicPreviewSheet.tsx` — shadcn `Sheet` content.
-
----
-
-### Tech notes
-
-- Pillar slug → mascot image: small map identical to the one in `MyJourney.tsx`. Extract to `src/game/pillarTheme.ts` so both files share it (also moves `PILLAR_THEME` colors out of `WorldPage`).
-- All progress reads stay local: `loadFullCatalog` + `loadUserProgress(user.id)` once per mount. No new server functions.
-- Celebrations: store `mem-completions-${pillarSlug}` in localStorage as a JSON array of completed module/topic ids. Diff on mount; fire confetti for new entries; rewrite the storage.
-- Filter + selected view persist in URL search params (`?view=modules&topic=<id>`) so back button works between drill levels.
-
----
-
-### Deferred (need more setup; flagging now so we don't quietly drop them)
-
-- **Friends' progress dots on topics** and **per-world leaderboard** — `class_progress` RLS only allows users to read their own rows, so we'd need either a Postgres view + RPC, or denormalised aggregate columns. Treat as a separate task.
-- **Pillar-themed full-scene background** (each world its own illustrated environment) — needs 4 new generated images. Can be added later by swapping the gradient for a hero `<img>` once art is produced.
-- **Daily mission tied to a pillar**, **parent/teacher notes**, **reflection journal** — all need new tables/columns. Out of scope here.
-
-If you want any of those three pulled into this pass, say which and I'll fold them in.
+Documentation only — no application code changes.
